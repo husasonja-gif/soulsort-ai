@@ -10,7 +10,7 @@ const openai = new OpenAI({
 // Pre-prompted responses for each question
 const questionCommentaries = [
   {
-    question: 'What are three values you try to practice in your relationships?',
+    question: '[[Q1]] What are three values you try to practice in your relationships?',
     systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
 
 The user just answered: "What are three values you try to practice in your relationships?"
@@ -25,10 +25,10 @@ Examples of good tone: "Cool, those make sense together" or "Nice, I can see how
 Avoid: "I appreciate your insight" or "That demonstrates healthy communication"`,
   },
   {
-    question: 'How do you like to navigate disagreements or misunderstandings?',
+    question: '[[Q2]] How do you like to navigate disagreements or misunderstandings?',
     systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
 
-The user just answered: "How do you like to navigate disagreements or misunderstandings?"
+The user just answered: "[[Q2]] How do you like to navigate disagreements or misunderstandings?"
 
 Provide a brief, chill reflection (1 sentence max) that:
 - Acknowledges their approach casually
@@ -40,10 +40,10 @@ Examples of good tone: "That sounds like a solid approach" or "Makes sense" or "
 Avoid: "I appreciate your communication style" or "That demonstrates healthy conflict resolution"`,
   },
   {
-    question: 'What helps you feel erotically connected to someone?',
+    question: '[[Q3]] What helps you feel erotically connected to someone?',
     systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
 
-The user just answered: "What helps you feel erotically connected to someone?"
+The user just answered: "[[Q3]] What helps you feel erotically connected to someone?"
 
 Provide a brief, chill reflection (1 sentence max) that:
 - Acknowledges what they said in a casual, non-judgmental way
@@ -55,10 +55,10 @@ Examples of good tone: "Got it" or "That makes sense" or "Cool"
 Avoid: "I appreciate your openness" or "That demonstrates healthy intimacy"`,
   },
   {
-    question: 'How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
+    question: '[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
     systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
 
-The user just answered: "How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?"
+The user just answered: "[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?"
 
 Provide a brief, chill reflection (1 sentence max) that:
 - Acknowledges their answer casually

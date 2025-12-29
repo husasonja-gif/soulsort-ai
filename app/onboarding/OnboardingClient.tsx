@@ -48,10 +48,10 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   ]
 
   const chatQuestions = [
-    'What are three values you try to practice in your relationships?',
-    'How do you like to navigate disagreements or misunderstandings?',
-    'What helps you feel erotically connected to someone?',
-    'How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
+    '[[Q1]] What are three values you try to practice in your relationships?',
+    '[[Q2]] How do you like to navigate disagreements or misunderstandings?',
+    '[[Q3]] What helps you feel erotically connected to someone?',
+    '[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
   ]
 
   const handleDealbreakerToggle = (option: string) => {

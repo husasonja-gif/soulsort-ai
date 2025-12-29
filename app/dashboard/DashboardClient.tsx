@@ -102,12 +102,6 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
         </div>
         <div className="flex gap-2 items-center">
           <ThemeToggle />
-          <a
-            href="/analytics"
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-          >
-            Analytics
-          </a>
           <button
             onClick={handleLogout}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:text-gray-100"

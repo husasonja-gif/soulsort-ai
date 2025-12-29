@@ -101,7 +101,8 @@ export async function GET(request: Request) {
       totalRequesters,
       completionRate,
       avgCost,
-      dau
+      dau,
+      qcMetrics
     ] = await Promise.all([
       getFunnelMetrics(supabase, days),
       getGrowthMetrics(supabase, days),
@@ -110,7 +111,8 @@ export async function GET(request: Request) {
       getTotalRequesters(supabase, days),
       getCompletionRate(supabase, days),
       getAvgCost(supabase, days),
-      getDAU(supabase)
+      getDAU(supabase),
+      getQCMetrics(supabase, days)
     ])
 
     return NextResponse.json({
@@ -122,6 +124,7 @@ export async function GET(request: Request) {
       growth_loop: growthData,
       engagement: engagementData,
       cost_trends: costData,
+      qc: qcMetrics,
     })
   } catch (error) {
     console.error('Error fetching metrics:', error)

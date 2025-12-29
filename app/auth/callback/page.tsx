@@ -197,10 +197,7 @@ function AuthCallbackContent() {
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
         <p className="text-gray-600">Completing sign in...</p>
-        {/* Error hidden during normal auth flow - only show if it persists */}
-        {error && !error.includes('PKCE') && !error.includes('code verifier') && (
-          <p className="text-red-600 text-sm mt-2">Error: {error}</p>
-        )}
+        {/* Errors hidden during auth flow to avoid confusion */}
       </div>
     </div>
   )
