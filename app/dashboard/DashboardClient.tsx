@@ -236,8 +236,8 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
                 Copy
               </button>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-              SoulSort AI - A Vibe-Check Engine. Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
+              Use this link in your socials/ bios/ at parties to ask others to vibe check against you. Spark better conversations and invite interpretation!
             </p>
             <div className="mt-4">
               <button

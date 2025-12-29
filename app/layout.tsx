@@ -14,8 +14,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SoulSort AI - Your Vibe-Check Engine",
-  description: "Pre-filter connections before the first date. AI-powered compatibility matching for women and queers.",
+  title: "SoulSort AI - A Vibe-Check Engine",
+  description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+  openGraph: {
+    title: "SoulSort AI - A Vibe-Check Engine",
+    description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SoulSort AI - A Vibe-Check Engine",
+    description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+  },
 };
 
 export default function RootLayout({
