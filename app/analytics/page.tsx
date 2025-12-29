@@ -115,7 +115,7 @@ export default function AnalyticsDashboard() {
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-red-900 dark:text-red-300 mb-2">Access Denied</h2>
-            <p className="text-red-700 dark:text-red-300 mb-4">{error}</p>
+            <div className="text-red-700 dark:text-red-300 mb-4 whitespace-pre-line">{error}</div>
             <div className="flex gap-4">
               <a
                 href="/dashboard"
