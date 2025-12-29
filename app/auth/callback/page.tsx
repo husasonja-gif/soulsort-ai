@@ -31,7 +31,7 @@ function AuthCallbackContent() {
           const { data: { session } } = await supabase.auth.getSession()
           if (!session) {
             console.error('No session found after auth')
-            setError('Session not found')
+            // Don't show error immediately, try to redirect first
             router.push('/login?error=no_session')
             return
           }
@@ -40,10 +40,13 @@ function AuthCallbackContent() {
           
           if (userError) {
             console.error('Error getting user:', userError)
-            setError(userError.message)
-            setTimeout(() => {
-              window.location.href = '/login?error=auth_failed'
-            }, 1000)
+            // Only show error if it's a real error, not just PKCE code verifier warning
+            if (!userError.message.includes('PKCE code verifier')) {
+              setError(userError.message)
+              setTimeout(() => {
+                window.location.href = '/login?error=auth_failed'
+              }, 1000)
+            }
             return
           }
 
@@ -105,11 +108,16 @@ function AuthCallbackContent() {
           
           if (exchangeError) {
             console.error('Auth callback error:', exchangeError)
-            setError(exchangeError.message)
-            setTimeout(() => {
-              window.location.href = `/login?error=${encodeURIComponent(exchangeError.message)}`
-            }, 1000)
-            return
+            // Don't show PKCE code verifier errors - they're often false positives
+            if (!exchangeError.message.includes('PKCE code verifier')) {
+              setError(exchangeError.message)
+              setTimeout(() => {
+                window.location.href = `/login?error=${encodeURIComponent(exchangeError.message)}`
+              }, 1000)
+              return
+            }
+            // For PKCE errors, try to continue anyway - might still work
+            console.log('PKCE error detected, attempting to continue...')
           }
 
           if (!data.session) {

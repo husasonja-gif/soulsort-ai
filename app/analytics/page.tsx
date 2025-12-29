@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import ThemeToggle from '@/components/ThemeToggle'
 import MetricCard from './components/MetricCard'
 import FunnelChart from './components/FunnelChart'
 import CostChart from './components/CostChart'
@@ -141,12 +142,15 @@ export default function AnalyticsDashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-purple-600 dark:text-purple-400">Analytics Dashboard</h1>
-          <a
-            href="/dashboard"
-            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-          >
-            Back to Dashboard
-          </a>
+          <div className="flex gap-2 items-center">
+            <ThemeToggle />
+            <a
+              href="/dashboard"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+            >
+              Back to Dashboard
+            </a>
+          </div>
         </div>
 
         {/* Date Range Selector */}

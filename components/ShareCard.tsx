@@ -22,9 +22,12 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
     try {
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 3,
         logging: false,
         useCORS: true,
+        allowTaint: false,
+        width: cardRef.current.offsetWidth,
+        height: cardRef.current.offsetHeight,
       } as any)
       
       const link = document.createElement('a')
@@ -52,45 +55,43 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
   }
 
   return (
-    <div className="w-full max-w-md mx-auto">
+    <div className="w-full max-w-lg mx-auto">
       <div
         ref={cardRef}
-        className="bg-white p-4 sm:p-6 rounded-lg shadow-lg"
+        className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
         style={{ minHeight: '400px' }}
       >
-        <div className="text-center mb-4">
-          <h2 className="text-2xl font-bold text-purple-600 mb-1">SoulSort AI</h2>
-          <p className="text-gray-600 text-sm">Curious how we align?</p>
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">SoulSort AI</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-sm">Curious how we align?</p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-          <div className="w-full sm:w-48 h-48 sm:h-48 flex-shrink-0 flex items-center justify-center overflow-hidden">
-            <div className="w-full h-full scale-75 sm:scale-100">
-              <RadarChart data={radarData} label="Profile" />
-            </div>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
+          <div className="w-48 h-48 flex-shrink-0 flex items-center justify-center">
+            <RadarChart data={radarData} label="Profile" />
           </div>
-          <div className="flex-shrink-0 flex items-center justify-center">
+          <div className="flex-shrink-0 flex items-center justify-center p-3 bg-white dark:bg-gray-900 rounded-lg">
             <QRCodeSVG
               value={shareLink}
-              size={120}
+              size={140}
               level="M"
-              includeMargin={false}
+              includeMargin={true}
             />
           </div>
         </div>
 
         <div className="text-center mb-4">
-          <p className="text-xs text-gray-500 break-all">{shareLink}</p>
-          <p className="text-xs text-gray-400 mt-1">soulsort.ai - privacy-first - Dec 2024</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 break-all font-mono">{shareLink}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">soulsort.ai - privacy-first - Dec 2024</p>
         </div>
       </div>
 
       <button
         onClick={handleDownloadPNG}
         disabled={downloading}
-        className="w-full mt-4 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+        className="w-full mt-4 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {downloading ? 'Generating...' : 'Download as PNG'}
+        {downloading ? 'Generating PNG...' : 'Download as PNG'}
       </button>
     </div>
   )

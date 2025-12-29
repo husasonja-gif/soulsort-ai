@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import RadarChart from '@/components/RadarChart'
 import ShareCard from '@/components/ShareCard'
+import ThemeToggle from '@/components/ThemeToggle'
 import type { UserRadarProfile, ConsentRecord } from '@/lib/types'
 
 interface DashboardClientProps {
@@ -99,7 +100,8 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
         <div>
           <h1 className="text-3xl font-bold text-purple-600 dark:text-purple-400">Your SoulSort Profile</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          <ThemeToggle />
           <a
             href="/analytics"
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
