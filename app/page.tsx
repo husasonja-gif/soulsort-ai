@@ -1,22 +1,17 @@
 import Link from 'next/link'
-import ThemeToggle from '@/components/ThemeToggle'
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Theme Toggle */}
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle />
-      </div>
+    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50">
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-8 sm:py-12 text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+      <section className="container mx-auto px-4 py-12 text-center">
+        <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           SoulSort AI
         </h1>
-        <p className="text-xl sm:text-2xl text-gray-700 dark:text-gray-200 mb-3 max-w-2xl mx-auto font-semibold px-4">
+        <p className="text-2xl text-gray-700 mb-3 max-w-2xl mx-auto font-semibold">
           Save energy. Reduce noise. Reward maturity.
         </p>
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-xl mx-auto px-4">
+        <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto">
           A vibe-check engine designed to prevent selection fatigue. Get informed - let AI ask the important questions.
         </p>
 
@@ -32,38 +27,35 @@ export default function LandingPage() {
 
       {/* Trust Mechanisms */}
       <section className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-4xl mx-auto">
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="text-center p-6 bg-white rounded-lg shadow-sm">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
               <span className="text-2xl" style={{ filter: 'grayscale(100%) brightness(200%)' }}>🔒</span>
             </div>
-            <h3 className="font-semibold text-lg mb-2 dark:text-gray-100">Privacy first</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
+            <h3 className="font-semibold text-lg mb-2">Privacy first</h3>
+            <p className="text-gray-600 text-sm">
               Your raw responses are never stored - only your anonymized scores. 
             </p>
           </div>
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+          <div className="text-center p-6 bg-white rounded-lg shadow-sm">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
               <span className="text-2xl" style={{ filter: 'grayscale(100%) brightness(200%)' }}>✨</span>
             </div>
-            <h3 className="font-semibold text-lg mb-2 dark:text-gray-100">AI Powered</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
+            <h3 className="font-semibold text-lg mb-2">AI Powered</h3>
+            <p className="text-gray-600 text-sm">
               Quick and friendly chat instead of a stale form.
             </p>
           </div>
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm sm:col-span-2 md:col-span-1">
+          <div className="text-center p-6 bg-white rounded-lg shadow-sm">
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center">
               <span className="text-2xl" style={{ filter: 'grayscale(100%) brightness(200%)' }}>🌈</span>
             </div>
-            <h3 className="font-semibold text-lg mb-2 dark:text-gray-100">Inclusive by design</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
+            <h3 className="font-semibold text-lg mb-2">Inclusive by design</h3>
+            <p className="text-gray-600 text-sm">
               Built for women, queers and good guys who seek real connection.
             </p>
           </div>
         </div>
-        <p className="text-center text-gray-600 dark:text-gray-300 mt-6 max-w-2xl mx-auto px-4">
-          A private vibe-check for dating, friendships, and real human connection. Designed for sharing — without oversharing.
-        </p>
       </section>
 
       {/* How It Works */}
@@ -109,14 +101,14 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-12 text-center">
         <div className="max-w-2xl mx-auto">
-          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-200 mb-8 px-4">
-            Ready to create your profile? It's fun, easy and informative → <Link href="/login" className="text-purple-600 dark:text-purple-400 font-semibold hover:underline">get started for free</Link>
+          <p className="text-xl text-gray-700 mb-8">
+            Ready to create your profile? It's fun, easy and informative → <Link href="/login" className="text-purple-600 font-semibold hover:underline">get started for free</Link>
           </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="container mx-auto px-4 py-8 text-center text-sm text-gray-600 dark:text-gray-400">
+      <footer className="container mx-auto px-4 py-8 text-center text-sm text-gray-600">
         <p>© 2024 SoulSort AI. Privacy-first vibe filtering.</p>
       </footer>
     </div>

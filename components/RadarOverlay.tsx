@@ -55,17 +55,17 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
   ]
 
   return (
-    <ResponsiveContainer width="100%" height={350} className="sm:h-[400px]">
+    <ResponsiveContainer width="100%" height={400}>
       <RechartsRadarChart data={chartData}>
-        <PolarGrid stroke="#e5e7eb" className="dark:stroke-gray-700" />
+        <PolarGrid />
         <PolarAngleAxis 
           dataKey="dimension" 
-          tick={{ fontSize: 11, fill: '#666', className: 'dark:fill-gray-300' }}
+          tick={{ fontSize: 12, fill: '#666' }}
         />
         <PolarRadiusAxis 
           angle={90} 
           domain={[0, 100]} 
-          tick={{ fontSize: 9, fill: '#999', className: 'dark:fill-gray-400' }}
+          tick={{ fontSize: 10, fill: '#999' }}
         />
         <Radar
           name="Them"
@@ -88,7 +88,6 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
     </ResponsiveContainer>
   )
 }
-
 
 
 

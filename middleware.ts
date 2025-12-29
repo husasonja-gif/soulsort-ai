@@ -31,8 +31,8 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // 🔒 Protect dashboard and onboarding
-  if ((pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding')) && !user) {
+  // 🔒 Protect dashboard, onboarding, and analytics
+  if ((pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding') || pathname.startsWith('/analytics')) && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
@@ -81,5 +81,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/onboarding/:path*', '/login', '/auth/callback'],
+  matcher: ['/dashboard/:path*', '/onboarding/:path*', '/analytics/:path*', '/login', '/auth/callback'],
 }

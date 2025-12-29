@@ -32,6 +32,15 @@ export default async function DashboardPage() {
       redirect('/onboarding')
     }
 
+    // Track dashboard visit
+    try {
+      await supabase.rpc('track_dashboard_visit', {
+        user_id: user.id,
+      })
+    } catch (err) {
+      console.error('Error tracking dashboard visit:', err)
+    }
+
     const radarProfile = await getUserRadarProfile(user.id)
     const consents = await getUserConsents(user.id)
     
@@ -39,8 +48,7 @@ export default async function DashboardPage() {
     let shareLink = ''
     try {
       userLink = await getUserLink(user.id)
-      // Use environment variable or default to production domain
-      shareLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://soulsortai.com'}/r/${userLink.link_id}`
+      shareLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/r/${userLink.link_id}`
     } catch (error) {
       console.error('Error getting user link:', error)
       // Continue without share link if there's an error

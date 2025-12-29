@@ -50,17 +50,18 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
   ]
 
   return (
-    <ResponsiveContainer width="100%" height={350} className="sm:h-[400px]">
+    <ResponsiveContainer width="100%" height={400} className="min-h-[300px] sm:min-h-[400px]">
       <RechartsRadarChart data={chartData}>
-        <PolarGrid stroke="#e5e7eb" className="dark:stroke-gray-700" />
+        <PolarGrid />
         <PolarAngleAxis 
           dataKey="dimension" 
-          tick={{ fontSize: 11, fill: '#666', className: 'dark:fill-gray-300' }}
+          tick={{ fontSize: 10, fill: '#666' }}
+          className="dark:text-gray-300"
         />
         <PolarRadiusAxis 
           angle={90} 
           domain={[0, 100]} 
-          tick={{ fontSize: 9, fill: '#999', className: 'dark:fill-gray-400' }}
+          tick={{ fontSize: 8, fill: '#999' }}
         />
         <Radar
           name={label}

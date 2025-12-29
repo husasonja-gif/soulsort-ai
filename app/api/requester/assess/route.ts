@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { assessRequester } from '@/lib/llm'
 import { getUserRadarProfile, createRequesterAssessment } from '@/lib/db'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { evaluateDealbreakers, applyDealbreakerCaps, type RequesterStructuredFields } from '@/lib/dealbreakerEngine'
 import type { ChatMessage } from '@/lib/types'
 
@@ -210,6 +211,18 @@ export async function POST(request: Request) {
       status_orientation: structuredFields.status_orientation as 'low' | 'medium' | 'high' | undefined,
     }
 
+    // Get requester session ID if available (for tracking)
+    const supabase = await createSupabaseServerClient()
+    let requesterSessionId: string | null = null
+    if (body.session_token) {
+      const { data: session } = await supabase
+        .from('requester_sessions')
+        .select('id')
+        .eq('session_token', body.session_token)
+        .single()
+      requesterSessionId = session?.id || null
+    }
+
     // Assess requester (includes dealbreaker evaluation)
     const assessment = await assessRequester(
       requesterResponses,
@@ -223,7 +236,10 @@ export async function POST(request: Request) {
         consent: userRadarProfile.consent || (userRadarProfile as any).consent_dim, // Support both for migration
       },
       userRadarProfile.dealbreakers,
-      structuredFieldsFormatted
+      structuredFieldsFormatted,
+      null, // userId (requester is anonymous)
+      linkId,
+      requesterSessionId
     )
 
     // Save assessment (including dealbreaker hits - private to profile owner)

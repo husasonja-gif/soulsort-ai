@@ -1,128 +1,96 @@
 'use client'
 
-import { useRef } from 'react'
-import html2canvas from 'html2canvas'
+import { useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
-import { Radar, RadarChart as RechartsRadarChart, PolarGrid, ResponsiveContainer } from 'recharts'
+import html2canvas from 'html2canvas'
+import RadarChart from './RadarChart'
 import type { RadarDimensions } from '@/lib/types'
 
 interface ShareCardProps {
-  radarValues: RadarDimensions
-  shareUrl: string
-  date: string // e.g., "Dec 2024"
+  radarData: RadarDimensions
+  shareLink: string
 }
 
-export default function ShareCard({ radarValues, shareUrl, date }: ShareCardProps) {
+export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
+  const [downloading, setDownloading] = useState(false)
 
-  // Chart data for the radar (without labels/numbers)
-  const chartData = [
-    { dimension: 'Self Transcendence', value: radarValues.self_transcendence, fullMark: 100 },
-    { dimension: 'Self Enhancement', value: radarValues.self_enhancement, fullMark: 100 },
-    { dimension: 'Rooting', value: radarValues.rooting, fullMark: 100 },
-    { dimension: 'Searching', value: radarValues.searching, fullMark: 100 },
-    { dimension: 'Relational', value: radarValues.relational, fullMark: 100 },
-    { dimension: 'Erotic', value: radarValues.erotic, fullMark: 100 },
-    { dimension: 'Consent', value: radarValues.consent, fullMark: 100 },
-  ]
-
-  // Export as PNG using html2canvas
-  const exportAsPNG = async () => {
+  const handleDownloadPNG = async () => {
     if (!cardRef.current) return
-
+    
+    setDownloading(true)
     try {
       const canvas = await html2canvas(cardRef.current, {
-        width: 800,
-        height: 1000,
+        backgroundColor: '#ffffff',
+        scale: 2,
+        logging: false,
         useCORS: true,
-        allowTaint: false,
-      })
-
-      // Download
-      const url = canvas.toDataURL('image/png')
+      } as any)
+      
       const link = document.createElement('a')
-      link.download = `soulsort-radar-${date.replace(/\s+/g, '-').toLowerCase()}.png`
-      link.href = url
+      link.download = 'soulsort-radar.png'
+      link.href = canvas.toDataURL('image/png')
       link.click()
+      
+      // Track share action
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'share_clicked',
+          event_data: {
+            share_method: 'png_download',
+          },
+        }),
+      }).catch(err => console.error('Analytics tracking error:', err))
     } catch (error) {
-      console.error('Error exporting card:', error)
+      console.error('Error generating PNG:', error)
+      alert('Failed to generate PNG. Please try again.')
+    } finally {
+      setDownloading(false)
     }
   }
 
   return (
-    <div className="flex flex-col items-center">
-      {/* Share card (4:5 aspect ratio) */}
+    <div className="w-full max-w-md mx-auto">
       <div
         ref={cardRef}
-        className="relative bg-gradient-to-b from-purple-50 to-pink-50 rounded-lg overflow-hidden"
-        style={{ width: '800px', height: '1000px', aspectRatio: '4/5' }}
+        className="bg-white p-4 sm:p-6 rounded-lg shadow-lg"
+        style={{ minHeight: '400px' }}
       >
-        {/* Logo */}
-        <div className="absolute top-12 left-0 right-0 text-center">
-          <h1 className="text-5xl font-bold text-purple-600">SoulSort AI</h1>
+        <div className="text-center mb-4">
+          <h2 className="text-2xl font-bold text-purple-600 mb-1">SoulSort AI</h2>
+          <p className="text-gray-600 text-sm">Curious how we align?</p>
         </div>
 
-        {/* Headline (14px spacing after logo) */}
-        <div className="absolute" style={{ top: '112px', left: 0, right: 0 }}>
-          <p className="text-3xl text-gray-700 font-medium text-center">Curious how we align?</p>
-        </div>
-
-        {/* Radar Chart (central, dominant, 28px spacing after headline) */}
-        <div className="absolute" style={{ top: '184px', left: 0, right: 0, height: '520px' }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <RechartsRadarChart 
-              data={chartData} 
-              margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-              outerRadius="90%"
-            >
-              <PolarGrid stroke="#e5e7eb" />
-              <Radar
-                dataKey="value"
-                stroke="#9333ea"
-                fill="#9333ea"
-                fillOpacity={0.3}
-                strokeWidth={3}
-                dot={false}
-              />
-              {/* No PolarAngleAxis or PolarRadiusAxis to hide labels/numbers */}
-            </RechartsRadarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* QR + URL (28px spacing after radar, side by side) */}
-        <div className="absolute bottom-28 left-0 right-0 flex items-start justify-center gap-8">
-          <div className="flex flex-col items-center">
-            <div className="bg-white p-2 rounded-lg mb-2">
-              <QRCodeSVG
-                value={shareUrl}
-                size={128}
-                level="H"
-                includeMargin={false}
-                fgColor="#9333ea"
-                bgColor="#ffffff"
-              />
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
+          <div className="w-full sm:w-48 h-48 sm:h-48 flex-shrink-0 flex items-center justify-center overflow-hidden">
+            <div className="w-full h-full scale-75 sm:scale-100">
+              <RadarChart data={radarData} label="Profile" />
             </div>
-            <p className="text-sm text-gray-600 font-medium">Scan to compare</p>
           </div>
-          <div className="flex items-center" style={{ height: '148px' }}>
-            <p className="text-purple-600 font-semibold text-lg">{shareUrl}</p>
+          <div className="flex-shrink-0 flex items-center justify-center">
+            <QRCodeSVG
+              value={shareLink}
+              size={120}
+              level="M"
+              includeMargin={false}
+            />
           </div>
         </div>
 
-        {/* Footer (24px spacing after QR/URL) */}
-        <div className="absolute bottom-6 left-0 right-0 text-center">
-          <p className="text-sm text-gray-500">
-            SoulSort AI · privacy-first · {date}
-          </p>
+        <div className="text-center mb-4">
+          <p className="text-xs text-gray-500 break-all">{shareLink}</p>
+          <p className="text-xs text-gray-400 mt-1">soulsort.ai - privacy-first - Dec 2024</p>
         </div>
       </div>
 
-      {/* Export button */}
       <button
-        onClick={exportAsPNG}
-        className="mt-6 px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-semibold"
+        onClick={handleDownloadPNG}
+        disabled={downloading}
+        className="w-full mt-4 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
       >
-        Download as PNG
+        {downloading ? 'Generating...' : 'Download as PNG'}
       </button>
     </div>
   )

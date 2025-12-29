@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
-import ThemeToggle from '@/components/ThemeToggle'
 
 function LoginPageContent() {
   const router = useRouter()
@@ -126,16 +125,13 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 py-8">
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle />
-      </div>
-      <div className="w-full max-w-md p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
         <div className="text-center mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             SoulSort AI
           </h1>
-          <p className="text-gray-600 dark:text-gray-300">Sign in with a magic link</p>
+          <p className="text-gray-600">Sign in with a magic link</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -145,7 +141,7 @@ function LoginPageContent() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-gray-100"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
 
           <button
@@ -158,13 +154,13 @@ function LoginPageContent() {
         </form>
 
         {message && (
-          <p className={`mt-4 text-center text-sm ${message.includes('error') || message.includes('Error') ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-300'}`}>
+          <p className={`mt-4 text-center ${message.includes('error') || message.includes('Error') ? 'text-red-600' : 'text-gray-600'}`}>
             {message}
           </p>
         )}
 
-        <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
-          <Link href="/" className="text-purple-600 dark:text-purple-400 hover:underline">
+        <div className="mt-6 text-center text-sm text-gray-500">
+          <Link href="/" className="text-purple-600 hover:underline">
             ← Back to home
           </Link>
         </div>
@@ -176,14 +172,10 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-4 py-8">
-        <div className="w-full max-w-md p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              SoulSort AI
-            </h1>
-            <p className="text-gray-600 dark:text-gray-300">Loading...</p>
-          </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     }>

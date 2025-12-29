@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import type { ChatMessage } from '@/lib/types'
 
 const openai = new OpenAI({
@@ -99,12 +100,30 @@ CRITICAL: You MUST ONLY provide commentary/reflection. You MUST NEVER ask questi
       { role: 'user', content: `Question: "${question}"\n\nTheir answer: "${answer}"` },
     ]
 
+    const startTime = Date.now()
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
       temperature: 0.8,
       max_tokens: 100,
     })
+    const responseTime = Date.now() - startTime
+
+    // Track OpenAI usage
+    if (response.usage) {
+      const { trackOpenAIUsage } = await import('@/lib/trackOpenAIUsage')
+      const supabase = await createSupabaseServerClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      await trackOpenAIUsage({
+        userId: user?.id || null,
+        endpoint: 'onboarding_chat',
+        model: 'gpt-4o-mini',
+        usage: response.usage,
+        responseTimeMs: responseTime,
+        success: true,
+      })
+    }
 
     let commentary = response.choices[0].message.content || ''
 

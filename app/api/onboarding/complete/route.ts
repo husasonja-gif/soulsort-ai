@@ -84,7 +84,7 @@ export async function POST(request: Request) {
 
     console.log('Generating radar profile...')
     // Generate radar profile from survey and chat
-    const profile = await generateUserRadarProfile(surveyData, chatHistory as ChatMessage[])
+    const profile = await generateUserRadarProfile(surveyData, chatHistory as ChatMessage[], userId, null)
     console.log('Profile generated:', profile)
 
     console.log('Saving to database...')

@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import RadarOverlay from '@/components/RadarOverlay'
-import ThemeToggle from '@/components/ThemeToggle'
 import type { ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
 
 interface RequesterClientProps {
@@ -84,8 +83,36 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     userRadar: RadarDimensions
     requesterRadar: RadarDimensions
   } | null>(null)
+  
+  // Analytics tracking
+  const [sessionToken, setSessionToken] = useState<string | null>(null)
+  const [startTime, setStartTime] = useState<number | null>(null)
+
+  // Generate session token for anonymous tracking
+  const generateSessionToken = () => {
+    return `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+  }
 
   const handleStart = () => {
+    // Track requester start
+    const token = generateSessionToken()
+    setSessionToken(token)
+    setStartTime(Date.now())
+    
+    // Track analytics event
+    fetch('/api/analytics/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_type: 'requester_started',
+        event_data: {
+          link_id: linkId,
+          session_token: token,
+        },
+      }),
+    }).catch(err => console.error('Analytics tracking error:', err))
+    
+    setFlowState('chat')
     setFlowState('chat')
     setCurrentQuestionIndex(0)
     const firstQuestion = QUESTIONS[0]
@@ -143,6 +170,20 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           return
         } else {
           setConsentGiven(true)
+          
+          // Track consent granted
+          if (sessionToken) {
+            fetch('/api/analytics/track', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                event_type: 'requester_consent_granted',
+                event_data: {
+                  session_token: sessionToken,
+                },
+              }),
+            }).catch(err => console.error('Analytics tracking error:', err))
+          }
         }
       }
 
@@ -481,6 +522,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           chatHistory: finalChatHistory,
           skippedQuestions: Array.from(skipped),
           structuredFields: structuredFields, // Include structured fields
+          session_token: sessionToken, // Include session token for tracking
         }),
       })
 
@@ -488,6 +530,23 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
         const data = await response.json()
         setAssessment(data)
         setFlowState('results')
+        
+        // Track completion
+        if (sessionToken && startTime) {
+          const completionTime = Date.now() - startTime
+          fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_type: 'requester_completed',
+              event_data: {
+                session_token: sessionToken,
+                completion_time_ms: completionTime,
+                link_id: linkId,
+              },
+            }),
+          }).catch(err => console.error('Analytics tracking error:', err))
+        }
       } else {
         // Get response text first to see what we're dealing with
         const responseText = await response.text()
@@ -513,24 +572,43 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     }
   }
 
+  if (flowState === 'intro') {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
+          <h1 className="text-3xl font-bold mb-4 text-purple-600">Save time, test the vibe</h1>
+          <p className="text-gray-700 mb-4 text-lg">
+            Just 7 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
+          </p>
+          <p className="text-sm text-gray-500 mb-8">
+            Your responses are analyzed by AI and compared against their profile. No raw data is stored—only compatibility metrics.
+          </p>
+          <button
+            onClick={handleStart}
+            className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+          >
+            Start vibe check
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (flowState === 'consent-denied') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 sm:py-12 px-4">
-        <div className="absolute top-4 right-4 z-10">
-          <ThemeToggle />
-        </div>
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
             {chatHistory.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] p-3 rounded-lg text-sm sm:text-base ${
+                  className={`max-w-[80%] p-3 rounded-lg ${
                     msg.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100'
+                      : 'bg-white border border-gray-200 text-gray-800'
                   }`}
                 >
                   {msg.content}
@@ -538,31 +616,6 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               </div>
             ))}
           </div>
-        </div>
-      </div>
-    )
-  }
-
-  if (flowState === 'intro') {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 sm:py-12 px-4">
-        <div className="absolute top-4 right-4 z-10">
-          <ThemeToggle />
-        </div>
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8 text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4 text-purple-600 dark:text-purple-400">Save time, test the vibe</h1>
-          <p className="text-base sm:text-lg text-gray-700 dark:text-gray-200 mb-4">
-            Just 7 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
-          </p>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-            Your responses are analyzed by AI to generate a compatibility score and visual radar comparison.
-          </p>
-          <button
-            onClick={handleStart}
-            className="px-6 sm:px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors text-base sm:text-lg"
-          >
-            Start vibe check
-          </button>
         </div>
       </div>
     )
@@ -593,27 +646,24 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     const hasQuickReplyFieldCaptured = quickReplyField ? !!structuredFields[quickReplyField] : false
     
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 sm:py-12 px-4">
-        <div className="absolute top-4 right-4 z-10">
-          <ThemeToggle />
-        </div>
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col h-[calc(100vh-4rem)] sm:h-[600px]">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">Vibe-check</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-4 text-xs sm:text-sm">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 pb-24 sm:pb-12">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col" style={{ minHeight: 'calc(100vh - 6rem)', maxHeight: 'calc(100vh - 6rem)' }}>
+          <h1 className="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">Vibe-check</h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
             You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.
           </p>
 
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             {chatHistory.map((msg, idx) => (
               <div key={idx} className="space-y-2">
                 <div
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[85%] sm:max-w-[80%] p-3 rounded-lg text-sm sm:text-base ${
+                    className={`max-w-[80%] p-3 rounded-lg ${
                       msg.role === 'user'
                         ? 'bg-purple-600 text-white'
-                        : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100'
+                        : 'bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-800 dark:text-gray-100'
                     }`}
                   >
                     {msg.content}
@@ -624,8 +674,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-3 rounded-lg">
-                  <span className="animate-pulse text-gray-600 dark:text-gray-300">Thinking...</span>
+                <div className="bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 p-3 rounded-lg">
+                  <span className="animate-pulse dark:text-gray-100">Thinking...</span>
                 </div>
               </div>
             )}
@@ -638,7 +688,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
                 <button
                   key={idx}
                   onClick={() => handleQuickReplySelect(option, currentQuestionIndex)}
-                  className="px-3 sm:px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 rounded-full text-xs sm:text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors border border-purple-300 dark:border-purple-700"
+                  className="px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 rounded-full text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors border border-purple-300 dark:border-purple-700"
                   disabled={loading}
                 >
                   {option.label}
@@ -646,19 +696,20 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               ))}
             </div>
           )}
-          <form onSubmit={handleChatSubmit} className="flex gap-2">
+          <form onSubmit={handleChatSubmit} className="flex gap-2 pb-safe">
             <input
               type="text"
               value={currentMessage}
               onChange={(e) => setCurrentMessage(e.target.value)}
               placeholder={currentQuickReplies ? "Or type your response..." : "Type your response..."}
-              className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-gray-100 text-sm sm:text-base"
+              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
               disabled={loading}
+              autoComplete="off"
             />
             <button
               type="submit"
               disabled={loading || !currentMessage.trim() || currentQuickReplies !== null}
-              className="px-4 sm:px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 text-sm sm:text-base"
+              className="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
             >
               Send
             </button>
@@ -670,49 +721,41 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
   if (flowState === 'results' && assessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 sm:py-12 px-4">
-        <div className="absolute top-4 right-4 z-10">
-          <ThemeToggle />
-        </div>
-        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-center text-purple-600 dark:text-purple-400">Compatibility Results</h1>
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
+        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold mb-2 text-center text-purple-600">Compatibility Results</h1>
           
           {/* Score */}
-          <div className="text-center mb-6 sm:mb-8">
-            <div className="text-5xl sm:text-6xl font-bold text-purple-600 dark:text-purple-400 mb-2">
+          <div className="text-center mb-8">
+            <div className="text-6xl font-bold text-purple-600 mb-2">
               {assessment.score}%
             </div>
-            <p className="text-gray-600 dark:text-gray-300">Compatibility Score</p>
+            <p className="text-gray-600">Compatibility Score</p>
           </div>
 
           {/* Summary */}
-          <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
-            <h2 className="font-semibold text-base sm:text-lg mb-3 text-purple-600 dark:text-purple-400">Summary</h2>
-            <p className="text-gray-700 dark:text-gray-200 text-sm sm:text-base">{assessment.summary}</p>
+          <div className="bg-purple-50 rounded-lg p-6 mb-8">
+            <h2 className="font-semibold text-lg mb-3 text-purple-600">Summary</h2>
+            <p className="text-gray-700">{assessment.summary}</p>
           </div>
 
           {/* Radar Overlay */}
-          <div className="mb-6 sm:mb-8">
-            <h2 className="font-semibold text-base sm:text-lg mb-4 text-center text-purple-600 dark:text-purple-400">Radar Comparison</h2>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center mb-4 italic px-4">
-              This remains private - they can't see how you align unless you send a screenshot to them
-            </p>
-            <div className="overflow-x-auto">
-              <RadarOverlay
-                userData={assessment.userRadar}
-                requesterData={assessment.requesterRadar}
-              />
-            </div>
+          <div className="mb-8">
+            <h2 className="font-semibold text-lg mb-4 text-center text-purple-600">Radar Comparison</h2>
+            <RadarOverlay
+              userData={assessment.userRadar}
+              requesterData={assessment.requesterRadar}
+            />
           </div>
 
           {/* CTA to create account */}
-          <div className="text-center mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-gray-200 dark:border-gray-700">
-            <p className="text-gray-700 dark:text-gray-200 mb-4 text-sm sm:text-base px-4">
+          <div className="text-center mt-8 pt-8 border-t border-gray-200">
+            <p className="text-gray-700 mb-4">
               Want to create your own vibe-check link and see how others match with you?
             </p>
             <a
               href="/login"
-              className="inline-block px-6 sm:px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors text-sm sm:text-base"
+              className="inline-block px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
             >
               Create Your Profile
             </a>
@@ -724,5 +767,4 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
   return null
 }
-
 

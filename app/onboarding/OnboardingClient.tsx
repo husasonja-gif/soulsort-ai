@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import ThemeToggle from '@/components/ThemeToggle'
 import type { ChatMessage } from '@/lib/types'
 
 interface OnboardingClientProps {
@@ -221,16 +220,13 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'dealbreakers') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 sm:py-12 px-4">
-        <div className="absolute top-4 right-4 z-10">
-          <ThemeToggle />
-        </div>
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 dark:text-gray-100">Create Your SoulSort Profile</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm sm:text-base">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold mb-2">Create Your SoulSort Profile</h1>
+          <p className="text-gray-600 mb-6">
             {skipChat ? 'Section 1 of 1: Dealbreakers' : 'Section 1 of 2: Dealbreakers'}
           </p>
-          <p className="text-base sm:text-lg font-medium mb-6 dark:text-gray-200">
+          <p className="text-lg font-medium mb-6">
             Check all boxes that would be dealbreakers for you in a partner:
           </p>
 
@@ -238,22 +234,22 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             {dealbreakerOptions.map((option) => (
               <label
                 key={option}
-                className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/20 cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-purple-50 cursor-pointer transition-colors"
               >
                 <input
                   type="checkbox"
                   checked={dealbreakers.includes(option)}
                   onChange={() => handleDealbreakerToggle(option)}
-                  className="w-5 h-5 text-purple-600 dark:text-purple-400 rounded accent-purple-600 dark:accent-purple-400"
+                  className="w-5 h-5 text-purple-600 rounded"
                 />
-                <span className="flex-1 dark:text-gray-200 text-sm sm:text-base">{option}</span>
+                <span className="flex-1">{option}</span>
               </label>
             ))}
           </div>
 
           <button
             onClick={handleDealbreakersNext}
-            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors text-sm sm:text-base"
+            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
           >
             Continue to Preferences
           </button>
@@ -264,16 +260,13 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'preferences') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 sm:py-12 px-4">
-        <div className="absolute top-4 right-4 z-10">
-          <ThemeToggle />
-        </div>
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sm:p-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-2 dark:text-gray-100">Create Your SoulSort Profile</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-6 text-sm sm:text-base">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold mb-2">Create Your SoulSort Profile</h1>
+          <p className="text-gray-600 mb-6">
             {skipChat ? 'Section 1 of 1: Preferences' : 'Section 2 of 2: Preferences'}
           </p>
-          <p className="text-base sm:text-lg font-medium mb-6 dark:text-gray-200">
+          <p className="text-lg font-medium mb-6">
             Use the sliders to select the spot that describes you best:
           </p>
 
@@ -281,8 +274,8 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             {preferenceLabels.map((pref) => (
               <div key={pref.id} className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{pref.label}</span>
-                  <span className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">{pref.opposite}</span>
+                  <span className="text-sm font-medium text-gray-700">{pref.label}</span>
+                  <span className="text-sm font-medium text-gray-700">{pref.opposite}</span>
                 </div>
                 <input
                   type="range"
@@ -290,9 +283,9 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                   max="100"
                   value={preferences[pref.id]}
                   onChange={(e) => handlePreferenceChange(pref.id, parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600 dark:accent-purple-400"
+                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
                 />
-                <div className="text-center text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <div className="text-center text-sm text-gray-500">
                   {preferences[pref.id]}%
                 </div>
               </div>
@@ -301,7 +294,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
           <button
             onClick={handlePreferencesNext}
-            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors text-sm sm:text-base"
+            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
           >
             {skipChat ? 'Complete Profile' : 'Continue to Chat'}
           </button>
@@ -312,27 +305,24 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'chat') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-8 sm:py-12 px-4">
-        <div className="absolute top-4 right-4 z-10">
-          <ThemeToggle />
-        </div>
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col h-[calc(100vh-4rem)] sm:h-[600px]">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 dark:text-gray-100">Let's Chat</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-4 text-xs sm:text-sm">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 pb-24 sm:pb-12">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col" style={{ minHeight: 'calc(100vh - 6rem)', maxHeight: 'calc(100vh - 6rem)' }}>
+          <h1 className="text-2xl font-bold mb-4 dark:text-white">Let's Chat</h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
             I'll ask you {chatQuestions.length} questions to understand what matters most to you in relationships.
           </p>
 
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-3 sm:p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
+          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             {chatHistory.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] sm:max-w-[80%] p-3 rounded-lg text-sm sm:text-base ${
+                  className={`max-w-[80%] p-3 rounded-lg ${
                     msg.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-800 dark:text-gray-100'
+                      : 'bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-800 dark:text-gray-100'
                   }`}
                 >
                   {msg.content}
@@ -341,27 +331,28 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 p-3 rounded-lg">
-                  <span className="animate-pulse text-gray-600 dark:text-gray-300">Thinking...</span>
+                <div className="bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 p-3 rounded-lg">
+                  <span className="animate-pulse dark:text-gray-100">Thinking...</span>
                 </div>
               </div>
             )}
           </div>
 
           {!chatComplete ? (
-            <form onSubmit={handleChatSubmit} className="flex gap-2">
+            <form onSubmit={handleChatSubmit} className="flex gap-2 pb-safe">
               <input
                 type="text"
                 value={currentMessage}
                 onChange={(e) => setCurrentMessage(e.target.value)}
                 placeholder="Type your response..."
-                className="flex-1 px-3 sm:px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-gray-100 text-sm sm:text-base"
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
                 disabled={loading}
+                autoComplete="off"
               />
               <button
                 type="submit"
                 disabled={loading || !currentMessage.trim()}
-                className="px-4 sm:px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50 text-sm sm:text-base"
+                className="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
               >
                 Send
               </button>

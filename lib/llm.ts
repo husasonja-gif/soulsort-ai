@@ -1,5 +1,6 @@
 // LLM integration utilities for SoulSort AI
 import OpenAI from 'openai'
+import { trackOpenAIUsage } from './trackOpenAIUsage'
 import type { ChatMessage, RadarDimensions } from './types'
 
 const openai = new OpenAI({
@@ -48,7 +49,9 @@ export interface UserProfileOutput {
  */
 export async function generateUserRadarProfile(
   surveyResponses: Record<string, any>,
-  chatHistory: ChatMessage[]
+  chatHistory: ChatMessage[],
+  userId?: string | null,
+  linkId?: string | null
 ): Promise<CanonicalVectors & { chart: RadarChart; dealbreakers: string[] }> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error('OpenAI API key not configured')
@@ -351,6 +354,7 @@ Provide deltas to adjust the base priors based on chat evidence. Return deltas a
     console.log('=== END PROMPT ===')
 
     console.log('Calling OpenAI API for radar generation...')
+    const startTime = Date.now()
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -360,6 +364,20 @@ Provide deltas to adjust the base priors based on chat evidence. Return deltas a
       temperature: 0.3, // Lower temperature for more deterministic output
       response_format: { type: 'json_object' },
     })
+    const responseTime = Date.now() - startTime
+
+    // Track OpenAI usage
+    if (response.usage) {
+      await trackOpenAIUsage({
+        userId: userId || null,
+        linkId: linkId || null,
+        endpoint: 'generate_profile',
+        model: 'gpt-4o-mini',
+        usage: response.usage,
+        responseTimeMs: responseTime,
+        success: true,
+      })
+    }
 
     console.log('OpenAI response received')
     const content = response.choices[0].message.content
@@ -542,7 +560,10 @@ export async function assessRequester(
   requesterResponses: Record<string, any>,
   userRadarProfile: RadarDimensions,
   userDealbreakers: string[],
-  structuredFields?: Record<string, any>
+  structuredFields?: Record<string, any>,
+  userId?: string | null,
+  linkId?: string | null,
+  requesterSessionId?: string | null
 ): Promise<{
   radar: RadarDimensions
   compatibilityScore: number
@@ -652,6 +673,7 @@ Assess compatibility based on these responses.`
     } else {
       console.log('Calling OpenAI for requester assessment...')
     }
+    const startTime = Date.now()
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -661,6 +683,21 @@ Assess compatibility based on these responses.`
       temperature: 0.2,
       response_format: { type: 'json_object' },
     })
+    const responseTime = Date.now() - startTime
+
+    // Track OpenAI usage
+    if (response.usage) {
+      await trackOpenAIUsage({
+        userId: userId || null,
+        linkId: linkId || null,
+        requesterSessionId: requesterSessionId || null,
+        endpoint: 'requester_assess',
+        model: 'gpt-4o-mini',
+        usage: response.usage,
+        responseTimeMs: responseTime,
+        success: true,
+      })
+    }
 
     const content = response.choices[0].message.content
     if (!content) {
@@ -892,12 +929,27 @@ Keep responses concise (1-2 sentences) and conversational.`
   ]
 
   try {
+    const startTime = Date.now()
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
       temperature: 0.8,
       max_tokens: 150,
     })
+    const responseTime = Date.now() - startTime
+
+    // Track OpenAI usage (optional - for onboarding chat)
+    if (response.usage) {
+      await trackOpenAIUsage({
+        userId: null, // Onboarding chat doesn't have userId yet
+        linkId: null,
+        endpoint: 'onboarding_chat_message',
+        model: 'gpt-4o-mini',
+        usage: response.usage,
+        responseTimeMs: responseTime,
+        success: true,
+      }).catch(err => console.error('Error tracking OpenAI usage:', err))
+    }
 
     return response.choices[0].message.content || 'Tell me more about what you\'re looking for.'
   } catch (error) {
@@ -936,12 +988,27 @@ Keep it conversational and supportive.`
   ]
 
   try {
+    const startTime = Date.now()
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages,
       temperature: 0.8,
       max_tokens: 100,
     })
+    const responseTime = Date.now() - startTime
+
+    // Track OpenAI usage (optional - for requester commentary)
+    if (response.usage) {
+      await trackOpenAIUsage({
+        userId: null,
+        linkId: null,
+        endpoint: 'requester_commentary',
+        model: 'gpt-4o-mini',
+        usage: response.usage,
+        responseTimeMs: responseTime,
+        success: true,
+      }).catch(err => console.error('Error tracking OpenAI usage:', err))
+    }
 
     return response.choices[0].message.content || 'What matters most to you in a relationship?'
   } catch (error) {
@@ -949,6 +1016,4 @@ Keep it conversational and supportive.`
     throw error
   }
 }
-
-
 
