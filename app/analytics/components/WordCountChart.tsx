@@ -8,11 +8,20 @@ interface WordCountChartProps {
 }
 
 export default function WordCountChart({ missingRate, wordCountBins }: WordCountChartProps) {
+  if (!missingRate || !wordCountBins) {
+    return (
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+        <h3 className="text-lg font-semibold mb-4 dark:text-gray-100">Missing Rate & Word Count Distribution</h3>
+        <p className="text-gray-500 dark:text-gray-400">No data available</p>
+      </div>
+    )
+  }
+  
   const missingData = [
-    { question: 'Q1', rate: missingRate.q1 * 100 },
-    { question: 'Q2', rate: missingRate.q2 * 100 },
-    { question: 'Q3', rate: missingRate.q3 * 100 },
-    { question: 'Q4', rate: missingRate.q4 * 100 },
+    { question: 'Q1', rate: (missingRate.q1 || 0) * 100 },
+    { question: 'Q2', rate: (missingRate.q2 || 0) * 100 },
+    { question: 'Q3', rate: (missingRate.q3 || 0) * 100 },
+    { question: 'Q4', rate: (missingRate.q4 || 0) * 100 },
   ]
   
   const wordCountData = ['q1', 'q2', 'q3', 'q4'].map(q => ({

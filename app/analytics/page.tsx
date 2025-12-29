@@ -239,12 +239,12 @@ export default function AnalyticsDashboard() {
 
             {/* Row 2: B2 Entropy/Saturation */}
             <div className="mb-8">
-              <EntropyChart data={metrics.qc.entropy_saturation} />
+              <EntropyChart data={metrics.qc.entropy_saturation || []} />
             </div>
 
             {/* Row 3: A2 Archetypes */}
             <div className="mb-8">
-              <ArchetypeTable archetypes={metrics.qc.archetypes} />
+              <ArchetypeTable archetypes={metrics.qc.archetypes || []} />
             </div>
           </>
         )}

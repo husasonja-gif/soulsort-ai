@@ -356,7 +356,15 @@ async function getQCMetrics(supabase: any, days: number) {
       default_clustering_rate: 0,
       distributions: {},
       entropy_saturation: [],
-      missing_wordcount: {},
+      missing_wordcount: {
+        missing_rate: { q1: 0, q2: 0, q3: 0, q4: 0 },
+        word_count_bins: {
+          q1: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+          q2: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+          q3: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+          q4: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+        }
+      },
       archetypes: []
     }
   }
@@ -380,7 +388,15 @@ async function getQCMetrics(supabase: any, days: number) {
       default_clustering_rate: 0,
       distributions: {},
       entropy_saturation: [],
-      missing_wordcount: {},
+      missing_wordcount: {
+        missing_rate: { q1: 0, q2: 0, q3: 0, q4: 0 },
+        word_count_bins: {
+          q1: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+          q2: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+          q3: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+          q4: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+        }
+      },
       archetypes: []
     }
   }
