@@ -3,7 +3,10 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 
 // Simple admin check - you can enhance this later
 function isAdmin(email: string | undefined): boolean {
-  if (!email) return false
+  if (!email) {
+    console.error('Admin check failed: no email provided')
+    return false
+  }
   
   // Get admin emails from environment variable
   const adminEmailsStr = process.env.ADMIN_EMAILS || ''
@@ -14,17 +17,29 @@ function isAdmin(email: string | undefined): boolean {
   
   const userEmail = email.toLowerCase().trim()
   
-  // Debug logging (remove in production if needed)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Admin check:', {
+  // Always log for debugging (can be removed later)
+  console.log('Admin check:', {
+    userEmail,
+    adminEmails,
+    adminEmailsStr,
+    hasAdminEmails: adminEmails.length > 0,
+    isAdmin: adminEmails.includes(userEmail),
+    envVarExists: !!process.env.ADMIN_EMAILS,
+    envVarLength: process.env.ADMIN_EMAILS?.length || 0
+  })
+  
+  const isAdminResult = adminEmails.includes(userEmail)
+  
+  if (!isAdminResult) {
+    console.error('Admin check failed:', {
       userEmail,
       adminEmails,
       adminEmailsStr,
-      isAdmin: adminEmails.includes(userEmail)
+      matchFound: adminEmails.some(e => e === userEmail)
     })
   }
   
-  return adminEmails.includes(userEmail)
+  return isAdminResult
 }
 
 export async function GET(request: Request) {
@@ -37,22 +52,37 @@ export async function GET(request: Request) {
     }
 
     // Check admin access
+    console.log('Checking admin access for user:', {
+      userId: user.id,
+      userEmail: user.email,
+      adminEmailsEnv: process.env.ADMIN_EMAILS,
+      adminEmailsExists: !!process.env.ADMIN_EMAILS
+    })
+    
     const adminCheck = isAdmin(user.email)
     if (!adminCheck) {
       // Log for debugging
       console.error('Admin access denied:', {
         userEmail: user.email,
+        userEmailLower: user.email?.toLowerCase().trim(),
         adminEmails: process.env.ADMIN_EMAILS,
-        hasAdminEmails: !!process.env.ADMIN_EMAILS
+        hasAdminEmails: !!process.env.ADMIN_EMAILS,
+        adminEmailsParsed: process.env.ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase())
       })
       return NextResponse.json({ 
         error: 'Forbidden - Admin access required',
-        details: process.env.NODE_ENV === 'development' ? {
+        details: {
           userEmail: user.email,
-          adminEmails: process.env.ADMIN_EMAILS
-        } : undefined
+          adminEmails: process.env.ADMIN_EMAILS || 'NOT SET',
+          debug: {
+            userEmailLower: user.email?.toLowerCase().trim(),
+            adminEmailsParsed: process.env.ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || []
+          }
+        }
       }, { status: 403 })
     }
+    
+    console.log('Admin access granted for:', user.email)
 
     const { searchParams } = new URL(request.url)
     const range = searchParams.get('range') || '30d'
