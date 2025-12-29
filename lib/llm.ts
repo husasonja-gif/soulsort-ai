@@ -582,6 +582,20 @@ Compare the requester's responses against the user's radar profile.
 User's radar dimensions:
 ${JSON.stringify(userRadarProfile)}
 
+CRITICAL: GARBAGE RESPONSE DETECTION
+Before assessing compatibility, check if responses are garbage/non-serious:
+- Single repeated words (e.g., "test", "test", "test" or "yes", "yes", "yes")
+- Nonsensical or random text (e.g., "asdf", "qwerty", "123", "abc")
+- Extremely short answers (< 3 words) to substantive questions (Q4-Q7)
+- Copy-paste spam or gibberish
+- Answers that show no engagement with the question content
+
+If garbage responses are detected:
+- Set ALL radar dimensions to 20-40 (low engagement, no real signals)
+- Set compatibility score to MAX 40 (never higher)
+- Write summary noting limited information available
+- Add "low_engagement" to abuseFlags
+
 CRITICAL LANGUAGE RULES (for summary only):
 - The summary will be shown to the requester (the person who took the assessment)
 - Always refer to the requester as "you" or "your"
@@ -597,10 +611,10 @@ CRITICAL LANGUAGE RULES (for summary only):
 - If the requester avoids consent/boundaries questions: reduce consent
 
 Generate:
-1. Requester's radar profile (7 dimensions, 0-100) - based on their responses
-2. Compatibility score (0-100) - calculated STRICTLY from radar dimension alignment using the formula above
+1. Requester's radar profile (7 dimensions, 0-100) - based on their responses, OR 20-40 if garbage detected
+2. Compatibility score (0-100) - calculated STRICTLY from radar dimension alignment, OR MAX 40 if garbage detected
 3. A thoughtful summary (2-3 sentences) written from the requester's perspective using "you" for them and "they/them" for the other person. Describe compatibility patterns descriptively without mentioning dealbreakers or using judgmental language. The summary is independent of the score.
-4. Abuse detection flags (empty array if none, or ["flag1", "flag2"] if concerning patterns detected)
+4. Abuse detection flags (empty array if none, or ["low_engagement"] if garbage detected, or ["flag1", "flag2"] if concerning patterns detected)
 
 Return ONLY valid JSON:
 {

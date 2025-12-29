@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import html2canvas from 'html2canvas'
-import RadarChart from './RadarChart'
+import RadarChartNoLabels from './RadarChartNoLabels'
 import type { RadarDimensions } from '@/lib/types'
 
 interface ShareCardProps {
@@ -20,20 +20,33 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
     
     setDownloading(true)
     try {
+      // Wait a bit for any animations/rendering to complete
+      await new Promise(resolve => setTimeout(resolve, 200))
+      
       const canvas = await html2canvas(cardRef.current, {
         backgroundColor: '#ffffff',
-        scale: 3,
+        scale: 2,
         logging: false,
         useCORS: true,
-        allowTaint: false,
-        width: cardRef.current.offsetWidth,
-        height: cardRef.current.offsetHeight,
+        allowTaint: true,
+        windowWidth: cardRef.current.scrollWidth,
+        windowHeight: cardRef.current.scrollHeight,
       } as any)
       
+      // Convert to data URL and download
+      const dataUrl = canvas.toDataURL('image/png', 1.0)
       const link = document.createElement('a')
       link.download = 'soulsort-radar.png'
-      link.href = canvas.toDataURL('image/png')
+      link.href = dataUrl
+      
+      // Append to body, click, then remove
+      document.body.appendChild(link)
       link.click()
+      
+      // Clean up after a short delay
+      setTimeout(() => {
+        document.body.removeChild(link)
+      }, 100)
       
       // Track share action
       fetch('/api/analytics/track', {
@@ -68,7 +81,7 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
           <div className="w-48 h-48 flex-shrink-0 flex items-center justify-center">
-            <RadarChart data={radarData} label="Profile" />
+            <RadarChartNoLabels data={radarData} label="Profile" />
           </div>
           <div className="flex-shrink-0 flex items-center justify-center p-3 bg-white dark:bg-gray-900 rounded-lg">
             <QRCodeSVG
