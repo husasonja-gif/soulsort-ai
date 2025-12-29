@@ -63,11 +63,25 @@ export default function AnalyticsDashboard() {
         } else if (response.status === 403) {
           // Authenticated but not admin
           const errorData = await response.json().catch(() => ({}))
-          setError(
-            errorData.details 
-              ? `Access denied. Your email (${errorData.details.userEmail}) is not in the admin list. Please contact support or check your Vercel environment variables.`
-              : 'Access denied. Admin access required. Please ensure your email is set in the ADMIN_EMAILS environment variable.'
-          )
+          console.error('Access denied details:', errorData)
+          
+          if (errorData.details) {
+            const { userEmail, adminEmails, debug } = errorData.details
+            setError(
+              `Access denied. Your email "${userEmail}" is not in the admin list.\n\n` +
+              `Admin emails configured: ${adminEmails || 'NOT SET'}\n\n` +
+              `Debug info:\n` +
+              `- Your email (lowercase): ${debug?.userEmailLower || userEmail}\n` +
+              `- Admin emails (parsed): ${JSON.stringify(debug?.adminEmailsParsed || [])}\n\n` +
+              `Please verify:\n` +
+              `1. Your email matches exactly (case-insensitive)\n` +
+              `2. ADMIN_EMAILS is set in Vercel environment variables\n` +
+              `3. The variable is set for Production environment\n` +
+              `4. You've redeployed after setting the variable`
+            )
+          } else {
+            setError('Access denied. Admin access required. Please ensure your email is set in the ADMIN_EMAILS environment variable.')
+          }
         } else {
           setError('Failed to fetch metrics')
         }
