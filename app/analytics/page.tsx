@@ -44,21 +44,12 @@ export default function AnalyticsDashboard() {
   const [metrics, setMetrics] = useState<MetricsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [checkingAuth, setCheckingAuth] = useState(true)
 
-  // Check authentication first
+  // Fetch metrics on mount and when date range changes
+  // Middleware already protects this route, so we can directly fetch
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        router.push('/login?redirect=/analytics')
-        return
-      }
-      setCheckingAuth(false)
-      fetchMetrics(dateRange)
-    }
-    checkAuth()
-  }, [router, dateRange])
+    fetchMetrics(dateRange)
+  }, [dateRange])
 
   const fetchMetrics = async (range: string) => {
     setLoading(true)
@@ -67,8 +58,8 @@ export default function AnalyticsDashboard() {
       const response = await fetch(`/api/analytics/metrics?range=${range}`)
       if (!response.ok) {
         if (response.status === 401) {
-          // Not authenticated - redirect to login
-          router.push('/login?redirect=/analytics')
+          // Not authenticated - redirect to login (shouldn't happen due to middleware, but handle it)
+          window.location.href = '/login?redirect=/analytics'
           return
         } else if (response.status === 403) {
           // Authenticated but not admin
@@ -93,14 +84,12 @@ export default function AnalyticsDashboard() {
     }
   }
 
-  if (checkingAuth || loading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-300">
-              {checkingAuth ? 'Checking authentication...' : 'Loading analytics...'}
-            </p>
+            <p className="text-gray-600 dark:text-gray-300">Loading analytics...</p>
           </div>
         </div>
       </div>
