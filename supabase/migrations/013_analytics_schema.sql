@@ -86,9 +86,9 @@ CREATE TABLE IF NOT EXISTS share_actions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_share_actions_user_id ON share_actions(user_id);
-CREATE INDEX idx_share_actions_link_id ON share_actions(link_id);
-CREATE INDEX idx_share_actions_created_at ON share_actions(created_at);
+CREATE INDEX IF NOT EXISTS idx_share_actions_user_id ON share_actions(user_id);
+CREATE INDEX IF NOT EXISTS idx_share_actions_link_id ON share_actions(link_id);
+CREATE INDEX IF NOT EXISTS idx_share_actions_created_at ON share_actions(created_at);
 
 -- ============================================================================
 -- OPENAI USAGE TRACKING
@@ -120,10 +120,10 @@ CREATE TABLE IF NOT EXISTS openai_usage (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_openai_usage_user_id ON openai_usage(user_id);
-CREATE INDEX idx_openai_usage_endpoint ON openai_usage(endpoint);
-CREATE INDEX idx_openai_usage_created_at ON openai_usage(created_at);
-CREATE INDEX idx_openai_usage_success ON openai_usage(success);
+CREATE INDEX IF NOT EXISTS idx_openai_usage_user_id ON openai_usage(user_id);
+CREATE INDEX IF NOT EXISTS idx_openai_usage_endpoint ON openai_usage(endpoint);
+CREATE INDEX IF NOT EXISTS idx_openai_usage_created_at ON openai_usage(created_at);
+CREATE INDEX IF NOT EXISTS idx_openai_usage_success ON openai_usage(success);
 
 -- ============================================================================
 -- VECTOR ANALYTICS (Consent-Only)
@@ -153,8 +153,8 @@ CREATE TABLE IF NOT EXISTS vector_analytics (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_vector_analytics_user_id ON vector_analytics(user_id);
-CREATE INDEX idx_vector_analytics_created_at ON vector_analytics(created_at);
+CREATE INDEX IF NOT EXISTS idx_vector_analytics_user_id ON vector_analytics(user_id);
+CREATE INDEX IF NOT EXISTS idx_vector_analytics_created_at ON vector_analytics(created_at);
 
 -- Only allow inserts if user has analytics consent
 CREATE OR REPLACE FUNCTION check_analytics_consent()
@@ -192,8 +192,8 @@ CREATE TABLE IF NOT EXISTS dashboard_visits (
   UNIQUE(user_id, visit_date)
 );
 
-CREATE INDEX idx_dashboard_visits_user_id ON dashboard_visits(user_id);
-CREATE INDEX idx_dashboard_visits_visit_date ON dashboard_visits(visit_date);
+CREATE INDEX IF NOT EXISTS idx_dashboard_visits_user_id ON dashboard_visits(user_id);
+CREATE INDEX IF NOT EXISTS idx_dashboard_visits_visit_date ON dashboard_visits(visit_date);
 
 -- ============================================================================
 -- ROW LEVEL SECURITY
