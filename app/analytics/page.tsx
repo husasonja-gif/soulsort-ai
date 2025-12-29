@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
 import MetricCard from './components/MetricCard'
 import FunnelChart from './components/FunnelChart'
 import CostChart from './components/CostChart'
