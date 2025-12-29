@@ -13,16 +13,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://soulsortai.com'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
   title: "SoulSort AI - A Vibe-Check Engine",
   description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
   openGraph: {
     title: "SoulSort AI - A Vibe-Check Engine",
     description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
     type: "website",
+    url: appUrl,
+    siteName: "SoulSort AI",
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "SoulSort AI - A Vibe-Check Engine",
     description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
   },

@@ -11,6 +11,13 @@ export async function middleware(request: NextRequest) {
 
   const response = NextResponse.next()
 
+  // Add cache control headers for OG metadata routes
+  if (pathname.startsWith('/r/')) {
+    response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
@@ -69,8 +76,7 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .maybeSingle()
 
-    // If profile doesn't exist yet or onboarding not completed, redirect to onboarding
-    if (!profile || !profile.onboarding_completed) {
+    if (error || !profile || !profile.onboarding_completed) {
       const url = request.nextUrl.clone()
       url.pathname = '/onboarding'
       return NextResponse.redirect(url)
@@ -81,5 +87,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/onboarding/:path*', '/analytics/:path*', '/login', '/auth/callback'],
+  matcher: ['/dashboard/:path*', '/onboarding/:path*', '/login', '/auth/callback', '/analytics/:path*', '/r/:path*'],
 }

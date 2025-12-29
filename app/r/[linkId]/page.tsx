@@ -1,5 +1,34 @@
 import { getUserLinkByLinkId } from '@/lib/db'
 import RequesterClient from './RequesterClient'
+import type { Metadata } from 'next'
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://soulsortai.com'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ linkId: string }>
+}): Promise<Metadata> {
+  const { linkId } = await params
+  const url = `${appUrl}/r/${linkId}`
+  
+  return {
+    title: "SoulSort AI - A Vibe-Check Engine",
+    description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+    openGraph: {
+      title: "SoulSort AI - A Vibe-Check Engine",
+      description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+      type: "website",
+      url: url,
+      siteName: "SoulSort AI",
+    },
+    twitter: {
+      card: "summary",
+      title: "SoulSort AI - A Vibe-Check Engine",
+      description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+    },
+  }
+}
 
 export default async function RequesterPage({
   params,
