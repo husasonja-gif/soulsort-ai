@@ -4,9 +4,27 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 // Simple admin check - you can enhance this later
 function isAdmin(email: string | undefined): boolean {
   if (!email) return false
-  // For now, check against environment variable or hardcode your admin email
-  const adminEmails = process.env.ADMIN_EMAILS?.split(',') || []
-  return adminEmails.includes(email.toLowerCase())
+  
+  // Get admin emails from environment variable
+  const adminEmailsStr = process.env.ADMIN_EMAILS || ''
+  const adminEmails = adminEmailsStr
+    .split(',')
+    .map(e => e.trim().toLowerCase())
+    .filter(e => e.length > 0)
+  
+  const userEmail = email.toLowerCase().trim()
+  
+  // Debug logging (remove in production if needed)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('Admin check:', {
+      userEmail,
+      adminEmails,
+      adminEmailsStr,
+      isAdmin: adminEmails.includes(userEmail)
+    })
+  }
+  
+  return adminEmails.includes(userEmail)
 }
 
 export async function GET(request: Request) {
