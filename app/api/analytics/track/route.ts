@@ -20,6 +20,7 @@ export async function POST(request: Request) {
       'onboarding_started',
       'onboarding_completed',
       'onboarding_abandoned',
+      'compatibility_feedback',
     ]
     
     if (!body.event_type || !validEventTypes.includes(body.event_type)) {

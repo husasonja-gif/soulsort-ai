@@ -174,37 +174,39 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
         <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Sharing & Consent</h2>
 
         <div className="space-y-4">
-          <label className="flex items-start gap-3 cursor-pointer">
+          <div className="flex items-start gap-3">
             <input
               type="checkbox"
+              id="public-radar-checkbox"
               checked={publicRadar}
               onChange={(e) => handleConsentChange('public_radar', e.target.checked)}
               disabled={updating}
-              className="mt-1 w-5 h-5 text-purple-600 rounded accent-purple-600"
+              className="mt-1 w-5 h-5 text-purple-600 rounded accent-purple-600 cursor-pointer flex-shrink-0"
             />
-            <div className="flex-1">
+            <label htmlFor="public-radar-checkbox" className="flex-1 cursor-pointer">
               <span className="font-medium dark:text-gray-100">My radar can be viewed publicly</span>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 Allow others to see your radar profile when they use your link (without your identity).
               </p>
-            </div>
-          </label>
+            </label>
+          </div>
 
-          <label className="flex items-start gap-3 cursor-pointer">
+          <div className="flex items-start gap-3">
             <input
               type="checkbox"
+              id="analytics-checkbox"
               checked={analyticsOptIn}
               onChange={(e) => handleConsentChange('analytics', e.target.checked)}
               disabled={updating}
-              className="mt-1 w-5 h-5 text-purple-600 rounded accent-purple-600"
+              className="mt-1 w-5 h-5 text-purple-600 rounded accent-purple-600 cursor-pointer flex-shrink-0"
             />
-            <div className="flex-1">
+            <label htmlFor="analytics-checkbox" className="flex-1 cursor-pointer">
               <span className="font-medium dark:text-gray-100">My data can be used for anonymized aggregate analytics</span>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 Help improve SoulSort by allowing your anonymized data to be used for archetype analysis. No raw responses are stored.
               </p>
-            </div>
-          </label>
+            </label>
+          </div>
 
           <div className="pt-2">
             <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Your share link</div>

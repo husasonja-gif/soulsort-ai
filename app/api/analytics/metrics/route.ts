@@ -102,7 +102,8 @@ export async function GET(request: Request) {
       completionRate,
       avgCost,
       dau,
-      qcMetrics
+      qcMetrics,
+      feedbackMetrics
     ] = await Promise.all([
       getFunnelMetrics(supabase, days),
       getGrowthMetrics(supabase, days),
@@ -112,7 +113,8 @@ export async function GET(request: Request) {
       getCompletionRate(supabase, days),
       getAvgCost(supabase, days),
       getDAU(supabase),
-      getQCMetrics(supabase, days)
+      getQCMetrics(supabase, days),
+      getFeedbackMetrics(supabase, days)
     ])
 
     return NextResponse.json({
@@ -125,6 +127,7 @@ export async function GET(request: Request) {
       engagement: engagementData,
       cost_trends: costData,
       qc: qcMetrics,
+      feedback: feedbackMetrics,
     })
   } catch (error) {
     console.error('Error fetching metrics:', error)
@@ -570,6 +573,38 @@ async function getQCMetrics(supabase: any, days: number) {
       word_count_bins: wordCountBins,
     },
     archetypes,
+  }
+}
+
+async function getFeedbackMetrics(supabase: any, days: number) {
+  const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+  
+  const { data: feedbackEvents } = await supabase
+    .from('analytics_events')
+    .select('event_data')
+    .eq('event_type', 'compatibility_feedback')
+    .gte('created_at', startDate)
+  
+  if (!feedbackEvents || feedbackEvents.length === 0) {
+    return {
+      total: 0,
+      positive: 0,
+      negative: 0,
+      positive_percentage: 0,
+      negative_percentage: 0,
+    }
+  }
+  
+  const positive = feedbackEvents.filter((e: any) => e.event_data?.feedback === 'positive').length
+  const negative = feedbackEvents.filter((e: any) => e.event_data?.feedback === 'negative').length
+  const total = feedbackEvents.length
+  
+  return {
+    total,
+    positive,
+    negative,
+    positive_percentage: total > 0 ? (positive / total) * 100 : 0,
+    negative_percentage: total > 0 ? (negative / total) * 100 : 0,
   }
 }
 

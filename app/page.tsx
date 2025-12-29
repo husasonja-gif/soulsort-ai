@@ -1,5 +1,75 @@
+'use client'
+
+import { useState } from 'react'
 import Link from 'next/link'
 import ThemeToggle from '@/components/ThemeToggle'
+
+function WaitlistForm() {
+  const [email, setEmail] = useState('')
+  const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError('')
+    
+    try {
+      const response = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, source: 'homepage' }),
+      })
+
+      const data = await response.json()
+      
+      if (response.ok) {
+        setSubmitted(true)
+        setEmail('')
+      } else {
+        setError(data.error || 'Failed to join waitlist')
+      }
+    } catch (err) {
+      setError('Failed to join waitlist. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="text-center">
+        <div className="text-4xl mb-2">✨</div>
+        <p className="text-purple-600 dark:text-purple-400 font-semibold">You're on the list!</p>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+          We'll notify you when new features launch.
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+      <input
+        type="email"
+        placeholder="your@email.com"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
+      />
+      <button
+        type="submit"
+        disabled={loading}
+        className="px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+      >
+        {loading ? 'Joining...' : 'Join Waitlist'}
+      </button>
+      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+    </form>
+  )
+}
 
 export default function LandingPage() {
   return (
@@ -99,6 +169,17 @@ export default function LandingPage() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Waitlist Section */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
+          <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">Join the Waitlist</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Be the first to know about new features and early access.
+          </p>
+          <WaitlistForm />
         </div>
       </section>
 

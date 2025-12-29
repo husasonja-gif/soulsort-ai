@@ -40,6 +40,13 @@ interface MetricsData {
     stickiness: number
     avg_completion_time: number
   }
+  feedback?: {
+    total: number
+    positive: number
+    negative: number
+    positive_percentage: number
+    negative_percentage: number
+  }
   qc?: {
     total_profiles: number
     missing_answer_rate: number
@@ -213,6 +220,27 @@ export default function AnalyticsDashboard() {
             subtitle="OpenAI API costs"
           />
         </div>
+
+        {/* Feedback Metrics */}
+        {metrics?.feedback && metrics.feedback.total > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <MetricCard
+              title="Feedback Response Rate"
+              value={`${metrics.feedback.total} responses`}
+              subtitle={`${dateRange} period`}
+            />
+            <MetricCard
+              title="Positive Feedback"
+              value={`${metrics.feedback.positive_percentage.toFixed(1)}%`}
+              subtitle={`${metrics.feedback.positive} of ${metrics.feedback.total}`}
+            />
+            <MetricCard
+              title="Negative Feedback"
+              value={`${metrics.feedback.negative_percentage.toFixed(1)}%`}
+              subtitle={`${metrics.feedback.negative} of ${metrics.feedback.total}`}
+            />
+          </div>
+        )}
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">

@@ -748,6 +748,9 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             />
           </div>
 
+          {/* Feedback Section */}
+          <FeedbackSection linkId={linkId} />
+
           {/* CTA to create account */}
           <div className="text-center mt-8 pt-8 border-t border-gray-200">
             <p className="text-gray-700 mb-4">
@@ -766,5 +769,71 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   }
 
   return null
+}
+
+function FeedbackSection({ linkId }: { linkId: string }) {
+  const [feedback, setFeedback] = useState<'positive' | 'negative' | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+
+  const handleFeedback = async (value: 'positive' | 'negative') => {
+    if (submitted || feedback) return
+    
+    setFeedback(value)
+    
+    try {
+      await fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event_type: 'compatibility_feedback',
+          event_data: {
+            link_id: linkId,
+            feedback: value,
+          },
+        }),
+      })
+      setSubmitted(true)
+    } catch (error) {
+      console.error('Error tracking feedback:', error)
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="text-center mt-6 pt-6 border-t border-gray-200">
+        <p className="text-sm text-gray-600">Thank you for your feedback!</p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-8 pt-8 border-t border-gray-200">
+      <p className="text-center text-gray-700 mb-4 font-medium">Does the result resonate?</p>
+      <div className="flex gap-4 justify-center">
+        <button
+          onClick={() => handleFeedback('positive')}
+          disabled={feedback !== null}
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            feedback === 'positive'
+              ? 'bg-green-600 text-white'
+              : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-300'
+          } disabled:opacity-50`}
+        >
+          Yeah, that landed
+        </button>
+        <button
+          onClick={() => handleFeedback('negative')}
+          disabled={feedback !== null}
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            feedback === 'negative'
+              ? 'bg-red-600 text-white'
+              : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-300'
+          } disabled:opacity-50`}
+        >
+          Hmm, not quite
+        </button>
+      </div>
+    </div>
+  )
 }
 
