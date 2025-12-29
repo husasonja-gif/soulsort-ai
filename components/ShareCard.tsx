@@ -39,7 +39,7 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
           allowTaint: false,
           removeContainer: false,
           imageTimeout: 15000,
-          onclone: (clonedDoc) => {
+          onclone: (clonedDoc: Document) => {
             // Ensure all SVG elements are visible
             const svgs = clonedDoc.querySelectorAll('svg')
             svgs.forEach((svg: any) => {
