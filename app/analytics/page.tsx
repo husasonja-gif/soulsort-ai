@@ -1,6 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabaseClient'
 import MetricCard from './components/MetricCard'
 import FunnelChart from './components/FunnelChart'
 import CostChart from './components/CostChart'
@@ -37,14 +39,26 @@ interface MetricsData {
 }
 
 export default function AnalyticsDashboard() {
+  const router = useRouter()
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('30d')
   const [metrics, setMetrics] = useState<MetricsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [checkingAuth, setCheckingAuth] = useState(true)
 
+  // Check authentication first
   useEffect(() => {
-    fetchMetrics(dateRange)
-  }, [dateRange])
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login?redirect=/analytics')
+        return
+      }
+      setCheckingAuth(false)
+      fetchMetrics(dateRange)
+    }
+    checkAuth()
+  }, [router, dateRange])
 
   const fetchMetrics = async (range: string) => {
     setLoading(true)
@@ -52,8 +66,18 @@ export default function AnalyticsDashboard() {
     try {
       const response = await fetch(`/api/analytics/metrics?range=${range}`)
       if (!response.ok) {
-        if (response.status === 403) {
-          setError('Access denied. Admin access required.')
+        if (response.status === 401) {
+          // Not authenticated - redirect to login
+          router.push('/login?redirect=/analytics')
+          return
+        } else if (response.status === 403) {
+          // Authenticated but not admin
+          const errorData = await response.json().catch(() => ({}))
+          setError(
+            errorData.details 
+              ? `Access denied. Your email (${errorData.details.userEmail}) is not in the admin list. Please contact support or check your Vercel environment variables.`
+              : 'Access denied. Admin access required. Please ensure your email is set in the ADMIN_EMAILS environment variable.'
+          )
         } else {
           setError('Failed to fetch metrics')
         }
@@ -69,12 +93,14 @@ export default function AnalyticsDashboard() {
     }
   }
 
-  if (loading) {
+  if (checkingAuth || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-300">Loading analytics...</p>
+            <p className="text-gray-600 dark:text-gray-300">
+              {checkingAuth ? 'Checking authentication...' : 'Loading analytics...'}
+            </p>
           </div>
         </div>
       </div>
@@ -86,8 +112,22 @@ export default function AnalyticsDashboard() {
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-red-900 dark:text-red-300 mb-2">Error</h2>
-            <p className="text-red-700 dark:text-red-300">{error}</p>
+            <h2 className="text-xl font-semibold text-red-900 dark:text-red-300 mb-2">Access Denied</h2>
+            <p className="text-red-700 dark:text-red-300 mb-4">{error}</p>
+            <div className="flex gap-4">
+              <a
+                href="/dashboard"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                Go to Dashboard
+              </a>
+              <a
+                href="/login"
+                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium dark:text-gray-100"
+              >
+                Login with Different Account
+              </a>
+            </div>
           </div>
         </div>
       </div>

@@ -24,11 +24,16 @@ function LoginPageContent() {
           .maybeSingle()
 
         const skipChat = searchParams.get('skipChat')
+        const redirect = searchParams.get('redirect')
+        
         // If they need onboarding and have skipChat, redirect to onboarding
         if ((!profile || !profile.onboarding_completed) && skipChat === 'true') {
           router.push('/onboarding?skipChat=true')
         } else if (!profile || !profile.onboarding_completed) {
           router.push('/onboarding')
+        } else if (redirect) {
+          // Redirect to the requested page after login
+          router.push(redirect)
         } else {
           router.push('/dashboard')
         }
@@ -80,7 +85,8 @@ function LoginPageContent() {
               const skipChat = searchParams.get('skipChat')
               router.push(skipChat ? '/onboarding?skipChat=true' : '/onboarding')
             } else {
-              router.push('/dashboard')
+              const redirect = searchParams.get('redirect')
+              router.push(redirect || '/dashboard')
             }
           } else {
             router.push('/dashboard')

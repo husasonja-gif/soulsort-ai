@@ -78,8 +78,14 @@ function AuthCallbackContent() {
             }
             window.location.href = skipChat ? '/onboarding?skipChat=true' : '/onboarding'
           } else {
-            console.log('Redirecting to dashboard')
-            window.location.href = '/dashboard'
+            console.log('Redirecting after auth')
+            // Check for redirect parameter
+            const redirect = searchParams.get('redirect') || 
+              (typeof window !== 'undefined' ? sessionStorage.getItem('redirect') : null)
+            if (typeof window !== 'undefined' && redirect) {
+              sessionStorage.removeItem('redirect') // Clear after use
+            }
+            window.location.href = redirect || '/dashboard'
           }
         }
 
