@@ -105,12 +105,29 @@ function LoginPageContent() {
 
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
     const skipChat = searchParams.get('skipChat')
-    // Store skipChat in sessionStorage for auth callback
-    if (skipChat === 'true' && typeof window !== 'undefined') {
-      sessionStorage.setItem('skipChat', 'true')
+    const redirect = searchParams.get('redirect')
+    
+    // Store skipChat and redirect in sessionStorage for auth callback
+    if (typeof window !== 'undefined') {
+      if (skipChat === 'true') {
+        sessionStorage.setItem('skipChat', 'true')
+      }
+      if (redirect) {
+        sessionStorage.setItem('redirect', redirect)
+      }
     }
-    const redirectUrl = skipChat === 'true' 
-      ? `${origin}/auth/callback?skipChat=true`
+    
+    // Build redirect URL with params
+    const callbackParams = new URLSearchParams()
+    if (skipChat === 'true') {
+      callbackParams.set('skipChat', 'true')
+    }
+    if (redirect) {
+      callbackParams.set('redirect', redirect)
+    }
+    
+    const redirectUrl = callbackParams.toString()
+      ? `${origin}/auth/callback?${callbackParams.toString()}`
       : `${origin}/auth/callback`
 
     const { error } = await supabase.auth.signInWithOtp({
