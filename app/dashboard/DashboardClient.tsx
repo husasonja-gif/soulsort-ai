@@ -236,8 +236,8 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
                 Copy
               </button>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
-              You can paste this link in your dating/online profile bio with a short explainer e.g. 'Here's my personal vibe-check link. Send me our score and I'm more likely to answer :)'
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              SoulSort AI - A Vibe-Check Engine. Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy
             </p>
             <div className="mt-4">
               <button
