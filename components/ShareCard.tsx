@@ -26,7 +26,7 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
       // Wait for rendering to complete
       await new Promise(resolve => setTimeout(resolve, 300))
       
-      // Force white background for PNG
+      // Force white background for PNG and convert all colors to hex
       const originalBg = cardRef.current.style.backgroundColor
       cardRef.current.style.backgroundColor = '#ffffff'
       
@@ -40,6 +40,54 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
           removeContainer: false,
           imageTimeout: 15000,
           onclone: (clonedDoc: Document) => {
+            // Convert all CSS colors to hex format to avoid lab() color function issues
+            // html2canvas doesn't support modern CSS color functions like lab()
+            const allElements = clonedDoc.querySelectorAll('*')
+            allElements.forEach((el: any) => {
+              try {
+                const computedStyle = window.getComputedStyle(el)
+                
+                // Convert background-color to hex
+                if (computedStyle.backgroundColor && computedStyle.backgroundColor !== 'rgba(0, 0, 0, 0)' && computedStyle.backgroundColor !== 'transparent') {
+                  const rgb = computedStyle.backgroundColor.match(/\d+/g)
+                  if (rgb && rgb.length >= 3) {
+                    const hex = '#' + rgb.slice(0, 3).map((x: string) => {
+                      const val = parseInt(x)
+                      return (val < 16 ? '0' : '') + val.toString(16)
+                    }).join('')
+                    el.style.backgroundColor = hex
+                  }
+                }
+                
+                // Convert text color to hex
+                if (computedStyle.color && computedStyle.color !== 'rgba(0, 0, 0, 0)') {
+                  const rgb = computedStyle.color.match(/\d+/g)
+                  if (rgb && rgb.length >= 3) {
+                    const hex = '#' + rgb.slice(0, 3).map((x: string) => {
+                      const val = parseInt(x)
+                      return (val < 16 ? '0' : '') + val.toString(16)
+                    }).join('')
+                    el.style.color = hex
+                  }
+                }
+                
+                // Convert border-color to hex
+                if (computedStyle.borderColor && computedStyle.borderColor !== 'rgba(0, 0, 0, 0)' && computedStyle.borderColor !== 'transparent') {
+                  const rgb = computedStyle.borderColor.match(/\d+/g)
+                  if (rgb && rgb.length >= 3) {
+                    const hex = '#' + rgb.slice(0, 3).map((x: string) => {
+                      const val = parseInt(x)
+                      return (val < 16 ? '0' : '') + val.toString(16)
+                    }).join('')
+                    el.style.borderColor = hex
+                  }
+                }
+              } catch (e) {
+                // Ignore conversion errors for individual elements
+                console.warn('Error converting color for element:', e)
+              }
+            })
+            
             // Ensure all SVG elements are visible
             const svgs = clonedDoc.querySelectorAll('svg')
             svgs.forEach((svg: any) => {
@@ -102,18 +150,23 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
       <div
         ref={cardRef}
         className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
-        style={{ minHeight: '400px' }}
+        style={{ 
+          minHeight: '400px',
+          backgroundColor: '#ffffff',
+          color: '#1f2937',
+          borderColor: '#e5e7eb'
+        }}
       >
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1">SoulSort AI</h2>
-          <p className="text-gray-600 dark:text-gray-300 text-sm">Curious how we align?</p>
+          <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1" style={{ color: '#9333ea' }}>SoulSort AI</h2>
+          <p className="text-gray-600 dark:text-gray-300 text-sm" style={{ color: '#4b5563' }}>Curious how we align?</p>
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
           <div className="w-72 h-72 flex-shrink-0 flex items-center justify-center">
             <RadarChartNoLabels data={radarData} label="Profile" />
           </div>
-          <div className="flex-shrink-0 flex items-center justify-center p-3 bg-white dark:bg-gray-900 rounded-lg">
+          <div className="flex-shrink-0 flex items-center justify-center p-3 bg-white dark:bg-gray-900 rounded-lg" style={{ backgroundColor: '#ffffff' }}>
             <QRCodeSVG
               value={shareLink}
               size={140}
@@ -124,8 +177,8 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
         </div>
 
         <div className="text-center mb-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 break-all font-mono">{shareLink}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">soulsort.ai - privacy-first - Dec 2024</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 break-all font-mono" style={{ color: '#6b7280' }}>{shareLink}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1" style={{ color: '#9ca3af' }}>soulsort.ai - privacy-first - Dec 2024</p>
         </div>
       </div>
 
