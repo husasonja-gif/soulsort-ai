@@ -37,8 +37,21 @@ export async function GET(request: Request) {
     }
 
     // Check admin access
-    if (!isAdmin(user.email)) {
-      return NextResponse.json({ error: 'Forbidden - Admin access required' }, { status: 403 })
+    const adminCheck = isAdmin(user.email)
+    if (!adminCheck) {
+      // Log for debugging
+      console.error('Admin access denied:', {
+        userEmail: user.email,
+        adminEmails: process.env.ADMIN_EMAILS,
+        hasAdminEmails: !!process.env.ADMIN_EMAILS
+      })
+      return NextResponse.json({ 
+        error: 'Forbidden - Admin access required',
+        details: process.env.NODE_ENV === 'development' ? {
+          userEmail: user.email,
+          adminEmails: process.env.ADMIN_EMAILS
+        } : undefined
+      }, { status: 403 })
     }
 
     const { searchParams } = new URL(request.url)
