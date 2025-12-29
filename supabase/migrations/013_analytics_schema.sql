@@ -27,9 +27,9 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   ))
 );
 
-CREATE INDEX idx_analytics_events_user_id ON analytics_events(user_id);
-CREATE INDEX idx_analytics_events_type ON analytics_events(event_type);
-CREATE INDEX idx_analytics_events_created_at ON analytics_events(created_at);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_user_id ON analytics_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_type ON analytics_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_analytics_events_created_at ON analytics_events(created_at);
 
 -- ============================================================================
 -- REQUester FUNNEL TRACKING
@@ -68,10 +68,10 @@ CREATE TABLE IF NOT EXISTS requester_sessions (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_requester_sessions_link_id ON requester_sessions(link_id);
-CREATE INDEX idx_requester_sessions_requester_id ON requester_sessions(requester_id);
-CREATE INDEX idx_requester_sessions_completed_at ON requester_sessions(completed_at);
-CREATE INDEX idx_requester_sessions_abandoned_at ON requester_sessions(abandoned_at);
+CREATE INDEX IF NOT EXISTS idx_requester_sessions_link_id ON requester_sessions(link_id);
+CREATE INDEX IF NOT EXISTS idx_requester_sessions_requester_id ON requester_sessions(requester_id);
+CREATE INDEX IF NOT EXISTS idx_requester_sessions_completed_at ON requester_sessions(completed_at);
+CREATE INDEX IF NOT EXISTS idx_requester_sessions_abandoned_at ON requester_sessions(abandoned_at);
 
 -- ============================================================================
 -- SHARE ACTIONS TRACKING
