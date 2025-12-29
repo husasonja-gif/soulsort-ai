@@ -4,7 +4,7 @@ import ThemeToggle from '@/components/ThemeToggle'
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="absolute top-4 right-4">
+      <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
       {/* Hero Section */}
