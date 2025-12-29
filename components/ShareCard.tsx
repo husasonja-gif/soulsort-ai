@@ -16,52 +16,82 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
   const [downloading, setDownloading] = useState(false)
 
   const handleDownloadPNG = async () => {
-    if (!cardRef.current) return
+    if (!cardRef.current) {
+      console.error('Card ref not available')
+      return
+    }
     
     setDownloading(true)
     try {
-      // Wait a bit for any animations/rendering to complete
-      await new Promise(resolve => setTimeout(resolve, 200))
+      // Wait for rendering to complete
+      await new Promise(resolve => setTimeout(resolve, 300))
       
-      const canvas = await html2canvas(cardRef.current, {
-        backgroundColor: '#ffffff',
-        scale: 2,
-        logging: false,
-        useCORS: true,
-        allowTaint: true,
-        windowWidth: cardRef.current.scrollWidth,
-        windowHeight: cardRef.current.scrollHeight,
-      } as any)
+      // Force white background for PNG
+      const originalBg = cardRef.current.style.backgroundColor
+      cardRef.current.style.backgroundColor = '#ffffff'
       
-      // Convert to data URL and download
-      const dataUrl = canvas.toDataURL('image/png', 1.0)
-      const link = document.createElement('a')
-      link.download = 'soulsort-radar.png'
-      link.href = dataUrl
-      
-      // Append to body, click, then remove
-      document.body.appendChild(link)
-      link.click()
-      
-      // Clean up after a short delay
-      setTimeout(() => {
-        document.body.removeChild(link)
-      }, 100)
-      
-      // Track share action
-      fetch('/api/analytics/track', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_type: 'share_clicked',
-          event_data: {
-            share_method: 'png_download',
+      try {
+        const canvas = await html2canvas(cardRef.current, {
+          backgroundColor: '#ffffff',
+          scale: 2,
+          logging: false,
+          useCORS: true,
+          allowTaint: false,
+          removeContainer: false,
+          imageTimeout: 15000,
+          onclone: (clonedDoc) => {
+            // Ensure all SVG elements are visible
+            const svgs = clonedDoc.querySelectorAll('svg')
+            svgs.forEach((svg: any) => {
+              svg.style.display = 'block'
+              svg.style.visibility = 'visible'
+            })
           },
-        }),
-      }).catch(err => console.error('Analytics tracking error:', err))
+        } as any)
+        
+        // Convert to blob for better browser compatibility
+        canvas.toBlob((blob: Blob | null) => {
+          if (!blob) {
+            throw new Error('Failed to create blob from canvas')
+          }
+          
+          const url = URL.createObjectURL(blob)
+          const link = document.createElement('a')
+          link.style.display = 'none'
+          link.href = url
+          link.download = 'soulsort-radar.png'
+          
+          document.body.appendChild(link)
+          
+          // Trigger download
+          link.click()
+          
+          // Cleanup
+          setTimeout(() => {
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
+          }, 100)
+          
+          // Track share action
+          fetch('/api/analytics/track', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              event_type: 'share_clicked',
+              event_data: {
+                share_method: 'png_download',
+              },
+            }),
+          }).catch(err => console.error('Analytics tracking error:', err))
+        }, 'image/png', 1.0)
+      } finally {
+        // Restore original background
+        cardRef.current.style.backgroundColor = originalBg
+      }
     } catch (error) {
       console.error('Error generating PNG:', error)
-      alert('Failed to generate PNG. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      alert(`Failed to generate PNG: ${errorMessage}. Please try again.`)
     } finally {
       setDownloading(false)
     }
@@ -80,7 +110,7 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
-          <div className="w-48 h-48 flex-shrink-0 flex items-center justify-center">
+          <div className="w-72 h-72 flex-shrink-0 flex items-center justify-center">
             <RadarChartNoLabels data={radarData} label="Profile" />
           </div>
           <div className="flex-shrink-0 flex items-center justify-center p-3 bg-white dark:bg-gray-900 rounded-lg">
