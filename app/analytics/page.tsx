@@ -8,6 +8,10 @@ import FunnelChart from './components/FunnelChart'
 import CostChart from './components/CostChart'
 import EngagementChart from './components/EngagementChart'
 import GrowthLoopChart from './components/GrowthLoopChart'
+import DistributionChart from './components/DistributionChart'
+import EntropyChart from './components/EntropyChart'
+import WordCountChart from './components/WordCountChart'
+import ArchetypeTable from './components/ArchetypeTable'
 
 interface MetricsData {
   total_requesters: number
@@ -35,6 +39,23 @@ interface MetricsData {
     mau: number
     stickiness: number
     avg_completion_time: number
+  }
+  qc?: {
+    total_profiles: number
+    missing_answer_rate: number
+    default_clustering_rate: number
+    distributions: Record<string, { bins: number[]; median: number; iqr: number; defaultClustering: number }>
+    entropy_saturation: { date: string; entropy: number; saturation: number }[]
+    missing_wordcount: {
+      missing_rate: { q1: number; q2: number; q3: number; q4: number }
+      word_count_bins: Record<string, { '0': number; '1-5': number; '6-15': number; '16-30': number; '31+': number }>
+    }
+    archetypes: {
+      signature: string
+      count: number
+      percentage: number
+      median: { st: number; se: number; root: number; search: number; rel: number; ero: number; con: number }
+    }[]
   }
 }
 
@@ -172,24 +193,24 @@ export default function AnalyticsDashboard() {
         {/* Key Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <MetricCard
-            title="Total Requesters"
-            value={metrics?.total_requesters ?? 0}
+            title="Total Profiles"
+            value={metrics?.qc?.total_profiles ?? metrics?.total_requesters ?? 0}
             subtitle={`${dateRange} period`}
           />
           <MetricCard
-            title="Completion Rate"
-            value={metrics?.completion_rate ? `${metrics.completion_rate.toFixed(1)}%` : '0%'}
-            subtitle="Started → Completed"
+            title="Missing Answer Rate"
+            value={metrics?.qc?.missing_answer_rate ? `${(metrics.qc.missing_answer_rate * 100).toFixed(1)}%` : '0%'}
+            subtitle="QC: Missing answers"
           />
           <MetricCard
-            title="Avg Cost/Completion"
+            title="Default Clustering"
+            value={metrics?.qc?.default_clustering_rate ? `${(metrics.qc.default_clustering_rate * 100).toFixed(1)}%` : '0%'}
+            subtitle="% in 45-55 band"
+          />
+          <MetricCard
+            title="Avg Cost/Profile"
             value={metrics?.avg_cost ? `$${metrics.avg_cost.toFixed(4)}` : '$0.0000'}
             subtitle="OpenAI API costs"
-          />
-          <MetricCard
-            title="Daily Active Users"
-            value={metrics?.dau ?? 0}
-            subtitle="Dashboard visits"
           />
         </div>
 
@@ -199,10 +220,34 @@ export default function AnalyticsDashboard() {
           <GrowthLoopChart data={metrics?.growth_loop} />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <CostChart data={metrics?.cost_trends || []} />
           <EngagementChart data={metrics?.engagement} />
         </div>
+
+        {/* QC Analytics Panels */}
+        {metrics?.qc && (
+          <>
+            {/* Row 1: B1 Distributions + B3 Missing/Word Count */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <DistributionChart distributions={metrics.qc.distributions} />
+              <WordCountChart
+                missingRate={metrics.qc.missing_wordcount.missing_rate}
+                wordCountBins={metrics.qc.missing_wordcount.word_count_bins}
+              />
+            </div>
+
+            {/* Row 2: B2 Entropy/Saturation */}
+            <div className="mb-8">
+              <EntropyChart data={metrics.qc.entropy_saturation} />
+            </div>
+
+            {/* Row 3: A2 Archetypes */}
+            <div className="mb-8">
+              <ArchetypeTable archetypes={metrics.qc.archetypes} />
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

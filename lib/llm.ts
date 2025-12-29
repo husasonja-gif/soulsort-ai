@@ -588,13 +588,14 @@ Provide deltas to adjust the base priors based on chat evidence. Return deltas a
           low_evidence: lowEvidence,
         }
         
-        await supabaseAdmin
+        const { error: traceError } = await supabaseAdmin
           .from('profile_generation_traces')
           .insert(traceData)
-          .catch((err: any) => {
-            console.error('Error writing profile generation trace:', err)
-            // Don't throw - trace writing is non-blocking
-          })
+        
+        if (traceError) {
+          console.error('Error writing profile generation trace:', traceError)
+          // Don't throw - trace writing is non-blocking
+        }
       }
     } catch (traceError) {
       console.error('Error setting up trace writing:', traceError)

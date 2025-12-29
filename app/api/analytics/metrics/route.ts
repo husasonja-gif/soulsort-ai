@@ -344,3 +344,216 @@ async function getDAU(supabase: any) {
   return new Set(data?.map((d: any) => d.user_id) || []).size
 }
 
+async function getQCMetrics(supabase: any, days: number) {
+  const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+  
+  // Use service role to read traces
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!serviceRoleKey) {
+    return {
+      total_profiles: 0,
+      missing_answer_rate: 0,
+      default_clustering_rate: 0,
+      distributions: {},
+      entropy_saturation: [],
+      missing_wordcount: {},
+      archetypes: []
+    }
+  }
+  
+  const { createClient } = await import('@supabase/supabase-js')
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    serviceRoleKey
+  )
+  
+  const { data: traces, error } = await supabaseAdmin
+    .from('profile_generation_traces')
+    .select('*')
+    .gte('created_at', startDate)
+    .order('created_at', { ascending: true })
+  
+  if (error || !traces || traces.length === 0) {
+    return {
+      total_profiles: 0,
+      missing_answer_rate: 0,
+      default_clustering_rate: 0,
+      distributions: {},
+      entropy_saturation: [],
+      missing_wordcount: {},
+      archetypes: []
+    }
+  }
+  
+  // B1: Distributions - compute 7-dim derived scores and histograms
+  const dimScores: Record<string, number[]> = {
+    Self_Transcendence: [],
+    Self_Enhancement: [],
+    Rooting: [],
+    Searching: [],
+    Relational: [],
+    Erotic: [],
+    Consent: [],
+  }
+  
+  // B3: Missing + word count
+  let totalMissing = 0
+  const wordCountBins: Record<string, { '0': number; '1-5': number; '6-15': number; '16-30': number; '31+': number }> = {
+    q1: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+    q2: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+    q3: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+    q4: { '0': 0, '1-5': 0, '6-15': 0, '16-30': 0, '31+': 0 },
+  }
+  
+  // B2: Entropy + saturation (daily)
+  const dailyStats: Record<string, { std: number[]; saturation: number }> = {}
+  
+  // A2: Archetype signatures
+  const signatureCounts: Record<string, { count: number; traces: any[] }> = {}
+  
+  traces.forEach((trace: any) => {
+    const fv = trace.final_vectors || {}
+    const vv = fv.values_vector || []
+    const ev = fv.erotic_vector || []
+    const rv = fv.relational_vector || []
+    const cv = fv.consent_vector || []
+    
+    // Compute 7-dim derived scores
+    const st = (vv[0] || 0.5) * 100
+    const se = (vv[1] || 0.5) * 100
+    const root = (vv[2] || 0.5) * 100
+    const search = (vv[3] || 0.5) * 100
+    const rel = (rv.reduce((a: number, b: number) => a + b, 0) / 5) * 100
+    const ero = (ev.reduce((a: number, b: number) => a + b, 0) / 5) * 100
+    const con = (cv.reduce((a: number, b: number) => a + b, 0) / 4) * 100
+    
+    dimScores.Self_Transcendence.push(st)
+    dimScores.Self_Enhancement.push(se)
+    dimScores.Rooting.push(root)
+    dimScores.Searching.push(search)
+    dimScores.Relational.push(rel)
+    dimScores.Erotic.push(ero)
+    dimScores.Consent.push(con)
+    
+    // Missing rate
+    const status = trace.extraction_status || {}
+    if (status.q1 === 'missing') totalMissing++
+    if (status.q2 === 'missing') totalMissing++
+    if (status.q3 === 'missing') totalMissing++
+    if (status.q4 === 'missing') totalMissing++
+    
+    // Word count bins
+    const wc = trace.answer_word_counts || {}
+    ;['q1', 'q2', 'q3', 'q4'].forEach(q => {
+      const count = wc[q] || 0
+      if (count === 0) wordCountBins[q]['0']++
+      else if (count <= 5) wordCountBins[q]['1-5']++
+      else if (count <= 15) wordCountBins[q]['6-15']++
+      else if (count <= 30) wordCountBins[q]['16-30']++
+      else wordCountBins[q]['31+']++
+    })
+    
+    // Daily entropy/saturation
+    const date = new Date(trace.created_at).toISOString().split('T')[0]
+    if (!dailyStats[date]) {
+      dailyStats[date] = { std: [], saturation: 0 }
+    }
+    const dayScores = [st, se, root, search, rel, ero, con]
+    const mean = dayScores.reduce((a, b) => a + b, 0) / dayScores.length
+    const variance = dayScores.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / dayScores.length
+    dailyStats[date].std.push(Math.sqrt(variance))
+    const saturated = dayScores.filter(s => s < 10 || s > 90).length
+    dailyStats[date].saturation += saturated / dayScores.length
+    
+    // Archetype signature
+    const bin = (val: number) => val < 33 ? 'L' : val < 67 ? 'M' : 'H'
+    const sig = `ST:${bin(st)} SE:${bin(se)} Root:${bin(root)} Search:${bin(search)} Rel:${bin(rel)} Ero:${bin(ero)} Con:${bin(con)}`
+    if (!signatureCounts[sig]) {
+      signatureCounts[sig] = { count: 0, traces: [] }
+    }
+    signatureCounts[sig].count++
+    signatureCounts[sig].traces.push({ st, se, root, search, rel, ero, con })
+  })
+  
+  // Compute distributions (histograms with 10 bins)
+  const distributions: Record<string, { bins: number[]; median: number; iqr: number; defaultClustering: number }> = {}
+  Object.keys(dimScores).forEach(dim => {
+    const scores = dimScores[dim]
+    if (scores.length === 0) {
+      distributions[dim] = { bins: Array(10).fill(0), median: 50, iqr: 0, defaultClustering: 0 }
+      return
+    }
+    const bins = Array(10).fill(0)
+    scores.forEach(s => {
+      const binIdx = Math.min(9, Math.floor(s / 10))
+      bins[binIdx]++
+    })
+    const sorted = [...scores].sort((a, b) => a - b)
+    const median = sorted[Math.floor(sorted.length / 2)]
+    const q1 = sorted[Math.floor(sorted.length / 4)]
+    const q3 = sorted[Math.floor((sorted.length * 3) / 4)]
+    const iqr = q3 - q1
+    const defaultClustering = scores.filter(s => s >= 45 && s <= 55).length / scores.length
+    distributions[dim] = { bins, median, iqr, defaultClustering }
+  })
+  
+  // B2: Entropy/saturation time series
+  const entropySaturation = Object.entries(dailyStats)
+    .map(([date, stats]) => {
+      const dayTraces = traces.filter(t => new Date(t.created_at).toISOString().split('T')[0] === date)
+      return {
+        date: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        entropy: stats.std.length > 0 ? stats.std.reduce((a, b) => a + b, 0) / stats.std.length : 0,
+        saturation: dayTraces.length > 0 ? stats.saturation / dayTraces.length : 0,
+      }
+    })
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  
+  // A2: Top 10 archetypes
+  const archetypes = Object.entries(signatureCounts)
+    .map(([signature, data]) => {
+      const traces = data.traces
+      const median = {
+        st: traces.map((t: any) => t.st).sort((a: number, b: number) => a - b)[Math.floor(traces.length / 2)],
+        se: traces.map((t: any) => t.se).sort((a: number, b: number) => a - b)[Math.floor(traces.length / 2)],
+        root: traces.map((t: any) => t.root).sort((a: number, b: number) => a - b)[Math.floor(traces.length / 2)],
+        search: traces.map((t: any) => t.search).sort((a: number, b: number) => a - b)[Math.floor(traces.length / 2)],
+        rel: traces.map((t: any) => t.rel).sort((a: number, b: number) => a - b)[Math.floor(traces.length / 2)],
+        ero: traces.map((t: any) => t.ero).sort((a: number, b: number) => a - b)[Math.floor(traces.length / 2)],
+        con: traces.map((t: any) => t.con).sort((a: number, b: number) => a - b)[Math.floor(traces.length / 2)],
+      }
+      return {
+        signature,
+        count: data.count,
+        percentage: (data.count / traces.length) * 100,
+        median,
+      }
+    })
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 10)
+  
+  // Overall default clustering rate
+  const allScores = Object.values(dimScores).flat()
+  const defaultClusteringRate = allScores.length > 0 
+    ? allScores.filter(s => s >= 45 && s <= 55).length / allScores.length 
+    : 0
+  
+  return {
+    total_profiles: traces.length,
+    missing_answer_rate: traces.length > 0 ? totalMissing / (traces.length * 4) : 0,
+    default_clustering_rate: defaultClusteringRate,
+    distributions,
+    entropy_saturation: entropySaturation,
+    missing_wordcount: {
+      missing_rate: {
+        q1: traces.filter((t: any) => t.extraction_status?.q1 === 'missing').length / traces.length,
+        q2: traces.filter((t: any) => t.extraction_status?.q2 === 'missing').length / traces.length,
+        q3: traces.filter((t: any) => t.extraction_status?.q3 === 'missing').length / traces.length,
+        q4: traces.filter((t: any) => t.extraction_status?.q4 === 'missing').length / traces.length,
+      },
+      word_count_bins: wordCountBins,
+    },
+    archetypes,
+  }
+}
+
