@@ -203,7 +203,21 @@ export async function createRequesterAssessment(
   abuseFlags: string[] = [],
   dealbreakerHits: Array<{ ruleId: string; label: string; reason: string; evidence: Array<{ field: string; value: string | number }>; capScoreTo: number }> = []
 ) {
-  const supabase = await createSupabaseServerClient()
+  // Use service role to bypass RLS for requester assessment inserts
+  // Requesters are anonymous, so we need service role to insert on their behalf
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  let supabase
+  
+  if (serviceRoleKey) {
+    const { createClient } = await import('@supabase/supabase-js')
+    supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey
+    )
+  } else {
+    // Fallback to regular client if service role not available
+    supabase = await createSupabaseServerClient()
+  }
   
   // Ensure all values are integers (0-100) as required by the database
   // Map consent (code) to consent_dim (DB) for database compatibility
@@ -316,6 +330,7 @@ export async function completeOnboarding(userId: string) {
 
   if (error) throw error
 }
+
 
 
 
