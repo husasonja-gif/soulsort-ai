@@ -177,9 +177,16 @@ function LoginPageContent() {
         </form>
 
         {message && (
-          <p className={`mt-4 text-center ${message.includes('error') || message.includes('Error') ? 'text-red-600' : 'text-gray-600'}`}>
-            {message}
-          </p>
+          <div className="mt-4 text-center">
+            <p className={`${message.includes('error') || message.includes('Error') ? 'text-red-600' : 'text-gray-600'}`}>
+              {message}
+            </p>
+            {message.includes('Check your email') && (
+              <p className="mt-2 text-sm text-gray-500">
+                If you can't find the link, check your spam folder.
+              </p>
+            )}
+          </div>
         )}
 
         <div className="mt-6 text-center text-sm text-gray-500">

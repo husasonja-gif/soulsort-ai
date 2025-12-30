@@ -813,10 +813,10 @@ function FeedbackSection({ linkId }: { linkId: string }) {
         <button
           onClick={() => handleFeedback('positive')}
           disabled={feedback !== null}
-          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors border-2 ${
             feedback === 'positive'
-              ? 'bg-green-600 text-white'
-              : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-300'
+              ? 'bg-white text-purple-600 border-purple-600'
+              : 'bg-white text-purple-600 border-purple-600 hover:bg-purple-50'
           } disabled:opacity-50`}
         >
           Yeah, that landed
@@ -824,10 +824,10 @@ function FeedbackSection({ linkId }: { linkId: string }) {
         <button
           onClick={() => handleFeedback('negative')}
           disabled={feedback !== null}
-          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors border-2 ${
             feedback === 'negative'
-              ? 'bg-red-600 text-white'
-              : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-300'
+              ? 'bg-white text-purple-600 border-purple-600'
+              : 'bg-white text-purple-600 border-purple-600 hover:bg-purple-50'
           } disabled:opacity-50`}
         >
           Hmm, not quite

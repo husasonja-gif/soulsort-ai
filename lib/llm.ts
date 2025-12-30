@@ -416,28 +416,40 @@ Provide deltas to adjust the base priors based on chat evidence. Return deltas a
       throw new Error(`Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`)
     }
 
-    // Validate deltas
-    if (!Array.isArray(result.values_delta) || result.values_delta.length !== 5) {
-      throw new Error('Invalid values_delta: must be array of 5 floats')
+    // Validate and fix deltas with fallbacks
+    const ensureArray = (arr: any, length: number, defaultValue: number = 0.0): number[] => {
+      if (!Array.isArray(arr)) {
+        console.warn(`Delta is not an array, using default: ${defaultValue} repeated ${length} times`)
+        return Array(length).fill(defaultValue)
+      }
+      if (arr.length !== length) {
+        console.warn(`Delta array has length ${arr.length}, expected ${length}. Padding or truncating.`)
+        const fixed = [...arr]
+        while (fixed.length < length) {
+          fixed.push(defaultValue)
+        }
+        return fixed.slice(0, length)
+      }
+      // Ensure all elements are numbers
+      return arr.map((val: any) => {
+        const num = Number(val)
+        return isNaN(num) ? defaultValue : num
+      })
     }
-    if (!Array.isArray(result.erotic_delta) || result.erotic_delta.length !== 5) {
-      throw new Error('Invalid erotic_delta: must be array of 5 floats')
-    }
-    if (!Array.isArray(result.relational_delta) || result.relational_delta.length !== 5) {
-      throw new Error('Invalid relational_delta: must be array of 5 floats')
-    }
-    if (!Array.isArray(result.consent_delta) || result.consent_delta.length !== 4) {
-      throw new Error('Invalid consent_delta: must be array of 4 floats')
-    }
+
+    const values_delta_raw = ensureArray(result.values_delta, 5, 0.0)
+    const erotic_delta_raw = ensureArray(result.erotic_delta, 5, 0.0)
+    const relational_delta_raw = ensureArray(result.relational_delta, 5, 0.0)
+    const consent_delta_raw = ensureArray(result.consent_delta, 4, 0.0)
 
     // Clamp deltas to [-0.2, +0.2]
     const clampDelta = (delta: number) => Math.max(-0.2, Math.min(0.2, Number(delta) || 0.0))
     const clampDeltaVector = (vec: number[]) => vec.map(clampDelta)
     
-    const values_delta = clampDeltaVector(result.values_delta)
-    const erotic_delta = clampDeltaVector(result.erotic_delta)
-    const relational_delta = clampDeltaVector(result.relational_delta)
-    const consent_delta = clampDeltaVector(result.consent_delta)
+    const values_delta = clampDeltaVector(values_delta_raw)
+    const erotic_delta = clampDeltaVector(erotic_delta_raw)
+    const relational_delta = clampDeltaVector(relational_delta_raw)
+    const consent_delta = clampDeltaVector(consent_delta_raw)
 
     console.log('=== DELTAS FROM LLM ===')
     console.log('values_delta:', values_delta)
