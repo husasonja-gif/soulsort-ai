@@ -77,6 +77,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   const [skippedQuestions, setSkippedQuestions] = useState<Set<number>>(new Set())
   // Structured fields captured from quick replies
   const [structuredFields, setStructuredFields] = useState<Record<string, string>>({})
+  // Requester consent for analytics (default OFF for privacy-first)
+  const [analyticsOptIn, setAnalyticsOptIn] = useState<boolean>(false)
   const [assessment, setAssessment] = useState<{
     score: number
     summary: string
@@ -99,7 +101,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     setSessionToken(token)
     setStartTime(Date.now())
     
-    // Track analytics event
+    // Track analytics event with consent info
     fetch('/api/analytics/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -108,6 +110,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
         event_data: {
           link_id: linkId,
           session_token: token,
+          analytics_opt_in: analyticsOptIn,
         },
       }),
     }).catch(err => console.error('Analytics tracking error:', err))
@@ -523,6 +526,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           skippedQuestions: Array.from(skipped),
           structuredFields: structuredFields, // Include structured fields
           session_token: sessionToken, // Include session token for tracking
+          analytics_opt_in: analyticsOptIn, // Requester consent for analytics
         }),
       })
 
@@ -531,7 +535,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
         setAssessment(data)
         setFlowState('results')
         
-        // Track completion
+        // Track completion with assessment ID
         if (sessionToken && startTime) {
           const completionTime = Date.now() - startTime
           fetch('/api/analytics/track', {
@@ -543,6 +547,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
                 session_token: sessionToken,
                 completion_time_ms: completionTime,
                 link_id: linkId,
+                assessment_id: data.assessmentId,
+                analytics_opt_in: analyticsOptIn,
               },
             }),
           }).catch(err => console.error('Analytics tracking error:', err))
@@ -580,9 +586,28 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           <p className="text-gray-700 mb-4 text-lg">
             Just 7 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
           </p>
-          <p className="text-sm text-gray-500 mb-8">
+          <p className="text-sm text-gray-500 mb-6">
             Your responses are analyzed by AI and compared against their profile. No raw data is stored—only compatibility metrics.
           </p>
+          
+          {/* Analytics consent toggle - privacy-first, default OFF */}
+          <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={analyticsOptIn}
+                onChange={(e) => setAnalyticsOptIn(e.target.checked)}
+                className="mt-1 w-4 h-4 text-purple-600 rounded"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                I consent to anonymized analytics being used to improve SoulSort (no raw answers stored).
+              </span>
+            </label>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-7">
+              Optional. You can still complete the vibe check without this.
+            </p>
+          </div>
+          
           <button
             onClick={handleStart}
             className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"

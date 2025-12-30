@@ -103,7 +103,9 @@ export async function GET(request: Request) {
       avgCost,
       dau,
       qcMetrics,
-      feedbackMetrics
+      feedbackMetrics,
+      requesterMetrics,
+      costMetrics
     ] = await Promise.all([
       getFunnelMetrics(supabase, days),
       getGrowthMetrics(supabase, days),
@@ -114,7 +116,9 @@ export async function GET(request: Request) {
       getAvgCost(supabase, days),
       getDAU(supabase),
       getQCMetrics(supabase, days),
-      getFeedbackMetrics(supabase, days)
+      getFeedbackMetrics(supabase, days),
+      getRequesterMetrics(supabase, days),
+      getCostMetrics(supabase, days)
     ])
 
     return NextResponse.json({
@@ -128,6 +132,8 @@ export async function GET(request: Request) {
       cost_trends: costData,
       qc: qcMetrics,
       feedback: feedbackMetrics,
+      requester: requesterMetrics,
+      cost: costMetrics,
     })
   } catch (error) {
     console.error('Error fetching metrics:', error)
@@ -557,10 +563,27 @@ async function getQCMetrics(supabase: any, days: number) {
     ? allScores.filter(s => s >= 45 && s <= 55).length / allScores.length 
     : 0
   
+  // Calculate avg cost per profile from OpenAI usage
+  let avgCostPerProfile = 0
+  if (traces.length > 0) {
+    const { data: profileUsage } = await supabaseAdmin
+      .from('openai_usage')
+      .select('cost_usd')
+      .eq('endpoint', 'generate_profile')
+      .gte('created_at', startDate)
+      .eq('success', true)
+    
+    if (profileUsage && profileUsage.length > 0) {
+      const totalCost = profileUsage.reduce((sum: number, u: any) => sum + parseFloat(u.cost_usd || 0), 0)
+      avgCostPerProfile = totalCost / traces.length
+    }
+  }
+  
   return {
     total_profiles: traces.length,
     missing_answer_rate: traces.length > 0 ? totalMissing / (traces.length * 4) : 0,
     default_clustering_rate: defaultClusteringRate,
+    avg_cost_per_profile: avgCostPerProfile,
     distributions,
     entropy_saturation: entropySaturation,
     missing_wordcount: {
@@ -605,6 +628,136 @@ async function getFeedbackMetrics(supabase: any, days: number) {
     negative,
     positive_percentage: total > 0 ? (positive / total) * 100 : 0,
     negative_percentage: total > 0 ? (negative / total) * 100 : 0,
+  }
+}
+
+// Get requester flow metrics (total flows, avg/median requests per user, distribution)
+async function getRequesterMetrics(supabase: any, days: number) {
+  const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+  
+  // Use requester_assessment_events if available, otherwise fallback to requester_sessions
+  let completedFlows = 0
+  let requestsPerUser: Record<string, number> = {}
+  
+  // Try requester_assessment_events first (new table)
+  if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    
+    const { data: events } = await supabaseAdmin
+      .from('requester_assessment_events')
+      .select('link_id, status')
+      .eq('status', 'completed')
+      .gte('created_at', startDate)
+    
+    if (events) {
+      completedFlows = events.length
+      events.forEach((e: any) => {
+        requestsPerUser[e.link_id] = (requestsPerUser[e.link_id] || 0) + 1
+      })
+    }
+  }
+  
+  // Fallback to requester_sessions if events table is empty
+  if (completedFlows === 0) {
+    const { data: sessions } = await supabase
+      .from('requester_sessions')
+      .select('link_id')
+      .not('completed_at', 'is', null)
+      .gte('started_at', startDate)
+    
+    if (sessions) {
+      completedFlows = sessions.length
+      sessions.forEach((s: any) => {
+        requestsPerUser[s.link_id] = (requestsPerUser[s.link_id] || 0) + 1
+      })
+    }
+  }
+  
+  // Calculate mean and median
+  const requestCounts = Object.values(requestsPerUser).sort((a, b) => a - b)
+  const mean = requestCounts.length > 0
+    ? requestCounts.reduce((sum, count) => sum + count, 0) / requestCounts.length
+    : 0
+  const median = requestCounts.length > 0
+    ? requestCounts[Math.floor(requestCounts.length / 2)]
+    : 0
+  
+  // Distribution: 0, 1, 2-3, 4-10, 10+
+  const distribution = {
+    '0': 0,
+    '1': 0,
+    '2-3': 0,
+    '4-10': 0,
+    '10+': 0,
+  }
+  
+  // Get all users with links to calculate 0 requests
+  const { data: allLinks } = await supabase
+    .from('user_links')
+    .select('link_id, user_id')
+    .eq('is_active', true)
+  
+  const allUserLinkIds = new Set(allLinks?.map((l: any) => l.link_id) || [])
+  const usersWithRequests = new Set(Object.keys(requestsPerUser))
+  distribution['0'] = allUserLinkIds.size - usersWithRequests.size
+  
+  requestCounts.forEach((count) => {
+    if (count === 1) {
+      distribution['1']++
+    } else if (count >= 2 && count <= 3) {
+      distribution['2-3']++
+    } else if (count >= 4 && count <= 10) {
+      distribution['4-10']++
+    } else if (count > 10) {
+      distribution['10+']++
+    }
+  })
+  
+  return {
+    total_flows: completedFlows,
+    avg_requests_per_user: mean,
+    median_requests_per_user: median,
+    distribution,
+  }
+}
+
+// Get cost metrics (avg cost per profile generation, excluding requester costs)
+async function getCostMetrics(supabase: any, days: number) {
+  const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
+  
+  // Get profile generation costs only (exclude requester_assess)
+  const { data: profileUsage } = await supabase
+    .from('openai_usage')
+    .select('cost_usd')
+    .eq('endpoint', 'generate_profile')
+    .gte('created_at', startDate)
+    .eq('success', true)
+  
+  // Count completed profile generations (from profile_generation_traces or user_radar_profiles)
+  const { count: profileCount } = await supabase
+    .from('user_radar_profiles')
+    .select('*', { count: 'exact', head: true })
+    .gte('updated_at', startDate)
+  
+  if (!profileUsage || profileUsage.length === 0 || !profileCount || profileCount === 0) {
+    return {
+      avg_cost_per_profile: 0,
+      total_profile_cost: 0,
+      total_profiles: 0,
+    }
+  }
+  
+  const totalCost = profileUsage.reduce((sum: number, u: any) => sum + parseFloat(u.cost_usd || 0), 0)
+  const avgCost = totalCost / profileCount
+  
+  return {
+    avg_cost_per_profile: avgCost,
+    total_profile_cost: totalCost,
+    total_profiles: profileCount,
   }
 }
 

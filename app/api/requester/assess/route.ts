@@ -5,6 +5,29 @@ import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { evaluateDealbreakers, applyDealbreakerCaps, type RequesterStructuredFields } from '@/lib/dealbreakerEngine'
 import type { ChatMessage } from '@/lib/types'
 
+/**
+ * REQUESTER VECTOR STORAGE AUDIT (Part C):
+ * 
+ * CURRENT STATE (as of this implementation):
+ * - requester_assessments table: Stores requester radar vectors (7 dims) + summary + compatibility score
+ *   - This was ALREADY storing requester vectors, but WITHOUT explicit consent
+ *   - Privacy concern: vectors were stored regardless of requester consent
+ * 
+ * NEW IMPLEMENTATION (privacy-first):
+ * - requester_assessment_events: Tracks start/completion events with analytics_opt_in flag
+ * - requester_assessment_traces: Stores vectors ONLY if analytics_opt_in = true
+ * - requester_assessments: Still stores vectors (for compatibility results), but traces are separate for analytics
+ * 
+ * CONSENT FLOW:
+ * - Requester sees consent toggle on intro screen (default OFF)
+ * - If OFF: Assessment runs, results shown, but NO trace stored for analytics
+ * - If ON: Assessment runs, results shown, AND trace stored in requester_assessment_traces
+ * 
+ * ANALYTICS GUARDRAILS:
+ * - Requester QC metrics only shown if N >= 20 opt-in traces (to prevent re-identification)
+ * - Distribution metrics use requester_assessment_events (counts only, no vectors)
+ */
+
 // Health check endpoint
 export async function GET() {
   return NextResponse.json({ status: 'ok', route: '/api/requester/assess' })
@@ -24,7 +47,7 @@ export async function POST(request: Request) {
     } else {
       console.log('Request body received:', { linkId: body.linkId, userId: body.userId, chatHistoryLength: body.chatHistory?.length, hasStructuredFields: !!body.structuredFields })
     }
-    const { linkId, userId, chatHistory, skippedQuestions = [], structuredFields = {} } = body
+    const { linkId, userId, chatHistory, skippedQuestions = [], structuredFields = {}, session_token, analytics_opt_in = false } = body
 
     if (!linkId || !userId) {
       return NextResponse.json(
@@ -252,6 +275,62 @@ export async function POST(request: Request) {
       assessment.abuseFlags,
       assessment.dealbreakerHits
     )
+
+    // Store requester trace if analytics_opt_in is true (privacy-first)
+    if (analytics_opt_in && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        
+        // Get OpenAI usage ID if available (for cost tracking)
+        let openaiUsageId: string | null = null
+        if (session_token) {
+          const { data: usageData } = await supabaseAdmin
+            .from('openai_usage')
+            .select('id')
+            .eq('requester_session_id', session_token)
+            .eq('endpoint', 'requester_assess')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+          openaiUsageId = usageData?.id || null
+        }
+        
+        const { error: traceError } = await supabaseAdmin
+          .from('requester_assessment_traces')
+          .insert({
+            link_id: linkId,
+            requester_session_id: session_token || null,
+            analytics_opt_in: true,
+            radar: {
+              self_transcendence: assessment.radar.self_transcendence,
+              self_enhancement: assessment.radar.self_enhancement,
+              rooting: assessment.radar.rooting,
+              searching: assessment.radar.searching,
+              relational: assessment.radar.relational,
+              erotic: assessment.radar.erotic,
+              consent: assessment.radar.consent,
+            },
+            model_version: 'gpt-4o-mini',
+            scoring_version: 'v1',
+            schema_version: 1,
+            abuse_flags: assessment.abuseFlags,
+            low_engagement: assessment.abuseFlags.includes('low_engagement'),
+            openai_usage_id: openaiUsageId,
+          })
+        
+        if (traceError) {
+          console.error('Error storing requester assessment trace:', traceError)
+          // Don't fail the request if trace storage fails
+        }
+      } catch (error) {
+        console.error('Error in requester trace storage:', error)
+        // Don't fail the request if trace storage fails
+      }
+    }
 
     return NextResponse.json({
       score: assessment.compatibilityScore,

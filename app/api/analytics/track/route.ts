@@ -59,6 +59,26 @@ export async function POST(request: Request) {
         console.error('Error creating requester session:', sessionError)
         // Don't fail the request, just log the error
       }
+      
+      // Also store requester_assessment_events (for analytics)
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        const { error: eventError } = await supabaseAdmin
+          .from('requester_assessment_events')
+          .insert({
+            link_id: body.event_data.link_id,
+            requester_session_id: body.event_data.session_token,
+            status: 'started',
+            analytics_opt_in: body.event_data.analytics_opt_in || false,
+          })
+        if (eventError) {
+          console.error('Error storing requester assessment event:', eventError)
+        }
+      }
     } else if (body.event_type === 'requester_consent_granted' && body.event_data?.session_token) {
       // Update session with consent timestamp
       const { error: updateError } = await supabase
@@ -81,6 +101,26 @@ export async function POST(request: Request) {
       
       if (updateError) {
         console.error('Error updating requester session:', updateError)
+      }
+      
+      // Also store requester_assessment_events completion (for analytics)
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+        const { error: eventError } = await supabaseAdmin
+          .from('requester_assessment_events')
+          .insert({
+            link_id: body.event_data.link_id,
+            requester_session_id: body.event_data.session_token,
+            status: 'completed',
+            analytics_opt_in: body.event_data.analytics_opt_in || false,
+          })
+        if (eventError) {
+          console.error('Error storing requester assessment completion event:', eventError)
+        }
       }
     }
     

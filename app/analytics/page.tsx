@@ -51,6 +51,7 @@ interface MetricsData {
     total_profiles: number
     missing_answer_rate: number
     default_clustering_rate: number
+    avg_cost_per_profile?: number
     distributions: Record<string, { bins: number[]; median: number; iqr: number; defaultClustering: number }>
     entropy_saturation: { date: string; entropy: number; saturation: number }[]
     missing_wordcount: {
@@ -63,6 +64,23 @@ interface MetricsData {
       percentage: number
       median: { st: number; se: number; root: number; search: number; rel: number; ero: number; con: number }
     }[]
+  }
+  requester?: {
+    total_flows: number
+    avg_requests_per_user: number
+    median_requests_per_user: number
+    distribution: {
+      '0': number
+      '1': number
+      '2-3': number
+      '4-10': number
+      '10+': number
+    }
+  }
+  cost?: {
+    avg_cost_per_profile: number
+    total_profile_cost: number
+    total_profiles: number
   }
 }
 
@@ -201,7 +219,7 @@ export default function AnalyticsDashboard() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <MetricCard
             title="Total Profiles"
-            value={metrics?.qc?.total_profiles ?? metrics?.total_requesters ?? 0}
+            value={metrics?.qc?.total_profiles ?? 0}
             subtitle={`${dateRange} period`}
           />
           <MetricCard
@@ -216,8 +234,18 @@ export default function AnalyticsDashboard() {
           />
           <MetricCard
             title="Avg Cost/Profile"
-            value={metrics?.avg_cost ? `$${metrics.avg_cost.toFixed(4)}` : '$0.0000'}
+            value={metrics?.cost?.avg_cost_per_profile ? `$${metrics.cost.avg_cost_per_profile.toFixed(4)}` : (metrics?.qc?.avg_cost_per_profile ? `$${metrics.qc.avg_cost_per_profile.toFixed(4)}` : '$0.0000')}
             subtitle="OpenAI API costs"
+          />
+          <MetricCard
+            title="Total Requester Flows"
+            value={metrics?.requester?.total_flows ?? 0}
+            subtitle={`Completed in ${dateRange}`}
+          />
+          <MetricCard
+            title="Avg Requests/User"
+            value={metrics?.requester?.avg_requests_per_user ? metrics.requester.avg_requests_per_user.toFixed(2) : '0.00'}
+            subtitle={`Mean (median: ${metrics?.requester?.median_requests_per_user?.toFixed(1) ?? '0'})`}
           />
         </div>
 
@@ -275,6 +303,40 @@ export default function AnalyticsDashboard() {
               <ArchetypeTable archetypes={metrics.qc.archetypes || []} />
             </div>
           </>
+        )}
+
+        {/* Requester Spread Metrics */}
+        {metrics?.requester && (
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-purple-600 dark:text-purple-400">Requester Spread</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+              <div className="mb-6">
+                <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100">Distribution of Requests per User</h3>
+                <div className="grid grid-cols-5 gap-4">
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['0']}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">0 requests</div>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['1']}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">1 request</div>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['2-3']}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">2-3 requests</div>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['4-10']}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">4-10 requests</div>
+                  </div>
+                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['10+']}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">10+ requests</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>

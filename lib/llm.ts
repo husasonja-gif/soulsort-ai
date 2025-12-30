@@ -69,7 +69,21 @@ export async function generateUserRadarProfile(
     const connectionChemistry = preferences.connection_chemistry || 50
     const kink = preferences.vanilla_kinky || 50
     const monogamy = preferences.open_monogamous || 50
-    const boundaries = preferences.boundaries || 50
+    
+    // BOUNDARIES SCALE V2: Unified computation for backward compatibility
+    // Old users: boundaries (0-100) represents difficulty (0=easy, 100=hard)
+    // New users: boundaries_ease (0-100) represents ease (0=hard, 100=easy)
+    // We compute a unified boundariesEase (0-100, where higher = easier) for consistent priors
+    const boundariesScaleVersion = preferences.boundaries_scale_version || 1
+    let boundariesEase: number
+    if (boundariesScaleVersion === 2 && preferences.boundaries_ease !== undefined) {
+      // New scale: boundaries_ease is already ease (0=hard, 100=easy)
+      boundariesEase = preferences.boundaries_ease
+    } else {
+      // Old scale: boundaries represents difficulty, invert to get ease
+      const oldBoundaries = preferences.boundaries || 50
+      boundariesEase = 100 - oldBoundaries
+    }
 
     // Base priors (0.0-1.0)
     const basePriors = {
@@ -85,7 +99,7 @@ export async function generateUserRadarProfile(
       desire_intensity: 0.5, // neutral prior, not tied to slider
       fantasy_openness: kink / 100.0,
       erotic_attunement: Math.max(0.0, Math.min(1.0, 0.4 + 0.4 * ((100 - connectionChemistry) / 100.0))), // connection-first starts higher
-      boundary_directness: (100 - boundaries) / 100.0, // easy boundaries = high directness
+      boundary_directness: boundariesEase / 100.0, // easy boundaries = high directness
 
       // RELATIONAL_VECTOR (5)
       enm_openness: (100 - monogamy) / 100.0,
@@ -95,10 +109,10 @@ export async function generateUserRadarProfile(
       communication_style: 0.5, // adjust from Q2
 
       // CONSENT_VECTOR (4)
-      consent_awareness: (100 - boundaries) / 100.0, // easy boundaries = high awareness
-      negotiation_comfort: 0.5, // adjust from Q2
+      consent_awareness: 0.5, // DO NOT derive from boundaries slider (per requirements)
+      negotiation_comfort: Math.max(0.0, Math.min(1.0, 0.45 + 0.20 * (boundariesEase / 100.0))), // small nudge from boundaries ease
       non_coerciveness: 0.5, // adjust from Q2/Q3
-      self_advocacy: 0.5, // adjust from Q2/Q3
+      self_advocacy: boundariesEase / 100.0, // derive from boundaries ease
     }
 
     console.log('=== COMPUTED BASE PRIORS ===')
@@ -575,7 +589,10 @@ Provide deltas to adjust the base priors based on chat evidence. Return deltas a
           connection_chemistry: preferences.connection_chemistry || null,
           vanilla_kinky: preferences.vanilla_kinky || null,
           open_monogamous: preferences.open_monogamous || null,
-          boundaries: preferences.boundaries || null,
+          boundaries_raw: boundariesScaleVersion === 1 ? (preferences.boundaries || null) : null, // old field if present
+          boundaries_ease: boundariesScaleVersion === 2 ? (preferences.boundaries_ease || null) : null, // new field if present
+          boundaries_scale_version: boundariesScaleVersion,
+          boundaries_ease_unified: Math.round(boundariesEase), // computed unified value
           base_priors: basePriors,
           deltas: {
             values_delta: values_delta,

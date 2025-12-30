@@ -20,7 +20,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
     connection_chemistry: 50,
     vanilla_kinky: 50,
     open_monogamous: 50,
-    boundaries: 50,
+    boundaries_ease: 50, // New: 0 = Hard, 100 = Easy
   })
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [currentQuestion, setCurrentQuestion] = useState<number>(0)
@@ -44,7 +44,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
     { id: 'connection_chemistry', label: 'Connection first', opposite: 'Chemistry first' },
     { id: 'vanilla_kinky', label: 'Vanilla', opposite: 'Kinky' },
     { id: 'open_monogamous', label: 'Open relationship', opposite: 'Monogamous' },
-    { id: 'boundaries', label: 'Easy to set boundaries', opposite: 'Difficulty setting limits' },
+    { id: 'boundaries_ease', label: 'Hard', opposite: 'Easy', title: 'Ease of setting boundaries' },
   ]
 
   const chatQuestions = [
@@ -273,6 +273,11 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
           <div className="space-y-6 mb-8">
             {preferenceLabels.map((pref) => (
               <div key={pref.id} className="space-y-2">
+                {pref.title && (
+                  <div className="text-center mb-2">
+                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{pref.title}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.label}</span>
                   <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.opposite}</span>

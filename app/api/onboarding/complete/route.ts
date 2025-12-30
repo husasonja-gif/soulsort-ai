@@ -106,6 +106,24 @@ export async function POST(request: Request) {
     )
     console.log('Profile saved to database')
 
+    console.log('Saving preferences...')
+    // Save preferences with boundaries_scale_version for new users
+    const preferencesToSave = {
+      ...preferences,
+      boundaries_scale_version: preferences.boundaries_ease !== undefined ? 2 : 1, // v2 if boundaries_ease exists
+    }
+    const { error: prefsError } = await supabase
+      .from('user_profiles')
+      .update({ preferences: preferencesToSave })
+      .eq('id', userId)
+    
+    if (prefsError) {
+      console.error('Error saving preferences:', prefsError)
+      // Don't fail onboarding if preferences save fails
+    } else {
+      console.log('Preferences saved')
+    }
+
     console.log('Marking onboarding as complete...')
     // Mark onboarding as complete
     await completeOnboarding(userId)
