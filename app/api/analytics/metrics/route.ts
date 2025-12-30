@@ -680,17 +680,32 @@ async function getRequesterMetrics(supabase: any, days: number) {
   
   // Fallback to requester_sessions if events table is empty
   if (completedFlows === 0) {
+    // Try requester_sessions first
     const { data: sessions } = await supabase
       .from('requester_sessions')
       .select('link_id')
       .not('completed_at', 'is', null)
       .gte('started_at', startDate)
     
-    if (sessions) {
+    if (sessions && sessions.length > 0) {
       completedFlows = sessions.length
       sessions.forEach((s: any) => {
         requestsPerUser[s.link_id] = (requestsPerUser[s.link_id] || 0) + 1
       })
+    } else {
+      // Final fallback: use requester_assessments directly (most reliable)
+      // This table is created when assessment completes, so it's the source of truth
+      const { data: assessments } = await supabase
+        .from('requester_assessments')
+        .select('link_id')
+        .gte('created_at', startDate)
+      
+      if (assessments && assessments.length > 0) {
+        completedFlows = assessments.length
+        assessments.forEach((a: any) => {
+          requestsPerUser[a.link_id] = (requestsPerUser[a.link_id] || 0) + 1
+        })
+      }
     }
   }
   

@@ -106,6 +106,7 @@ export async function POST(request: Request) {
       }
     } else if (body.event_type === 'requester_completed' && body.event_data?.session_token) {
       // Update session with completion
+      // Note: This might fail if session doesn't exist, but that's OK - we also track via requester_assessments
       const { error: updateError } = await supabase
         .from('requester_sessions')
         .update({
@@ -115,7 +116,11 @@ export async function POST(request: Request) {
         .eq('session_token', body.event_data.session_token)
       
       if (updateError) {
-        console.error('Error updating requester session:', updateError)
+        // Log but don't fail - requester_assessments table is the source of truth for completed flows
+        console.warn('Error updating requester session (non-critical):', updateError)
+        console.log('Note: Completed assessments are tracked via requester_assessments table')
+      } else {
+        console.log('Successfully updated requester session completion')
       }
       
       // Also store requester_assessment_events completion (for analytics)
