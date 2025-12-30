@@ -1061,10 +1061,20 @@ Assess compatibility based on these responses.`
   } catch (error) {
     console.error('Error in assessRequester:', error)
     if (error instanceof Error) {
+      console.error('Error name:', error.name)
       console.error('Error message:', error.message)
       console.error('Error stack:', error.stack)
+      // Re-throw with enhanced message if it's a generic error
+      if (!error.message || error.message === 'Unknown error') {
+        const enhancedError = new Error(`assessRequester failed: ${error.name || 'Error'} - ${error.stack || 'No stack trace'}`)
+        enhancedError.stack = error.stack
+        throw enhancedError
+      }
+    } else {
+      console.error('Non-Error object thrown:', typeof error, error)
+      // Wrap non-Error objects
+      throw new Error(`assessRequester failed: ${String(error)}`)
     }
-    console.error('Error in assessRequester:', error)
     throw error
   }
 }

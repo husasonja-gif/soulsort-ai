@@ -374,13 +374,43 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Error assessing requester:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    const errorStack = error instanceof Error ? error.stack : undefined
-    console.error('Error details:', { errorMessage, errorStack })
+    
+    // Extract detailed error information
+    let errorMessage = 'Unknown error'
+    let errorStack: string | undefined
+    let errorName: string | undefined
+    let errorCode: string | undefined
+    
+    if (error instanceof Error) {
+      errorMessage = error.message || 'Unknown error'
+      errorStack = error.stack
+      errorName = error.name
+    } else if (typeof error === 'string') {
+      errorMessage = error
+    } else if (error && typeof error === 'object') {
+      // Try to extract from error object
+      errorMessage = (error as any).message || (error as any).error || JSON.stringify(error)
+      errorCode = (error as any).code
+      errorName = (error as any).name
+    }
+    
+    console.error('Error details:', { 
+      errorMessage, 
+      errorStack, 
+      errorName, 
+      errorCode,
+      errorType: typeof error,
+      errorString: String(error)
+    })
+    
+    // Return detailed error for debugging (in non-production, include stack)
     return NextResponse.json(
       { 
         error: 'Failed to assess requester',
         details: errorMessage,
+        ...(process.env.NODE_ENV !== 'production' && errorStack ? { stack: errorStack } : {}),
+        ...(errorCode ? { code: errorCode } : {}),
+        ...(errorName ? { name: errorName } : {}),
       },
       { status: 500 }
     )

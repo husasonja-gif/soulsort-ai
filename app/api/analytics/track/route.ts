@@ -39,10 +39,10 @@ export async function POST(request: Request) {
     
     if (eventError) {
       console.error('Error inserting analytics event:', eventError)
-      return NextResponse.json(
-        { error: 'Failed to track event' },
-        { status: 500 }
-      )
+      console.error('Event data:', { event_type: body.event_type, event_data: body.event_data })
+      // Don't fail the request if analytics tracking fails - log and continue
+      // This allows the main flow to continue even if analytics has issues
+      console.warn('Analytics tracking failed, but continuing with request')
     }
     
     // Handle requester session tracking for specific events
@@ -184,8 +184,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error tracking event:', error)
+    
+    // Extract detailed error information
+    let errorMessage = 'Failed to track event'
+    if (error instanceof Error) {
+      errorMessage = error.message
+      console.error('Error stack:', error.stack)
+    } else if (typeof error === 'string') {
+      errorMessage = error
+    } else if (error && typeof error === 'object') {
+      errorMessage = (error as any).message || (error as any).error || JSON.stringify(error)
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to track event' },
+      { 
+        error: 'Failed to track event',
+        details: errorMessage,
+        ...(process.env.NODE_ENV !== 'production' && error instanceof Error && error.stack ? { stack: error.stack } : {}),
+      },
       { status: 500 }
     )
   }
