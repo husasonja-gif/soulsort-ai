@@ -247,23 +247,33 @@ export async function POST(request: Request) {
     }
 
     // Assess requester (includes dealbreaker evaluation)
-    const assessment = await assessRequester(
-      requesterResponses,
-      {
-        self_transcendence: userRadarProfile.self_transcendence,
-        self_enhancement: userRadarProfile.self_enhancement,
-        rooting: userRadarProfile.rooting,
-        searching: userRadarProfile.searching,
-        relational: userRadarProfile.relational,
-        erotic: userRadarProfile.erotic,
-        consent: userRadarProfile.consent || (userRadarProfile as any).consent_dim, // Support both for migration
-      },
-      userRadarProfile.dealbreakers,
-      structuredFieldsFormatted,
-      null, // userId (requester is anonymous)
-      linkId,
-      requesterSessionId
-    )
+    console.log('Calling assessRequester...')
+    let assessment
+    try {
+      assessment = await assessRequester(
+        requesterResponses,
+        {
+          self_transcendence: userRadarProfile.self_transcendence,
+          self_enhancement: userRadarProfile.self_enhancement,
+          rooting: userRadarProfile.rooting,
+          searching: userRadarProfile.searching,
+          relational: userRadarProfile.relational,
+          erotic: userRadarProfile.erotic,
+          consent: userRadarProfile.consent || (userRadarProfile as any).consent_dim, // Support both for migration
+        },
+        userRadarProfile.dealbreakers,
+        structuredFieldsFormatted,
+        null, // userId (requester is anonymous)
+        linkId,
+        requesterSessionId
+      )
+      console.log('Assessment completed successfully')
+    } catch (assessError) {
+      console.error('Error in assessRequester:', assessError)
+      console.error('Error stack:', assessError instanceof Error ? assessError.stack : 'No stack')
+      console.error('Error message:', assessError instanceof Error ? assessError.message : String(assessError))
+      throw assessError // Re-throw to be caught by outer try-catch
+    }
 
     // Save assessment (including dealbreaker hits - private to profile owner)
     const savedAssessment = await createRequesterAssessment(
@@ -277,6 +287,7 @@ export async function POST(request: Request) {
     )
 
     // Store requester trace if analytics_opt_in is true (privacy-first)
+    // Note: This is optional and won't fail the request if table doesn't exist yet
     if (analytics_opt_in && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       try {
         const { createClient } = await import('@supabase/supabase-js')
@@ -288,15 +299,19 @@ export async function POST(request: Request) {
         // Get OpenAI usage ID if available (for cost tracking)
         let openaiUsageId: string | null = null
         if (session_token) {
-          const { data: usageData } = await supabaseAdmin
-            .from('openai_usage')
-            .select('id')
-            .eq('requester_session_id', session_token)
-            .eq('endpoint', 'requester_assess')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle()
-          openaiUsageId = usageData?.id || null
+          try {
+            const { data: usageData } = await supabaseAdmin
+              .from('openai_usage')
+              .select('id')
+              .eq('requester_session_id', session_token)
+              .eq('endpoint', 'requester_assess')
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+            openaiUsageId = usageData?.id || null
+          } catch (usageError) {
+            console.warn('Could not fetch OpenAI usage ID (table may not exist):', usageError)
+          }
         }
         
         const { error: traceError } = await supabaseAdmin
@@ -323,11 +338,21 @@ export async function POST(request: Request) {
           })
         
         if (traceError) {
-          console.error('Error storing requester assessment trace:', traceError)
+          // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
+          if (traceError.message?.includes('does not exist') || traceError.code === '42P01') {
+            console.warn('requester_assessment_traces table does not exist yet (migration not run). Skipping trace storage.')
+          } else {
+            console.error('Error storing requester assessment trace:', traceError)
+          }
           // Don't fail the request if trace storage fails
         }
       } catch (error) {
-        console.error('Error in requester trace storage:', error)
+        // Table might not exist yet - that's OK
+        if (error instanceof Error && (error.message.includes('does not exist') || error.message.includes('relation'))) {
+          console.warn('requester_assessment_traces table does not exist yet (migration not run). Skipping trace storage.')
+        } else {
+          console.error('Error in requester trace storage:', error)
+        }
         // Don't fail the request if trace storage fails
       }
     }

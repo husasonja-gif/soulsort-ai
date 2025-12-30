@@ -640,24 +640,41 @@ async function getRequesterMetrics(supabase: any, days: number) {
   let requestsPerUser: Record<string, number> = {}
   
   // Try requester_assessment_events first (new table)
+  // Gracefully handle if table doesn't exist yet (migration not run)
   if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    const { createClient } = await import('@supabase/supabase-js')
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-    
-    const { data: events } = await supabaseAdmin
-      .from('requester_assessment_events')
-      .select('link_id, status')
-      .eq('status', 'completed')
-      .gte('created_at', startDate)
-    
-    if (events) {
-      completedFlows = events.length
-      events.forEach((e: any) => {
-        requestsPerUser[e.link_id] = (requestsPerUser[e.link_id] || 0) + 1
-      })
+    try {
+      const { createClient } = await import('@supabase/supabase-js')
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      
+      const { data: events, error: eventsError } = await supabaseAdmin
+        .from('requester_assessment_events')
+        .select('link_id, status')
+        .eq('status', 'completed')
+        .gte('created_at', startDate)
+      
+      if (eventsError) {
+        // Table might not exist yet - that's OK, fallback to requester_sessions
+        if (eventsError.message?.includes('does not exist') || eventsError.code === '42P01') {
+          console.warn('requester_assessment_events table does not exist yet. Using requester_sessions fallback.')
+        } else {
+          console.error('Error querying requester_assessment_events:', eventsError)
+        }
+      } else if (events && events.length > 0) {
+        completedFlows = events.length
+        events.forEach((e: any) => {
+          requestsPerUser[e.link_id] = (requestsPerUser[e.link_id] || 0) + 1
+        })
+      }
+    } catch (error) {
+      // Table might not exist yet - that's OK
+      if (error instanceof Error && (error.message.includes('does not exist') || error.message.includes('relation'))) {
+        console.warn('requester_assessment_events table does not exist yet. Using requester_sessions fallback.')
+      } else {
+        console.error('Error querying requester_assessment_events:', error)
+      }
     }
   }
   

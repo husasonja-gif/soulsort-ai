@@ -61,22 +61,37 @@ export async function POST(request: Request) {
       }
       
       // Also store requester_assessment_events (for analytics)
+      // Note: This is optional and won't fail if table doesn't exist yet
       if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        const { createClient } = await import('@supabase/supabase-js')
-        const supabaseAdmin = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
-        )
-        const { error: eventError } = await supabaseAdmin
-          .from('requester_assessment_events')
-          .insert({
-            link_id: body.event_data.link_id,
-            requester_session_id: body.event_data.session_token,
-            status: 'started',
-            analytics_opt_in: body.event_data.analytics_opt_in || false,
-          })
-        if (eventError) {
-          console.error('Error storing requester assessment event:', eventError)
+        try {
+          const { createClient } = await import('@supabase/supabase-js')
+          const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+          )
+          const { error: eventError } = await supabaseAdmin
+            .from('requester_assessment_events')
+            .insert({
+              link_id: body.event_data.link_id,
+              requester_session_id: body.event_data.session_token,
+              status: 'started',
+              analytics_opt_in: body.event_data.analytics_opt_in || false,
+            })
+          if (eventError) {
+            // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
+            if (eventError.message?.includes('does not exist') || eventError.code === '42P01') {
+              console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
+            } else {
+              console.error('Error storing requester assessment event:', eventError)
+            }
+          }
+        } catch (error) {
+          // Table might not exist yet - that's OK
+          if (error instanceof Error && (error.message.includes('does not exist') || error.message.includes('relation'))) {
+            console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
+          } else {
+            console.error('Error storing requester assessment event:', error)
+          }
         }
       }
     } else if (body.event_type === 'requester_consent_granted' && body.event_data?.session_token) {
@@ -104,22 +119,37 @@ export async function POST(request: Request) {
       }
       
       // Also store requester_assessment_events completion (for analytics)
+      // Note: This is optional and won't fail if table doesn't exist yet
       if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
-        const { createClient } = await import('@supabase/supabase-js')
-        const supabaseAdmin = createClient(
-          process.env.NEXT_PUBLIC_SUPABASE_URL!,
-          process.env.SUPABASE_SERVICE_ROLE_KEY!
-        )
-        const { error: eventError } = await supabaseAdmin
-          .from('requester_assessment_events')
-          .insert({
-            link_id: body.event_data.link_id,
-            requester_session_id: body.event_data.session_token,
-            status: 'completed',
-            analytics_opt_in: body.event_data.analytics_opt_in || false,
-          })
-        if (eventError) {
-          console.error('Error storing requester assessment completion event:', eventError)
+        try {
+          const { createClient } = await import('@supabase/supabase-js')
+          const supabaseAdmin = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+          )
+          const { error: eventError } = await supabaseAdmin
+            .from('requester_assessment_events')
+            .insert({
+              link_id: body.event_data.link_id,
+              requester_session_id: body.event_data.session_token,
+              status: 'completed',
+              analytics_opt_in: body.event_data.analytics_opt_in || false,
+            })
+          if (eventError) {
+            // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
+            if (eventError.message?.includes('does not exist') || eventError.code === '42P01') {
+              console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
+            } else {
+              console.error('Error storing requester assessment completion event:', eventError)
+            }
+          }
+        } catch (error) {
+          // Table might not exist yet - that's OK
+          if (error instanceof Error && (error.message.includes('does not exist') || error.message.includes('relation'))) {
+            console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
+          } else {
+            console.error('Error storing requester assessment completion event:', error)
+          }
         }
       }
     }
