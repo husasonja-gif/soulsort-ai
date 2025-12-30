@@ -844,16 +844,44 @@ Assess compatibility based on these responses.`
       console.log('Parsed result (summary/score only):', { summaryLength: result.summary?.length, compatibilityScore: result.compatibilityScore, hasRadar: !!result.radar, hasAbuseFlags: !!result.abuseFlags })
     }
     
+    // Validate and extract requester radar with robust fallbacks
+    const safeNumber = (val: any, defaultValue: number = 50): number => {
+      const num = Number(val)
+      if (isNaN(num) || !isFinite(num)) {
+        return defaultValue
+      }
+      return Math.max(0, Math.min(100, num))
+    }
+    
+    // Ensure result.radar is an object
+    const radarData = result.radar && typeof result.radar === 'object' && !Array.isArray(result.radar)
+      ? result.radar
+      : {}
+    
     // Extract and validate requester radar (read "consent" from LLM output, not "consent_dim")
     const requesterRadarBeforeCaps: RadarDimensions = {
-      self_transcendence: Math.max(0, Math.min(100, result.radar?.self_transcendence || 50)),
-      self_enhancement: Math.max(0, Math.min(100, result.radar?.self_enhancement || 50)),
-      rooting: Math.max(0, Math.min(100, result.radar?.rooting || 50)),
-      searching: Math.max(0, Math.min(100, result.radar?.searching || 50)),
-      relational: Math.max(0, Math.min(100, result.radar?.relational || 50)),
-      erotic: Math.max(0, Math.min(100, result.radar?.erotic || 50)),
-      consent: Math.max(0, Math.min(100, result.radar?.consent || result.radar?.consent_dim || 50)), // Support both for migration
+      self_transcendence: safeNumber(radarData.self_transcendence, 50),
+      self_enhancement: safeNumber(radarData.self_enhancement, 50),
+      rooting: safeNumber(radarData.rooting, 50),
+      searching: safeNumber(radarData.searching, 50),
+      relational: safeNumber(radarData.relational, 50),
+      erotic: safeNumber(radarData.erotic, 50),
+      consent: safeNumber(radarData.consent || radarData.consent_dim, 50), // Support both for migration
     }
+    
+    // Validate summary
+    const summary = typeof result.summary === 'string' && result.summary.trim().length > 0
+      ? result.summary.trim()
+      : 'Assessment completed.'
+    
+    // Validate compatibility score - check if LLM provided a valid score
+    const llmScoreRaw = result.compatibilityScore
+    const hasValidLlmScore = typeof llmScoreRaw === 'number' && 
+                             !isNaN(llmScoreRaw) && 
+                             isFinite(llmScoreRaw) && 
+                             llmScoreRaw >= 0 && 
+                             llmScoreRaw <= 100 &&
+                             llmScoreRaw !== 50 // 50 is the default, so likely invalid
 
     if (process.env.NODE_ENV !== 'production') {
       console.log('=== REQUESTER RADAR BEFORE SAFETY CAPS ===')
@@ -1002,10 +1030,14 @@ Assess compatibility based on these responses.`
       console.log('=== END DEALBREAKER EVALUATION ===')
     }
     
+    // Use calculated score (which already applies gates and dealbreakers)
+    // The LLM score is ignored in favor of our deterministic calculation
+    const finalScore = scoreAfterDealbreakers
+    
     return {
       radar: requesterRadar,
-      compatibilityScore: scoreAfterDealbreakers,
-      summary: result.summary || 'Assessment completed.',
+      compatibilityScore: finalScore,
+      summary: summary,
       abuseFlags,
       dealbreakerHits, // Include for storage (private to profile owner)
     }
