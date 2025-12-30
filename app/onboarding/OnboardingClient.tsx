@@ -220,13 +220,13 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'dealbreakers') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2">Create Your SoulSort Profile</h1>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">Create Your SoulSort Profile</h1>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">
             {skipChat ? 'Section 1 of 1: Dealbreakers' : 'Section 1 of 2: Dealbreakers'}
           </p>
-          <p className="text-lg font-medium mb-6">
+          <p className="text-lg font-medium mb-6 text-gray-900 dark:text-gray-100">
             Check all boxes that would be dealbreakers for you in a partner:
           </p>
 
@@ -234,15 +234,15 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             {dealbreakerOptions.map((option) => (
               <label
                 key={option}
-                className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-purple-50 cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
               >
                 <input
                   type="checkbox"
                   checked={dealbreakers.includes(option)}
                   onChange={() => handleDealbreakerToggle(option)}
-                  className="w-5 h-5 text-purple-600 rounded"
+                  className="w-5 h-5 text-purple-600 dark:text-purple-400 rounded"
                 />
-                <span className="flex-1">{option}</span>
+                <span className="flex-1 text-gray-900 dark:text-gray-100">{option}</span>
               </label>
             ))}
           </div>
@@ -260,13 +260,13 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'preferences') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2">Create Your SoulSort Profile</h1>
-          <p className="text-gray-600 mb-6">
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">Create Your SoulSort Profile</h1>
+          <p className="text-gray-700 dark:text-gray-300 mb-6">
             {skipChat ? 'Section 1 of 1: Preferences' : 'Section 2 of 2: Preferences'}
           </p>
-          <p className="text-lg font-medium mb-6">
+          <p className="text-lg font-medium mb-6 text-gray-900 dark:text-gray-100">
             Use the sliders to select the spot that describes you best:
           </p>
 
@@ -274,8 +274,8 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             {preferenceLabels.map((pref) => (
               <div key={pref.id} className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-700">{pref.label}</span>
-                  <span className="text-sm font-medium text-gray-700">{pref.opposite}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.label}</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.opposite}</span>
                 </div>
                 <input
                   type="range"
@@ -283,9 +283,9 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                   max="100"
                   value={preferences[pref.id]}
                   onChange={(e) => handlePreferenceChange(pref.id, parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
                 />
-                <div className="text-center text-sm text-gray-500">
+                <div className="text-center text-sm text-gray-700 dark:text-gray-300">
                   {preferences[pref.id]}%
                 </div>
               </div>
