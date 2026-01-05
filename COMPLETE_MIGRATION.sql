@@ -26,6 +26,10 @@ CREATE TABLE IF NOT EXISTS public.user_profiles (
   UNIQUE(email)
 );
 
+-- Add preferences column if it doesn't exist
+ALTER TABLE public.user_profiles
+  ADD COLUMN IF NOT EXISTS preferences JSONB DEFAULT '{}'::jsonb;
+
 -- Consent ledger (GDPR compliance)
 CREATE TABLE IF NOT EXISTS public.consent_ledger (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -348,10 +352,27 @@ CREATE TABLE IF NOT EXISTS public.profile_generation_traces (
   low_evidence BOOLEAN NOT NULL DEFAULT false
 );
 
+-- Add boundaries columns if they don't exist (for boundaries scale v2)
+ALTER TABLE public.profile_generation_traces
+  ADD COLUMN IF NOT EXISTS boundaries_raw INTEGER,
+  ADD COLUMN IF NOT EXISTS boundaries_ease INTEGER,
+  ADD COLUMN IF NOT EXISTS boundaries_scale_version INTEGER DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS boundaries_ease_unified INTEGER;
+
 CREATE INDEX idx_profile_traces_created_at ON public.profile_generation_traces(created_at);
 CREATE INDEX idx_profile_traces_user_id ON public.profile_generation_traces(user_id);
 CREATE INDEX idx_profile_traces_low_evidence ON public.profile_generation_traces(low_evidence);
 CREATE INDEX idx_profile_traces_model_version ON public.profile_generation_traces(model_version);
+
+-- Add index for boundaries_scale_version (after columns are added)
+DROP INDEX IF EXISTS idx_profile_traces_boundaries_scale_version;
+CREATE INDEX idx_profile_traces_boundaries_scale_version 
+  ON public.profile_generation_traces(boundaries_scale_version);
+
+-- Add index for preferences (after column is added)
+DROP INDEX IF EXISTS idx_user_profiles_preferences;
+CREATE INDEX idx_user_profiles_preferences 
+  ON public.user_profiles USING gin(preferences);
 
 -- ============================================================================
 -- ROW LEVEL SECURITY - BASE SCHEMA

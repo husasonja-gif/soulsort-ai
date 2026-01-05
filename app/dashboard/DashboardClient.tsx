@@ -69,6 +69,7 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
     try {
       const response = await fetch('/api/user/delete', {
         method: 'DELETE',
+        credentials: 'include', // Include cookies for authentication
       })
 
       if (response.ok) {
