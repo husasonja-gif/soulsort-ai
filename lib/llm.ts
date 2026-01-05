@@ -114,10 +114,12 @@ export async function generateUserRadarProfile(
       self_advocacy: boundariesEase / 100.0, // slider
     }
 
-    // Log base priors (dev only, no raw text)
-    if (process.env.NODE_ENV !== 'production' && process.env.DEBUG_EVIDENCE === 'true') {
+    // Log base priors (always log in non-prod for debugging)
+    if (process.env.NODE_ENV !== 'production') {
       console.log('=== COMPUTED BASE PRIORS ===')
-      console.log(JSON.stringify(basePriors, null, 2))
+      console.log('Input preferences:', JSON.stringify(preferences, null, 2))
+      console.log('Computed boundariesEase:', boundariesEase)
+      console.log('Base priors:', JSON.stringify(basePriors, null, 2))
       console.log('=== END BASE PRIORS ===')
     }
 
@@ -491,13 +493,19 @@ CHAT QUESTIONS AND ANSWERS:`
       }
     }
 
-    // Log final vectors (dev only)
+    // Log final vectors (always log in non-prod for debugging)
     if (process.env.NODE_ENV !== 'production') {
       console.log('=== FINAL VECTORS (baseline + deltas) ===')
-      console.log('values_vector:', values_vector)
-      console.log('erotic_vector:', erotic_vector)
-      console.log('relational_vector:', relational_vector)
-      console.log('consent_vector:', consent_vector)
+      console.log('Deltas applied:')
+      console.log('  values_delta:', values_delta)
+      console.log('  erotic_delta:', erotic_delta)
+      console.log('  relational_delta:', relational_delta)
+      console.log('  consent_delta:', consent_delta)
+      console.log('Final vectors:')
+      console.log('  values_vector:', values_vector)
+      console.log('  erotic_vector:', erotic_vector)
+      console.log('  relational_vector:', relational_vector)
+      console.log('  consent_vector:', consent_vector)
       console.log('flags:', { low_evidence: isLowEvidence, gaming_detected: gamingDetectedFlag })
       console.log('=== END FINAL VECTORS ===')
     }
