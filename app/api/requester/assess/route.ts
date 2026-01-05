@@ -56,15 +56,67 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get user's radar profile and dealbreakers
-    console.log('Fetching user radar profile for userId:', userId)
-    const userRadarProfile = await getUserRadarProfile(userId)
-    console.log('User radar profile result:', userRadarProfile ? 'found' : 'not found')
-    if (!userRadarProfile) {
-      console.error('User radar profile not found for userId:', userId)
-      console.error('This means the user has not completed onboarding or their profile was not created')
+    // CRITICAL: Deleted user / link integrity check (Part G)
+    // It must be IMPOSSIBLE to compare against a deleted or unpublished profile
+    const supabase = await createSupabaseServerClient()
+    
+    // 1. Verify link exists and is active
+    const { data: linkData, error: linkError } = await supabase
+      .from('user_links')
+      .select('link_id, user_id, is_active')
+      .eq('link_id', linkId)
+      .maybeSingle()
+    
+    if (linkError || !linkData) {
       return NextResponse.json(
-        { error: 'User profile not found. The user may not have completed onboarding.' },
+        { error: 'Link not found' },
+        { status: 404 }
+      )
+    }
+    
+    if (!linkData.is_active) {
+      return NextResponse.json(
+        { error: 'Link is no longer active' },
+        { status: 410 } // 410 Gone
+      )
+    }
+    
+    if (linkData.user_id !== userId) {
+      return NextResponse.json(
+        { error: 'Link user mismatch' },
+        { status: 404 }
+      )
+    }
+    
+    // 2. Verify user profile exists and is not deleted
+    const { data: userProfile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('id, onboarding_completed')
+      .eq('id', userId)
+      .maybeSingle()
+    
+    if (profileError || !userProfile) {
+      return NextResponse.json(
+        { error: 'User profile not found' },
+        { status: 404 }
+      )
+    }
+    
+    if (!userProfile.onboarding_completed) {
+      return NextResponse.json(
+        { error: 'User profile not completed' },
+        { status: 404 }
+      )
+    }
+    
+    // 3. Get user's radar profile and dealbreakers
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Fetching user radar profile for userId:', userId)
+    }
+    const userRadarProfile = await getUserRadarProfile(userId)
+    if (!userRadarProfile) {
+      return NextResponse.json(
+        { error: 'User radar profile not found' },
         { status: 404 }
       )
     }
@@ -235,7 +287,7 @@ export async function POST(request: Request) {
     }
 
     // Get requester session ID if available (for tracking)
-    const supabase = await createSupabaseServerClient()
+    // Note: supabase already defined above for integrity checks
     let requesterSessionId: string | null = null
     if (body.session_token) {
       const { data: session } = await supabase

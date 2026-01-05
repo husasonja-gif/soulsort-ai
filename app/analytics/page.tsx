@@ -47,24 +47,6 @@ interface MetricsData {
     positive_percentage: number
     negative_percentage: number
   }
-  qc?: {
-    total_profiles: number
-    missing_answer_rate: number
-    default_clustering_rate: number
-    avg_cost_per_profile?: number
-    distributions: Record<string, { bins: number[]; median: number; iqr: number; defaultClustering: number }>
-    entropy_saturation: { date: string; entropy: number; saturation: number }[]
-    missing_wordcount: {
-      missing_rate: { q1: number; q2: number; q3: number; q4: number }
-      word_count_bins: Record<string, { '0': number; '1-5': number; '6-15': number; '16-30': number; '31+': number }>
-    }
-    archetypes: {
-      signature: string
-      count: number
-      percentage: number
-      median: { st: number; se: number; root: number; search: number; rel: number; ero: number; con: number }
-    }[]
-  }
   requester?: {
     total_flows: number
     avg_requests_per_user: number
@@ -80,7 +62,28 @@ interface MetricsData {
   cost?: {
     avg_cost_per_profile: number
     total_profile_cost: number
+    total_requester_cost: number
+    total_cost_all: number
     total_profiles: number
+  }
+  qc?: {
+    total_profiles: number
+    total_users_onboarded?: number
+    missing_answer_rate: number
+    default_clustering_rate: number
+    avg_cost_per_profile?: number
+    distributions: Record<string, { bins: number[]; median: number; iqr: number; defaultClustering: number }>
+    entropy_saturation: { date: string; entropy: number; saturation: number }[]
+    missing_wordcount: {
+      missing_rate: { q1: number; q2: number; q3: number; q4: number }
+      word_count_bins: Record<string, { '0': number; '1-5': number; '6-15': number; '16-30': number; '31+': number }>
+    }
+    archetypes: {
+      signature: string
+      count: number
+      percentage: number
+      median: { st: number; se: number; root: number; search: number; rel: number; ero: number; con: number }
+    }[]
   }
 }
 
@@ -235,8 +238,22 @@ export default function AnalyticsDashboard() {
           <MetricCard
             title="Avg Cost/Profile"
             value={metrics?.cost?.avg_cost_per_profile ? `$${metrics.cost.avg_cost_per_profile.toFixed(4)}` : (metrics?.qc?.avg_cost_per_profile ? `$${metrics.qc.avg_cost_per_profile.toFixed(4)}` : '$0.0000')}
-            subtitle="OpenAI API costs"
+            subtitle="Profile generation only"
           />
+          {metrics?.cost?.total_cost_all !== undefined && (
+            <MetricCard
+              title="Total Cost (All)"
+              value={`$${metrics.cost.total_cost_all.toFixed(2)}`}
+              subtitle={`Profiles: $${metrics.cost.total_profile_cost.toFixed(2)}, Requesters: $${(metrics.cost.total_requester_cost || 0).toFixed(2)}`}
+            />
+          )}
+          {metrics?.qc?.total_users_onboarded && metrics.qc.total_users_onboarded !== metrics.qc.total_profiles && (
+            <MetricCard
+              title="Trace Coverage"
+              value={`${metrics.qc.total_profiles}/${metrics.qc.total_users_onboarded}`}
+              subtitle={`${Math.round((metrics.qc.total_profiles / metrics.qc.total_users_onboarded) * 100)}% have traces`}
+            />
+          )}
           <MetricCard
             title="Total Requester Flows"
             value={metrics?.requester?.total_flows ?? 0}

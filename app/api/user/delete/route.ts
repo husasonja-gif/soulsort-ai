@@ -38,14 +38,26 @@ export async function DELETE(request: Request) {
       // Continue even if this fails
     }
 
-    // Delete user links
+    // CRITICAL: Deactivate user links (don't delete - needed for guardrails)
+    // Set is_active = false so requester assessments are blocked
     const { error: linksError } = await supabase
+      .from('user_links')
+      .update({ is_active: false })
+      .eq('user_id', userId)
+
+    if (linksError) {
+      console.error('Error deactivating user links:', linksError)
+      // Continue even if this fails
+    }
+    
+    // Also delete links after deactivating (cleanup, but guardrails use is_active)
+    const { error: linksDeleteError } = await supabase
       .from('user_links')
       .delete()
       .eq('user_id', userId)
 
-    if (linksError) {
-      console.error('Error deleting user links:', linksError)
+    if (linksDeleteError) {
+      console.error('Error deleting user links:', linksDeleteError)
       // Continue even if this fails
     }
 
@@ -87,6 +99,31 @@ export async function DELETE(request: Request) {
 
     console.log(`Successfully deleted all data for user: ${userId}`)
 
+    // CRITICAL: Delete the auth user to prevent re-login
+    // This requires admin privileges - use service role key if available
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    if (serviceRoleKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js')
+        const supabaseAdmin = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          serviceRoleKey
+        )
+        // Delete auth user (requires service role)
+        const { error: authDeleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
+        if (authDeleteError) {
+          console.error('Error deleting auth user:', authDeleteError)
+          // Continue - at least profile is deleted
+        } else {
+          console.log(`Successfully deleted auth user: ${userId}`)
+        }
+      } catch (error) {
+        console.error('Error setting up admin client for auth deletion:', error)
+      }
+    } else {
+      console.warn('SUPABASE_SERVICE_ROLE_KEY not set - cannot delete auth user. User will be able to log back in.')
+    }
+
     // Sign out the user after deletion
     await supabase.auth.signOut()
 
@@ -103,4 +140,5 @@ export async function DELETE(request: Request) {
     )
   }
 }
+
 

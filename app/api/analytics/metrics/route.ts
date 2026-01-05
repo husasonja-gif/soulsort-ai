@@ -564,6 +564,7 @@ async function getQCMetrics(supabase: any, days: number) {
     : 0
   
   // Calculate avg cost per profile from OpenAI usage
+  // Note: This is only for profile generation costs, not requester assessments
   let avgCostPerProfile = 0
   if (traces.length > 0) {
     const { data: profileUsage } = await supabaseAdmin
@@ -579,8 +580,19 @@ async function getQCMetrics(supabase: any, days: number) {
     }
   }
   
+  // Also count total users from user_profiles (for comparison)
+  // This helps identify if traces are missing for some users
+  const { data: allUsers } = await supabaseAdmin
+    .from('user_profiles')
+    .select('id')
+    .eq('onboarding_completed', true)
+    .gte('updated_at', startDate)
+  
+  const totalUsersOnboarded = allUsers?.length || 0
+  
   return {
     total_profiles: traces.length,
+    total_users_onboarded: totalUsersOnboarded, // For comparison - shows if traces are missing
     missing_answer_rate: traces.length > 0 ? totalMissing / (traces.length * 4) : 0,
     default_clustering_rate: defaultClusteringRate,
     avg_cost_per_profile: avgCostPerProfile,
@@ -588,10 +600,10 @@ async function getQCMetrics(supabase: any, days: number) {
     entropy_saturation: entropySaturation,
     missing_wordcount: {
       missing_rate: {
-        q1: traces.filter((t: any) => t.extraction_status?.q1 === 'missing').length / traces.length,
-        q2: traces.filter((t: any) => t.extraction_status?.q2 === 'missing').length / traces.length,
-        q3: traces.filter((t: any) => t.extraction_status?.q3 === 'missing').length / traces.length,
-        q4: traces.filter((t: any) => t.extraction_status?.q4 === 'missing').length / traces.length,
+        q1: traces.length > 0 ? traces.filter((t: any) => t.extraction_status?.q1 === 'missing').length / traces.length : 0,
+        q2: traces.length > 0 ? traces.filter((t: any) => t.extraction_status?.q2 === 'missing').length / traces.length : 0,
+        q3: traces.length > 0 ? traces.filter((t: any) => t.extraction_status?.q3 === 'missing').length / traces.length : 0,
+        q4: traces.length > 0 ? traces.filter((t: any) => t.extraction_status?.q4 === 'missing').length / traces.length : 0,
       },
       word_count_bins: wordCountBins,
     },
@@ -761,13 +773,29 @@ async function getRequesterMetrics(supabase: any, days: number) {
 async function getCostMetrics(supabase: any, days: number) {
   const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
   
-  // Get profile generation costs only (exclude requester_assess)
-  const { data: profileUsage } = await supabase
+  // Get ALL OpenAI usage (profile generation + requester assessments)
+  const { data: allUsage } = await supabase
     .from('openai_usage')
-    .select('cost_usd')
-    .eq('endpoint', 'generate_profile')
+    .select('cost_usd, endpoint')
     .gte('created_at', startDate)
     .eq('success', true)
+  
+  if (!allUsage || allUsage.length === 0) {
+    return {
+      avg_cost_per_profile: 0,
+      total_profile_cost: 0,
+      total_cost_all: 0,
+      total_profiles: 0,
+    }
+  }
+  
+  // Separate by endpoint
+  const profileUsage = allUsage.filter((u: any) => u.endpoint === 'generate_profile')
+  const requesterUsage = allUsage.filter((u: any) => u.endpoint === 'requester_assess')
+  
+  const totalCostAll = allUsage.reduce((sum: number, u: any) => sum + parseFloat(u.cost_usd || 0), 0)
+  const totalProfileCost = profileUsage.reduce((sum: number, u: any) => sum + parseFloat(u.cost_usd || 0), 0)
+  const totalRequesterCost = requesterUsage.reduce((sum: number, u: any) => sum + parseFloat(u.cost_usd || 0), 0)
   
   // Count completed profile generations (from profile_generation_traces or user_radar_profiles)
   const { count: profileCount } = await supabase
@@ -775,21 +803,14 @@ async function getCostMetrics(supabase: any, days: number) {
     .select('*', { count: 'exact', head: true })
     .gte('updated_at', startDate)
   
-  if (!profileUsage || profileUsage.length === 0 || !profileCount || profileCount === 0) {
-    return {
-      avg_cost_per_profile: 0,
-      total_profile_cost: 0,
-      total_profiles: 0,
-    }
-  }
-  
-  const totalCost = profileUsage.reduce((sum: number, u: any) => sum + parseFloat(u.cost_usd || 0), 0)
-  const avgCost = totalCost / profileCount
+  const avgCostPerProfile = profileCount && profileCount > 0 ? totalProfileCost / profileCount : 0
   
   return {
-    avg_cost_per_profile: avgCost,
-    total_profile_cost: totalCost,
-    total_profiles: profileCount,
+    avg_cost_per_profile: avgCostPerProfile,
+    total_profile_cost: totalProfileCost,
+    total_requester_cost: totalRequesterCost,
+    total_cost_all: totalCostAll, // Total cost including requester assessments (matches OpenAI dashboard)
+    total_profiles: profileCount || 0,
   }
 }
 
