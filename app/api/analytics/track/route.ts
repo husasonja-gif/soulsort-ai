@@ -31,7 +31,17 @@ export async function POST(request: Request) {
     }
     
     // Insert analytics event
-    const { error: eventError } = await supabase.from('analytics_events').insert({
+    // Use service role key to bypass RLS (analytics events can come from anonymous requesters)
+    let analyticsClient = supabase
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const { createClient } = await import('@supabase/supabase-js')
+      analyticsClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+    }
+    
+    const { error: eventError } = await analyticsClient.from('analytics_events').insert({
       user_id: user?.id || null,
       event_type: body.event_type,
       event_data: body.event_data || {},
@@ -46,8 +56,18 @@ export async function POST(request: Request) {
     }
     
     // Handle requester session tracking for specific events
+    // Use service role key to bypass RLS (requester sessions are anonymous)
     if (body.event_type === 'requester_started' && body.event_data?.session_token && body.event_data?.link_id) {
-      const { error: sessionError } = await supabase.from('requester_sessions').insert({
+      let sessionClient = supabase
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const { createClient } = await import('@supabase/supabase-js')
+        sessionClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+      }
+      
+      const { error: sessionError } = await sessionClient.from('requester_sessions').insert({
         link_id: body.event_data.link_id,
         requester_id: user?.id || null,
         session_token: body.event_data.session_token,
@@ -96,7 +116,17 @@ export async function POST(request: Request) {
       }
     } else if (body.event_type === 'requester_consent_granted' && body.event_data?.session_token) {
       // Update session with consent timestamp
-      const { error: updateError } = await supabase
+      // Use service role key to bypass RLS (requester sessions are anonymous)
+      let sessionClient = supabase
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const { createClient } = await import('@supabase/supabase-js')
+        sessionClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+      }
+      
+      const { error: updateError } = await sessionClient
         .from('requester_sessions')
         .update({ consent_granted_at: new Date().toISOString() })
         .eq('session_token', body.event_data.session_token)
@@ -107,7 +137,17 @@ export async function POST(request: Request) {
     } else if (body.event_type === 'requester_completed' && body.event_data?.session_token) {
       // Update session with completion
       // Note: This might fail if session doesn't exist, but that's OK - we also track via requester_assessments
-      const { error: updateError } = await supabase
+      // Use service role key to bypass RLS (requester sessions are anonymous)
+      let sessionClient = supabase
+      if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        const { createClient } = await import('@supabase/supabase-js')
+        sessionClient = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
+      }
+      
+      const { error: updateError } = await sessionClient
         .from('requester_sessions')
         .update({
           completed_at: new Date().toISOString(),

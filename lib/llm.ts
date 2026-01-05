@@ -267,7 +267,8 @@ NO free text. NO explanations. NO evidence strings.`
       }
     }
 
-    // Build user prompt - NO raw answers in production
+    // Build user prompt - MUST include actual answers for LLM to work
+    // Privacy: Raw text is sent to OpenAI (required for processing) but NOT stored in database
     let userPrompt = `BASE PRIORS (computed from sliders):
 ${JSON.stringify(basePriors, null, 2)}
 
@@ -275,27 +276,29 @@ Dealbreakers: ${dealbreakers.length > 0 ? dealbreakers.length + ' selected' : 'N
 
 CHAT QUESTIONS AND ANSWERS:`
     
-    // Only include raw answers in dev with DEBUG_EVIDENCE flag
-    if (enableDebugEvidence) {
-      extractedAnswers.forEach((ans, idx) => {
-        userPrompt += `\n\nQ${idx + 1}: ${onboardingQuestions[idx].replace(`[[Q${idx + 1}]] `, '')}\nA: ${ans}`
-      })
-    } else {
-      // Production: only word counts and status
-      extractedAnswers.forEach((ans, idx) => {
-        const wordCount = answerWordCounts[idx] || 0
-        const status = extractionStatus[`q${idx + 1}` as keyof typeof extractionStatus]
-        userPrompt += `\n\nQ${idx + 1}: status=${status}, word_count=${wordCount}`
-      })
-    }
+    // Always include actual answers in prompt (required for LLM to generate deltas)
+    // Privacy note: Answers are sent to OpenAI API but NOT stored in database
+    extractedAnswers.forEach((ans, idx) => {
+      userPrompt += `\n\nQ${idx + 1}: ${onboardingQuestions[idx].replace(`[[Q${idx + 1}]] `, '')}\nA: ${ans}`
+    })
     
     userPrompt += `\n\nProvide deltas to adjust the base priors based on chat evidence. Return ONLY the JSON format specified.`
 
-    // Log prompt only in dev with DEBUG_EVIDENCE flag (privacy-safe)
+    // Log prompt only in dev with DEBUG_EVIDENCE flag (privacy-safe logging)
+    // Note: Prompt always includes answers (required for LLM), but we only log in dev
     if (enableDebugEvidence) {
       const promptForLogging = userPrompt.replace(/sk-[a-zA-Z0-9]+/g, 'sk-REDACTED')
       console.log('=== PROMPT SENT TO OPENAI (DEV ONLY) ===')
       console.log(promptForLogging)
+      console.log('=== END PROMPT ===')
+    } else if (process.env.NODE_ENV !== 'production') {
+      // In non-prod, log word counts only (privacy-safe)
+      console.log('=== PROMPT SENT TO OPENAI (word counts only) ===')
+      extractedAnswers.forEach((ans, idx) => {
+        const wordCount = answerWordCounts[idx] || 0
+        const status = extractionStatus[`q${idx + 1}` as keyof typeof extractionStatus]
+        console.log(`Q${idx + 1}: status=${status}, word_count=${wordCount}`)
+      })
       console.log('=== END PROMPT ===')
     }
 
@@ -740,8 +743,8 @@ Before assessing compatibility, check if responses are garbage/non-serious:
 - Answers that show no engagement with the question content
 
 If garbage responses are detected:
-- Set ALL radar dimensions to 20-40 (low engagement, no real signals)
-- Set compatibility score to MAX 40 (never higher)
+- Set ALL radar dimensions to 15-25 (low engagement, no real signals)
+- Set compatibility score to MAX 25 (never higher)
 - Write summary noting limited information available
 - Add "low_engagement" to abuseFlags
 
@@ -760,8 +763,8 @@ CRITICAL LANGUAGE RULES (for summary only):
 - If the requester avoids consent/boundaries questions: reduce consent
 
 Generate:
-1. Requester's radar profile (7 dimensions, 0-100) - based on their responses, OR 20-40 if garbage detected
-2. Compatibility score (0-100) - calculated STRICTLY from radar dimension alignment, OR MAX 40 if garbage detected
+1. Requester's radar profile (7 dimensions, 0-100) - based on their responses, OR 15-25 if garbage detected
+2. Compatibility score (0-100) - calculated STRICTLY from radar dimension alignment, OR MAX 25 if garbage detected
 3. A thoughtful summary (2-3 sentences) written from the requester's perspective using "you" for them and "they/them" for the other person. Describe compatibility patterns descriptively without mentioning dealbreakers or using judgmental language. The summary is independent of the score.
 4. Abuse detection flags (empty array if none, or ["low_engagement"] if garbage detected, or ["flag1", "flag2"] if concerning patterns detected)
 
@@ -1032,21 +1035,21 @@ Assess compatibility based on these responses.`
     if (isGarbage) {
       if (process.env.NODE_ENV !== 'production') {
         console.warn('=== GARBAGE RESPONSES DETECTED (CODE-LEVEL) ===')
-        console.warn('Capping score at 40 and radar at 20-40')
+        console.warn('Capping score at 25 and radar at 15-25')
       }
       
-      // Force cap: score MAX 40, radar 20-40
-      compatibilityScore = Math.min(compatibilityScore, 40)
+      // Force cap: score MAX 25, radar 15-25
+      compatibilityScore = Math.min(compatibilityScore, 25)
       
-      // Cap all radar dimensions to 20-40 range
+      // Cap all radar dimensions to 15-25 range
       requesterRadar = {
-        self_transcendence: Math.max(20, Math.min(40, requesterRadar.self_transcendence)),
-        self_enhancement: Math.max(20, Math.min(40, requesterRadar.self_enhancement)),
-        rooting: Math.max(20, Math.min(40, requesterRadar.rooting)),
-        searching: Math.max(20, Math.min(40, requesterRadar.searching)),
-        relational: Math.max(20, Math.min(40, requesterRadar.relational)),
-        erotic: Math.max(20, Math.min(40, requesterRadar.erotic)),
-        consent: Math.max(20, Math.min(40, requesterRadar.consent)),
+        self_transcendence: Math.max(15, Math.min(25, requesterRadar.self_transcendence)),
+        self_enhancement: Math.max(15, Math.min(25, requesterRadar.self_enhancement)),
+        rooting: Math.max(15, Math.min(25, requesterRadar.rooting)),
+        searching: Math.max(15, Math.min(25, requesterRadar.searching)),
+        relational: Math.max(15, Math.min(25, requesterRadar.relational)),
+        erotic: Math.max(15, Math.min(25, requesterRadar.erotic)),
+        consent: Math.max(15, Math.min(25, requesterRadar.consent)),
       }
       
       // Add low_engagement flag if not already present
@@ -1096,7 +1099,7 @@ Assess compatibility based on these responses.`
     
     // CRITICAL: Re-apply garbage cap AFTER dealbreakers (final enforcement)
     if (isGarbage) {
-      scoreAfterDealbreakers = Math.min(scoreAfterDealbreakers, 40)
+      scoreAfterDealbreakers = Math.min(scoreAfterDealbreakers, 25)
     }
     
     if (process.env.NODE_ENV !== 'production') {
