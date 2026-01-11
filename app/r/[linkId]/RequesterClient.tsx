@@ -247,11 +247,14 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       
       if (option.field === 'status_orientation') {
         // After status_orientation, we're done with all questions
-        setChatHistory(prev => [...prev, userMessage])
-        setTimeout(() => {
-          generateAssessment([...chatHistory, userMessage], skippedQuestions)
-        }, 0)
+        const finalHistory = [...chatHistory, userMessage]
+        setChatHistory(finalHistory)
         setLoading(false)
+        // Generate assessment immediately (no setTimeout to avoid race conditions)
+        generateAssessment(finalHistory, skippedQuestions).catch(err => {
+          console.error('Error in generateAssessment:', err)
+          setLoading(false)
+        })
         return
       }
 
@@ -452,6 +455,26 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       // Move to next question or complete
       const nextIndex = getNextQuestionIndex(currentQuestionIndex)
       
+      // Check if we need to insert a quick-reply question after the current answer
+      // After Q7 (index 6, just answered) -> status_orientation
+      if (currentQuestionIndex === 6 && !structuredFields.status_orientation) {
+        // Show status_orientation quick reply question
+        const statusQuestion = 'How important is status or success when choosing a partner?'
+        const statusQuickReplies = QUICK_REPLY_QUESTIONS[7] || null
+        setChatHistory(prev => [
+          ...prev,
+          {
+            role: 'assistant',
+            content: statusQuestion,
+            timestamp: new Date(),
+            quickReplies: statusQuickReplies || undefined,
+          },
+        ])
+        // Don't increment question index - wait for status_orientation answer
+        setLoading(false)
+        return
+      }
+      
       if (nextIndex !== null) {
         // Check if we're skipping any questions between current and next
         for (let i = currentQuestionIndex + 1; i < nextIndex; i++) {
@@ -477,12 +500,6 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           quickReplies = QUICK_REPLY_QUESTIONS[5] || null
           // Show kink question, then after answer show erotic (index 5)
         }
-        // After Q7 (index 6, just answered) -> status_orientation
-        else if (currentQuestionIndex === 6 && !structuredFields.status_orientation) {
-          nextQuestion = 'How important is status or success when choosing a partner?'
-          quickReplies = QUICK_REPLY_QUESTIONS[7] || null
-          // Don't increment question index yet
-        }
         
         // Only increment index if we're showing a regular question, not a quick-reply question
         if (!quickReplies) {
@@ -504,6 +521,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       } else {
         // All questions answered (including skipped ones) - generate assessment
         // Pass skipped questions info and structured fields to the assessment
+        console.log('All questions answered, generating assessment...')
         await generateAssessment(updatedHistory, skippedQuestions)
       }
     } catch (error) {
@@ -516,6 +534,14 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   const generateAssessment = async (finalChatHistory: ChatMessage[], skipped: Set<number> = new Set()) => {
     setLoading(true)
     try {
+      console.log('Calling /api/requester/assess with:', {
+        linkId,
+        userId,
+        chatHistoryLength: finalChatHistory.length,
+        skippedQuestions: Array.from(skipped),
+        structuredFields,
+      })
+      
       const response = await fetch('/api/requester/assess', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -532,6 +558,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
       if (response.ok) {
         const data = await response.json()
+        console.log('Assessment received:', { score: data.compatibilityScore, hasRadar: !!data.radar })
         setAssessment(data)
         setFlowState('results')
         
@@ -566,15 +593,17 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
         }
         
         console.error('Assessment error data:', errorData)
-        alert(`Failed to generate assessment: ${errorData.error || errorData.details || `HTTP ${response.status}: ${response.statusText}`}`)
+        const errorMsg = errorData.error || errorData.details || `HTTP ${response.status}: ${response.statusText}`
+        alert(`Failed to generate assessment: ${errorMsg}`)
+        // Don't reset loading state on error - keep user on chat screen so they can see the error
+        // setLoading(false) - commented out so user can see what happened
       }
     } catch (error) {
       console.error('Error generating assessment:', error)
       const errorMessage = error instanceof Error ? error.message : 'Failed to generate assessment'
       console.error('Full error:', error)
-      alert(`Error: ${errorMessage}`)
-    } finally {
-      setLoading(false)
+      alert(`Error: ${errorMessage}. Please try refreshing the page.`)
+      setLoading(false) // Reset loading on network errors
     }
   }
 

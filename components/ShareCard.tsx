@@ -178,7 +178,7 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
 
         <div className="text-center mb-4">
           <p className="text-xs text-gray-500 dark:text-gray-400 break-all font-mono" style={{ color: '#6b7280' }}>{shareLink}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1" style={{ color: '#9ca3af' }}>soulsort.ai - privacy-first - Dec 2024</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1" style={{ color: '#9ca3af' }}>soulsort.ai - privacy-first - {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
         </div>
       </div>
 

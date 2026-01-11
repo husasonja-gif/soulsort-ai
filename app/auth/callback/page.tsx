@@ -25,14 +25,27 @@ function AuthCallbackContent() {
 
         const redirectAfterAuth = async () => {
           // Wait a bit for session to be set and cookies to be written
-          await new Promise(resolve => setTimeout(resolve, 500))
+          await new Promise(resolve => setTimeout(resolve, 1000))
           
-          // Verify session exists
-          const { data: { session } } = await supabase.auth.getSession()
+          // Verify session exists with retry
+          let session = null
+          let retries = 3
+          while (retries > 0 && !session) {
+            const { data: { session: currentSession } } = await supabase.auth.getSession()
+            if (currentSession) {
+              session = currentSession
+              break
+            }
+            await new Promise(resolve => setTimeout(resolve, 500))
+            retries--
+          }
+          
           if (!session) {
-            console.error('No session found after auth')
-            // Don't show error immediately, try to redirect first
-            router.push('/login?error=no_session')
+            console.error('No session found after auth (after retries)')
+            setError('Session not found. Please try logging in again.')
+            setTimeout(() => {
+              window.location.href = '/login?error=no_session'
+            }, 2000)
             return
           }
           
@@ -41,11 +54,11 @@ function AuthCallbackContent() {
           if (userError) {
             console.error('Error getting user:', userError)
             // Only show error if it's a real error, not just PKCE code verifier warning
-            if (!userError.message.includes('PKCE code verifier')) {
+            if (!userError.message.includes('PKCE code verifier') && !userError.message.includes('code verifier')) {
               setError(userError.message)
               setTimeout(() => {
                 window.location.href = '/login?error=auth_failed'
-              }, 1000)
+              }, 2000)
             }
             return
           }
@@ -55,7 +68,7 @@ function AuthCallbackContent() {
             setError('No user found after authentication')
             setTimeout(() => {
               window.location.href = '/login?error=no_user'
-            }, 1000)
+            }, 2000)
             return
           }
 
@@ -109,23 +122,43 @@ function AuthCallbackContent() {
           if (exchangeError) {
             console.error('Auth callback error:', exchangeError)
             // Don't show PKCE code verifier errors - they're often false positives
-            if (!exchangeError.message.includes('PKCE code verifier')) {
+            if (!exchangeError.message.includes('PKCE code verifier') && !exchangeError.message.includes('code verifier')) {
               setError(exchangeError.message)
               setTimeout(() => {
                 window.location.href = `/login?error=${encodeURIComponent(exchangeError.message)}`
-              }, 1000)
+              }, 2000)
               return
             }
-            // For PKCE errors, try to continue anyway - might still work
-            console.log('PKCE error detected, attempting to continue...')
+            // For PKCE errors, check if we still got a session
+            if (!data?.session) {
+              console.error('PKCE error and no session - redirecting to login')
+              setError('Authentication failed. Please try again.')
+              setTimeout(() => {
+                window.location.href = '/login?error=auth_failed'
+              }, 2000)
+              return
+            }
+            // For PKCE errors but we have a session, continue
+            console.log('PKCE error detected but session exists, continuing...')
           }
 
-          if (!data.session) {
+          if (!data?.session) {
             console.error('No session returned from exchange')
             setError('No session returned')
             setTimeout(() => {
               window.location.href = '/login?error=no_session'
-            }, 1000)
+            }, 2000)
+            return
+          }
+          
+          // Verify session is actually valid before redirecting
+          const { data: { user: verifyUser }, error: verifyError } = await supabase.auth.getUser()
+          if (verifyError || !verifyUser) {
+            console.error('Session verification failed:', verifyError)
+            setError('Session verification failed')
+            setTimeout(() => {
+              window.location.href = '/login?error=session_verification_failed'
+            }, 2000)
             return
           }
 

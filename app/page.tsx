@@ -194,7 +194,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 text-center text-sm text-gray-600 dark:text-gray-400">
-        <p>© 2024 SoulSort AI. Privacy-first vibe filtering.</p>
+        <p>© 2025 SoulSort AI. Privacy-first vibe filtering.</p>
       </footer>
     </div>
   )
