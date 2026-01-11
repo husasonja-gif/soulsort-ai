@@ -164,7 +164,8 @@ export async function POST(request: Request) {
       }
       
       // Also store requester_assessment_events completion (for analytics)
-      // Note: This is optional and won't fail if table doesn't exist yet
+      // CRITICAL: UPDATE existing 'started' row instead of INSERTING new row
+      // This ensures we don't double-count flows
       if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         try {
           const { createClient } = await import('@supabase/supabase-js')
@@ -172,20 +173,51 @@ export async function POST(request: Request) {
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
             process.env.SUPABASE_SERVICE_ROLE_KEY!
           )
-          const { error: eventError } = await supabaseAdmin
+          
+          // First, try to UPDATE existing 'started' row
+          const { data: existingEvent, error: findError } = await supabaseAdmin
             .from('requester_assessment_events')
-            .insert({
-              link_id: body.event_data.link_id,
-              requester_session_id: body.event_data.session_token,
-              status: 'completed',
-              analytics_opt_in: body.event_data.analytics_opt_in || false,
-            })
-          if (eventError) {
-            // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
-            if (eventError.message?.includes('does not exist') || eventError.code === '42P01') {
-              console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
+            .select('id')
+            .eq('requester_session_id', body.event_data.session_token)
+            .eq('status', 'started')
+            .maybeSingle()
+          
+          if (existingEvent && !findError) {
+            // Update existing row
+            const { error: updateError } = await supabaseAdmin
+              .from('requester_assessment_events')
+              .update({
+                status: 'completed',
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', existingEvent.id)
+            
+            if (updateError) {
+              console.error('Error updating requester assessment completion event:', updateError)
             } else {
-              console.error('Error storing requester assessment completion event:', eventError)
+              console.log('Successfully updated requester_assessment_events to completed')
+            }
+          } else {
+            // No existing 'started' row found, insert new 'completed' row
+            // This handles cases where 'started' event wasn't tracked
+            const { error: insertError } = await supabaseAdmin
+              .from('requester_assessment_events')
+              .insert({
+                link_id: body.event_data.link_id,
+                requester_session_id: body.event_data.session_token,
+                status: 'completed',
+                analytics_opt_in: body.event_data.analytics_opt_in || false,
+              })
+            
+            if (insertError) {
+              // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
+              if (insertError.message?.includes('does not exist') || insertError.code === '42P01') {
+                console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
+              } else {
+                console.error('Error inserting requester assessment completion event:', insertError)
+              }
+            } else {
+              console.log('Successfully inserted requester_assessment_events completed (no started row found)')
             }
           }
         } catch (error) {

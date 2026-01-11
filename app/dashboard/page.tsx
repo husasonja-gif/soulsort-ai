@@ -19,18 +19,35 @@ export default async function DashboardPage() {
     // Check if onboarding is needed
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('onboarding_completed')
+      .select('id, onboarding_completed, email')
       .eq('id', user.id)
       .maybeSingle()
 
     if (profileError) {
       console.error('Error fetching user profile:', profileError)
+      console.error('User ID:', user.id, 'Email:', user.email)
+      // Don't redirect if profile doesn't exist - might be a new user
+      // Instead, check if profile exists at all
+      if (profileError.code === 'PGRST116' || profileError.message?.includes('No rows')) {
+        console.log('User profile not found, redirecting to onboarding')
+        redirect('/onboarding')
+      } else {
+        // Other error - log and redirect to onboarding as safe fallback
+        redirect('/onboarding')
+      }
+    }
+
+    if (!profile) {
+      console.log('No profile found for user:', user.id, 'redirecting to onboarding')
       redirect('/onboarding')
     }
 
-    if (!profile?.onboarding_completed) {
+    if (!profile.onboarding_completed) {
+      console.log('User has not completed onboarding, redirecting')
       redirect('/onboarding')
     }
+    
+    console.log('User authenticated and onboarded:', user.email, 'Profile ID:', profile.id)
 
     // Track dashboard visit
     try {
