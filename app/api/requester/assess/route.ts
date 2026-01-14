@@ -61,20 +61,41 @@ export async function POST(request: Request) {
     const supabase = await createSupabaseServerClient()
     
     // 1. Verify link exists and is active
-    const { data: linkData, error: linkError } = await supabase
+    // Use service role key to bypass RLS for link lookup (public links need to be accessible)
+    let linkSupabase = supabase
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const { createClient } = await import('@supabase/supabase-js')
+      linkSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+    }
+    
+    const { data: linkData, error: linkError } = await linkSupabase
       .from('user_links')
       .select('link_id, user_id, is_active')
       .eq('link_id', linkId)
       .maybeSingle()
     
-    if (linkError || !linkData) {
+    if (linkError) {
+      console.error('Error fetching link:', linkError)
+      console.error('Link ID:', linkId, 'User ID:', userId)
       return NextResponse.json(
-        { error: 'Link not found' },
+        { error: 'Error fetching link', details: linkError.message },
+        { status: 500 }
+      )
+    }
+    
+    if (!linkData) {
+      console.error('Link not found:', linkId)
+      return NextResponse.json(
+        { error: 'Link not found', linkId },
         { status: 404 }
       )
     }
     
     if (!linkData.is_active) {
+      console.error('Link is inactive:', linkId)
       return NextResponse.json(
         { error: 'Link is no longer active' },
         { status: 410 } // 410 Gone
@@ -82,6 +103,7 @@ export async function POST(request: Request) {
     }
     
     if (linkData.user_id !== userId) {
+      console.error('Link user mismatch:', { linkUserId: linkData.user_id, providedUserId: userId, linkId })
       return NextResponse.json(
         { error: 'Link user mismatch' },
         { status: 404 }
@@ -89,20 +111,32 @@ export async function POST(request: Request) {
     }
     
     // 2. Verify user profile exists and is not deleted
-    const { data: userProfile, error: profileError } = await supabase
+    // Use service role key to bypass RLS for profile lookup
+    const { data: userProfile, error: profileError } = await linkSupabase
       .from('user_profiles')
       .select('id, onboarding_completed')
       .eq('id', userId)
       .maybeSingle()
     
-    if (profileError || !userProfile) {
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError)
+      console.error('User ID:', userId)
       return NextResponse.json(
-        { error: 'User profile not found' },
+        { error: 'Error fetching user profile', details: profileError.message },
+        { status: 500 }
+      )
+    }
+    
+    if (!userProfile) {
+      console.error('User profile not found:', userId)
+      return NextResponse.json(
+        { error: 'User profile not found', userId },
         { status: 404 }
       )
     }
     
     if (!userProfile.onboarding_completed) {
+      console.error('User profile not completed:', userId)
       return NextResponse.json(
         { error: 'User profile not completed' },
         { status: 404 }

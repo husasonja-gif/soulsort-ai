@@ -50,6 +50,12 @@ export async function POST(request: Request) {
     if (eventError) {
       console.error('Error inserting analytics event:', eventError)
       console.error('Event data:', { event_type: body.event_type, event_data: body.event_data })
+      // Check if it's a constraint violation (invalid event type)
+      if (eventError.code === '23514' || eventError.message?.includes('valid_event_type')) {
+        console.error('CRITICAL: Event type not in schema constraint. Valid types:', validEventTypes)
+        console.error('Attempted event type:', body.event_type)
+        // This is a schema mismatch - log but don't block
+      }
       // Don't fail the request if analytics tracking fails - log and continue
       // This allows the main flow to continue even if analytics has issues
       console.warn('Analytics tracking failed, but continuing with request')
