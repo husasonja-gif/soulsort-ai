@@ -94,6 +94,7 @@ export default function BMNLAssessmentPage() {
 
     const updatedHistory = [...chatHistory, userMessage]
     setChatHistory(updatedHistory)
+    const answerText = currentAnswer.trim()
     setCurrentAnswer('')
     setLoading(true)
 
@@ -106,7 +107,7 @@ export default function BMNLAssessmentPage() {
           participant_id: participantId,
           question_number: questionNumber,
           question_text: questionText,
-          answer: currentAnswer,
+          answer: answerText,
           chat_history: updatedHistory,
         }),
       })
