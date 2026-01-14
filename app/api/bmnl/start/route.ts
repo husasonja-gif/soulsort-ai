@@ -1,6 +1,4 @@
 import { NextResponse } from 'next/server'
-import { createSupabaseServerClient } from '@/lib/supabaseServer'
-import { supabase } from '@/lib/supabaseClient'
 
 export async function POST(request: Request) {
   try {
@@ -63,8 +61,15 @@ export async function POST(request: Request) {
 
       if (createError) {
         console.error('Error creating participant:', createError)
+        // Check if table doesn't exist
+        if (createError.code === '42P01' || createError.message?.includes('does not exist')) {
+          return NextResponse.json(
+            { error: 'Database table not found. Please run the migration: supabase/migrations/021_bmnl_schema.sql' },
+            { status: 500 }
+          )
+        }
         return NextResponse.json(
-          { error: 'Failed to create participant' },
+          { error: 'Failed to create participant', details: createError.message },
           { status: 500 }
         )
       }
@@ -117,8 +122,9 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Error in BMNL start:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     return NextResponse.json(
-      { error: 'Failed to start assessment' },
+      { error: 'Failed to start assessment', details: errorMessage },
       { status: 500 }
     )
   }

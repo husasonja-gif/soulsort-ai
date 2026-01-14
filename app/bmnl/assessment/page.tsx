@@ -207,19 +207,19 @@ export default function BMNLAssessmentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 via-yellow-50 to-red-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-8 max-w-3xl">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-6">
-          <h1 className="text-2xl font-bold mb-2 text-orange-600 dark:text-orange-400">
+    <div className="min-h-screen bg-white dark:bg-gray-50">
+      <div className="container mx-auto px-4 py-6 sm:py-8 max-w-3xl">
+        <div className="bg-white dark:bg-white rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-gray-900">
             Cultural Onboarding
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-600">
             Question {currentQuestionIndex + 1} of {BMNL_QUESTIONS.length}
           </p>
         </div>
 
         {/* Chat History */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-6 min-h-[400px] max-h-[600px] overflow-y-auto">
+        <div className="bg-white dark:bg-white rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 min-h-[300px] sm:min-h-[400px] max-h-[500px] sm:max-h-[600px] overflow-y-auto">
           <div className="space-y-4">
             {chatHistory.map((message, idx) => (
               <div
@@ -227,20 +227,20 @@ export default function BMNLAssessmentPage() {
                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg p-4 ${
+                  className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-3 sm:p-4 ${
                     message.role === 'user'
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-100 text-gray-900 dark:text-gray-900'
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap text-sm sm:text-base">{message.content}</p>
                 </div>
               </div>
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4">
-                  <div className="animate-pulse">Processing...</div>
+                <div className="bg-gray-100 dark:bg-gray-100 rounded-lg p-4">
+                  <div className="animate-pulse text-gray-600">Processing...</div>
                 </div>
               </div>
             )}
@@ -248,19 +248,19 @@ export default function BMNLAssessmentPage() {
         </div>
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-white rounded-lg p-4 sm:p-6">
           <textarea
             value={currentAnswer}
             onChange={(e) => setCurrentAnswer(e.target.value)}
             placeholder="Type your answer here..."
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 dark:bg-gray-700 dark:text-gray-100 mb-4 min-h-[120px]"
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 mb-4 min-h-[100px] sm:min-h-[120px]"
             disabled={loading}
             required
           />
           <button
             type="submit"
             disabled={!currentAnswer.trim() || loading}
-            className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             {loading ? 'Processing...' : currentQuestionIndex < BMNL_QUESTIONS.length - 1 ? 'Next Question' : 'Complete Assessment'}
           </button>
