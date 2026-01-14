@@ -194,6 +194,7 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   
   CONSTRAINT valid_event_type CHECK (event_type IN (
     'requester_started',
+    'requester_consent_granted',
     'requester_completed',
     'requester_abandoned',
     'radar_viewed',
@@ -201,7 +202,8 @@ CREATE TABLE IF NOT EXISTS analytics_events (
     'dashboard_visited',
     'onboarding_started',
     'onboarding_completed',
-    'onboarding_abandoned'
+    'onboarding_abandoned',
+    'compatibility_feedback'
   ))
 );
 
