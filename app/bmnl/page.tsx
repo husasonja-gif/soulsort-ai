@@ -32,7 +32,13 @@ export default function BMNLLandingPage() {
 
       if (response.ok) {
         const data = await response.json()
-        router.push(`/bmnl/assessment?token=${data.token}`)
+        // Start assessment tracking
+        await fetch('/api/bmnl/assessment/start', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ participant_id: data.participant_id }),
+        })
+        router.push(`/bmnl/assessment?token=${data.token}&participant_id=${data.participant_id}`)
       } else {
         const error = await response.json()
         alert(error.error || 'Failed to start assessment')

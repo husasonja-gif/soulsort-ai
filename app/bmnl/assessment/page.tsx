@@ -182,6 +182,8 @@ export default function BMNLAssessmentPage() {
       })
 
       if (response.ok) {
+        const data = await response.json()
+        // Redirect to dashboard with token
         router.push(`/bmnl/dashboard?token=${token}`)
       } else {
         const error = await response.json()
