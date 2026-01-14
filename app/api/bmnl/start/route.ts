@@ -48,13 +48,17 @@ export async function POST(request: Request) {
       participantId = existing.id
       authUserId = existing.auth_user_id
     } else {
-      // Create new participant
+      // Create new participant with auto-delete date (6 months from now)
+      const autoDeleteDate = new Date()
+      autoDeleteDate.setMonth(autoDeleteDate.getMonth() + 6)
+
       const { data: newParticipant, error: createError } = await supabaseAdmin
         .from('bmnl_participants')
         .insert({
           email: email.toLowerCase(),
           consent_granted_at: new Date().toISOString(),
           status: 'pending',
+          auto_delete_at: autoDeleteDate.toISOString(),
         })
         .select('id')
         .single()
@@ -64,12 +68,19 @@ export async function POST(request: Request) {
         // Check if table doesn't exist
         if (createError.code === '42P01' || createError.message?.includes('does not exist')) {
           return NextResponse.json(
-            { error: 'Database table not found. Please run the migration: supabase/migrations/021_bmnl_schema.sql' },
+            { error: 'Database table not found. Please run the migration: supabase/migrations/021_bmnl_schema.sql', details: createError.message },
             { status: 500 }
           )
         }
         return NextResponse.json(
-          { error: 'Failed to create participant', details: createError.message },
+          { error: 'Failed to create participant', details: createError.message, code: createError.code },
+          { status: 500 }
+        )
+      }
+
+      if (!newParticipant) {
+        return NextResponse.json(
+          { error: 'Failed to create participant: no data returned' },
           { status: 500 }
         )
       }
@@ -95,20 +106,30 @@ export async function POST(request: Request) {
         authUserId = authData.user.id
 
         // Update participant with auth user ID
-        await supabaseAdmin
+        const { error: updateError } = await supabaseAdmin
           .from('bmnl_participants')
           .update({ auth_user_id: authUserId })
           .eq('id', participantId)
 
-        // Log consent
-        await supabaseAdmin
-          .from('bmnl_consent_log')
-          .insert({
-            participant_id: participantId,
-            consent_type: 'assessment',
-            granted: true,
-            consent_text: 'Cultural onboarding assessment consent',
-          })
+        if (updateError) {
+          console.error('Error updating participant with auth user ID:', updateError)
+          // Continue anyway
+        }
+      }
+
+      // Log consent (always, regardless of auth status)
+      const { error: consentError } = await supabaseAdmin
+        .from('bmnl_consent_log')
+        .insert({
+          participant_id: participantId,
+          consent_type: 'assessment',
+          granted: true,
+          consent_text: 'Cultural onboarding assessment consent',
+        })
+
+      if (consentError) {
+        console.error('Error logging consent:', consentError)
+        // Don't fail the request if consent logging fails
       }
     }
 
