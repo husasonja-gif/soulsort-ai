@@ -150,13 +150,17 @@ Extract signals for this answer.`
     }
 
     // Track usage
+    const startTime = Date.now()
     await trackOpenAIUsage({
       userId: null,
       endpoint: 'bmnl_signal_extraction',
       model: CURRENT_MODEL_VERSION,
-      promptTokens: completion.usage?.prompt_tokens || 0,
-      completionTokens: completion.usage?.completion_tokens || 0,
-      totalTokens: completion.usage?.total_tokens || 0,
+      usage: {
+        prompt_tokens: completion.usage?.prompt_tokens || 0,
+        completion_tokens: completion.usage?.completion_tokens || 0,
+        total_tokens: completion.usage?.total_tokens || 0,
+      },
+      responseTimeMs: Date.now() - startTime,
       success: true,
     })
 
