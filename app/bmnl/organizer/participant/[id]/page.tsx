@@ -206,7 +206,7 @@ function ParticipantDetailContent() {
         {data.radar && (
           <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
             <h2 className="text-xl font-bold mb-4 text-gray-900">Radar Profile</h2>
-            <BMNLRadarChart radar={data.radar} />
+            <BMNLRadarChart data={data.radar} />
           </div>
         )}
 
