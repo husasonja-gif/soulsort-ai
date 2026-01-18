@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     // Get participant data (limited fields only - no auth_user_id)
     const { data: participant, error: participantError } = await supabaseAdmin
       .from('bmnl_participants')
-      .select('id, email, created_at, consent_granted_at, assessment_started_at, assessment_completed_at, auto_delete_at, manually_deleted_at, status')
+      .select('id, email, created_at, consent_granted_at, assessment_started_at, assessment_completed_at, auto_delete_at, manually_deleted_at, status, needs_human_review, review_notes')
       .eq('id', participantId)
       .single()
 
