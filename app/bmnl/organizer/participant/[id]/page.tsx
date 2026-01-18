@@ -79,13 +79,16 @@ function ParticipantDetailContent() {
       if (response.ok) {
         const exportData = await response.json()
         
-        // Also get flags if any
-        const flagsResponse = await fetch(`/api/bmnl/organizer/overview`)
+        // Get flags directly for this participant
         let flags: any[] = []
-        if (flagsResponse.ok) {
-          const overviewData = await flagsResponse.json()
-          const flaggedParticipant = overviewData.flagged?.find((p: any) => p.id === participantId)
-          flags = flaggedParticipant?.flags || []
+        try {
+          const flagsResponse = await fetch(`/api/bmnl/organizer/participant/${participantId}`)
+          if (flagsResponse.ok) {
+            const flagsData = await flagsResponse.json()
+            flags = flagsData.flags || []
+          }
+        } catch (flagsError) {
+          console.error('Error fetching flags:', flagsError)
         }
 
         setData({
@@ -157,7 +160,9 @@ function ParticipantDetailContent() {
               {data.participant.status}
             </div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <div className={`bg-white border rounded-lg p-4 ${
+            data.participant.needs_human_review ? 'border-purple-200 bg-purple-50' : 'border-gray-200'
+          }`}>
             <div className="text-sm text-gray-600 mb-1">Needs Review</div>
             <div className={`text-lg font-semibold ${data.participant.needs_human_review ? 'text-purple-600' : 'text-gray-600'}`}>
               {data.participant.needs_human_review ? 'Yes' : 'No'}

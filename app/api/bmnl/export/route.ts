@@ -135,7 +135,7 @@ export async function GET(request: Request) {
     // Build GDPR-safe export (no signals, llm_notes, mapped_axes, weights, internal IDs)
     const exportData = {
       participant: {
-        participant_id: participant.id,
+        id: participant.id,
         email: participant.email,
         created_at: participant.created_at,
         consent_granted_at: participant.consent_granted_at,
@@ -144,6 +144,8 @@ export async function GET(request: Request) {
         auto_delete_at: participant.auto_delete_at,
         manually_deleted_at: participant.manually_deleted_at,
         status: participant.status,
+        needs_human_review: participant.needs_human_review || false,
+        review_notes: participant.review_notes || null,
       },
       consent: (consentData || []).map(c => ({
         type: c.consent_type,
