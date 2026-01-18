@@ -59,7 +59,7 @@ export async function POST(request: Request) {
     
     const { data: existing } = await query.maybeSingle()
 
-    let participantId: string
+    let participantId: string | undefined
     let currentAuthUserId: string | null = auth_user_id || null
 
     if (existing) {
@@ -145,7 +145,8 @@ export async function POST(request: Request) {
         participantId = newParticipant.id
       }
 
-      if (!newParticipant && !participantId) {
+      // If we still don't have a participantId at this point, it's an error
+      if (!participantId) {
         return NextResponse.json(
           { error: 'Failed to create participant: no data returned' },
           { status: 500 }
