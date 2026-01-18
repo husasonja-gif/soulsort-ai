@@ -77,3 +77,7 @@ END $$;
 This will allow authenticated users to insert their own radar profiles. The migration is idempotent, so it's safe to run even if the policy already exists.
 
 
+
+
+
+

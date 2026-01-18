@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { decryptText } from '@/lib/bmnl-crypto'
 
 export async function GET(request: Request) {
   try {
@@ -13,16 +14,27 @@ export async function GET(request: Request) {
     }
 
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    
     if (!serviceRoleKey) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        { error: 'Server configuration error: SUPABASE_SERVICE_ROLE_KEY is missing' },
+        { status: 500 }
+      )
+    }
+
+    if (!supabaseUrl) {
+      console.error('NEXT_PUBLIC_SUPABASE_URL is not set')
+      return NextResponse.json(
+        { error: 'Server configuration error: NEXT_PUBLIC_SUPABASE_URL is missing' },
         { status: 500 }
       )
     }
 
     const { createClient } = await import('@supabase/supabase-js')
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseUrl,
       serviceRoleKey
     )
 
@@ -41,10 +53,10 @@ export async function GET(request: Request) {
       )
     }
 
-    // Get answers
-    const { data: answers, error: answersError } = await supabaseAdmin
+    // Get answers (with encrypted flag)
+    const { data: answersData, error: answersError } = await supabaseAdmin
       .from('bmnl_answers')
-      .select('question_number, question_text, raw_answer, answered_at')
+      .select('question_number, question_text, raw_answer, answered_at, encrypted')
       .eq('participant_id', participantId)
       .order('question_number', { ascending: true })
 
@@ -56,6 +68,14 @@ export async function GET(request: Request) {
       )
     }
 
+    // Decrypt answers for display
+    const answers = (answersData || []).map(answer => ({
+      question_number: answer.question_number,
+      question_text: answer.question_text,
+      raw_answer: answer.encrypted ? decryptText(answer.raw_answer) : answer.raw_answer, // Decrypt if encrypted
+      answered_at: answer.answered_at,
+    }))
+
     return NextResponse.json({
       radar: radar ? {
         participation: radar.participation,
@@ -66,7 +86,7 @@ export async function GET(request: Request) {
         openness_to_learning: radar.openness_to_learning,
         gate_experience: radar.gate_experience,
       } : null,
-      answers: answers || [],
+      answers: answers,
     })
   } catch (error) {
     console.error('Error in dashboard:', error)
@@ -77,4 +97,5 @@ export async function GET(request: Request) {
     )
   }
 }
+
 

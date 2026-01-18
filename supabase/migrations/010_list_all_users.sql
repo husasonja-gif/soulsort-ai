@@ -11,3 +11,7 @@ FROM auth.users u
 LEFT JOIN public.user_profiles up ON u.id = up.id
 ORDER BY u.created_at DESC;
 
+
+
+
+

@@ -18,3 +18,6 @@ CREATE INDEX IF NOT EXISTS idx_profile_traces_boundaries_scale_version
 -- as part of the JSON structure, not as separate columns
 -- This keeps the schema flexible and avoids breaking existing queries
 
+
+
+

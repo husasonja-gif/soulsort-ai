@@ -26,24 +26,54 @@ export async function POST(request: Request) {
       serviceRoleKey
     )
 
-    // Mark for manual deletion (GDPR: process within 30 days)
-    const { error: updateError } = await supabaseAdmin
+    // Delete all related data (cascade deletes should handle most, but we'll be explicit)
+    // Delete in order to respect foreign key constraints
+    
+    // Delete flags
+    await supabaseAdmin
+      .from('bmnl_flags')
+      .delete()
+      .eq('participant_id', participantId)
+
+    // Delete signals
+    await supabaseAdmin
+      .from('bmnl_signals')
+      .delete()
+      .eq('participant_id', participantId)
+
+    // Delete radar profiles
+    await supabaseAdmin
+      .from('bmnl_radar_profiles')
+      .delete()
+      .eq('participant_id', participantId)
+
+    // Delete consent log
+    await supabaseAdmin
+      .from('bmnl_consent_log')
+      .delete()
+      .eq('participant_id', participantId)
+
+    // Delete answers
+    await supabaseAdmin
+      .from('bmnl_answers')
+      .delete()
+      .eq('participant_id', participantId)
+
+    // Finally, delete participant
+    const { error: deleteError } = await supabaseAdmin
       .from('bmnl_participants')
-      .update({
-        status: 'deleted',
-        manually_deleted_at: new Date().toISOString(),
-      })
+      .delete()
       .eq('id', participantId)
 
-    if (updateError) {
-      console.error('Error requesting deletion:', updateError)
+    if (deleteError) {
+      console.error('Error deleting participant:', deleteError)
       return NextResponse.json(
-        { error: 'Failed to request deletion', details: updateError.message },
+        { error: 'Failed to delete data', details: deleteError.message },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ success: true, message: 'Deletion request submitted' })
+    return NextResponse.json({ success: true, message: 'All data has been permanently deleted' })
   } catch (error) {
     console.error('Error in delete request:', error)
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
@@ -53,4 +83,5 @@ export async function POST(request: Request) {
     )
   }
 }
+
 

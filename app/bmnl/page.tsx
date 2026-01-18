@@ -7,48 +7,16 @@ import Link from 'next/link'
 export default function BMNLLandingPage() {
   const router = useRouter()
   const [consentGiven, setConsentGiven] = useState(false)
-  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const handleStart = async () => {
+  const handleStart = () => {
     if (!consentGiven) {
       alert('Please provide consent to continue')
       return
     }
 
-    if (!email || !email.includes('@')) {
-      alert('Please enter a valid email address')
-      return
-    }
-
-    setLoading(true)
-    try {
-      // Create participant and send magic link
-      const response = await fetch('/api/bmnl/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, consent_granted: true }),
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        // Start assessment tracking
-        await fetch('/api/bmnl/assessment/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ participant_id: data.participant_id }),
-        })
-        router.push(`/bmnl/assessment?token=${data.token}&participant_id=${data.participant_id}`)
-      } else {
-        const error = await response.json()
-        alert(error.error || 'Failed to start assessment')
-      }
-    } catch (error) {
-      console.error('Error starting assessment:', error)
-      alert('Failed to start assessment. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+    // Redirect to login page
+    router.push('/bmnl/login')
   }
 
   return (
@@ -108,21 +76,6 @@ export default function BMNLLandingPage() {
           </h3>
 
           <div className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900"
-                placeholder="your@email.com"
-                required
-              />
-            </div>
-
             <div className="flex items-start">
               <input
                 type="checkbox"
@@ -140,10 +93,10 @@ export default function BMNLLandingPage() {
                 </span>
               </label>
             </div>
-
+            
             <button
               onClick={handleStart}
-              disabled={!consentGiven || !email || loading}
+              disabled={!consentGiven || loading}
               className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
             >
               {loading ? 'Starting...' : 'Start Cultural Onboarding'}

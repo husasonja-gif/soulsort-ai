@@ -26,3 +26,6 @@ CREATE POLICY "No public access" ON public.waitlist
   USING (false)
   WITH CHECK (false);
 
+
+
+

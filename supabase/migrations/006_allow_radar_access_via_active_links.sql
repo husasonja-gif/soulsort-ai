@@ -21,3 +21,7 @@ CREATE POLICY "Users can view own radar" ON public.user_radar_profiles
     )
   );
 
+
+
+
+

@@ -71,3 +71,6 @@ export default function RadarChartNoLabels({ data, label = 'Profile', color = '#
   )
 }
 
+
+
+

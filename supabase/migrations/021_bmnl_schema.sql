@@ -64,27 +64,27 @@ CREATE INDEX IF NOT EXISTS idx_bmnl_answers_participant ON public.bmnl_answers(p
 CREATE INDEX IF NOT EXISTS idx_bmnl_answers_question ON public.bmnl_answers(question_number);
 
 -- ============================================================================
--- BM NL RADAR PROFILES (Non-numeric: low/medium/high)
+-- BM NL RADAR PROFILES (Non-numeric: low/emerging/stable/mastering - 4 levels)
 -- ============================================================================
 CREATE TABLE IF NOT EXISTS public.bmnl_radar_profiles (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   participant_id UUID NOT NULL REFERENCES public.bmnl_participants(id) ON DELETE CASCADE,
   
-  -- 6 axes, each: 'low', 'medium', 'high'
-  participation TEXT NOT NULL CHECK (participation IN ('low', 'medium', 'high')),
-  consent_literacy TEXT NOT NULL CHECK (consent_literacy IN ('low', 'medium', 'high')),
-  communal_responsibility TEXT NOT NULL CHECK (communal_responsibility IN ('low', 'medium', 'high')),
-  inclusion_awareness TEXT NOT NULL CHECK (inclusion_awareness IN ('low', 'medium', 'high')),
-  self_regulation TEXT NOT NULL CHECK (self_regulation IN ('low', 'medium', 'high')),
-  openness_to_learning TEXT NOT NULL CHECK (openness_to_learning IN ('low', 'medium', 'high')),
+  -- 6 axes, each: 'low', 'emerging', 'stable', 'mastering' (4 levels)
+  participation TEXT NOT NULL CHECK (participation IN ('low', 'emerging', 'stable', 'mastering')),
+  consent_literacy TEXT NOT NULL CHECK (consent_literacy IN ('low', 'emerging', 'stable', 'mastering')),
+  communal_responsibility TEXT NOT NULL CHECK (communal_responsibility IN ('low', 'emerging', 'stable', 'mastering')),
+  inclusion_awareness TEXT NOT NULL CHECK (inclusion_awareness IN ('low', 'emerging', 'stable', 'mastering')),
+  self_regulation TEXT NOT NULL CHECK (self_regulation IN ('low', 'emerging', 'stable', 'mastering')),
+  openness_to_learning TEXT NOT NULL CHECK (openness_to_learning IN ('low', 'emerging', 'stable', 'mastering')),
   
   -- Status determination
   gate_experience TEXT NOT NULL CHECK (gate_experience IN ('basic', 'needs_orientation')),
   
   -- Versioning
-  schema_version INTEGER NOT NULL DEFAULT 1,
+  schema_version INTEGER NOT NULL DEFAULT 2,
   model_version TEXT NOT NULL DEFAULT 'v2-bmnl',
-  scoring_version TEXT NOT NULL DEFAULT 'v1',
+  scoring_version TEXT NOT NULL DEFAULT 'v2',
   
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS public.bmnl_signals (
   
   -- Per-question signals
   question_number INTEGER NOT NULL,
-  signal_level TEXT NOT NULL CHECK (signal_level IN ('low', 'medium', 'high')),
+  signal_level TEXT NOT NULL CHECK (signal_level IN ('low', 'emerging', 'stable', 'mastering')),
   
   -- Flags
   is_garbage BOOLEAN NOT NULL DEFAULT FALSE,
@@ -190,6 +190,17 @@ CREATE TABLE IF NOT EXISTS public.bmnl_organizers (
 -- ============================================================================
 -- ROW LEVEL SECURITY
 -- ============================================================================
+
+-- Drop existing policies if they exist (to allow re-running the schema)
+DROP POLICY IF EXISTS "Participants can view own profile" ON public.bmnl_participants;
+DROP POLICY IF EXISTS "Participants can view own answers" ON public.bmnl_answers;
+DROP POLICY IF EXISTS "Participants can view own radar" ON public.bmnl_radar_profiles;
+DROP POLICY IF EXISTS "Organizers can view all participants" ON public.bmnl_participants;
+DROP POLICY IF EXISTS "Service role full access participants" ON public.bmnl_participants;
+DROP POLICY IF EXISTS "Service role full access answers" ON public.bmnl_answers;
+DROP POLICY IF EXISTS "Service role full access radar" ON public.bmnl_radar_profiles;
+DROP POLICY IF EXISTS "Service role full access signals" ON public.bmnl_signals;
+DROP POLICY IF EXISTS "Service role full access flags" ON public.bmnl_flags;
 
 -- Participants can only see their own data
 ALTER TABLE public.bmnl_participants ENABLE ROW LEVEL SECURITY;
@@ -308,4 +319,3 @@ BEGIN
     AND manually_deleted_at IS NULL;
 END;
 $$ LANGUAGE plpgsql;
-

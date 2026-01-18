@@ -83,3 +83,6 @@ https://soulsortai.com/r/YOUR_LINK_ID?v=2
 - Use platform debuggers to force refresh when needed
 - The `/api/og` endpoint can be used as a fallback for manual scraping
 
+
+
+

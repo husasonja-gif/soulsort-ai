@@ -338,3 +338,6 @@ CREATE TRIGGER enforce_analytics_consent
   FOR EACH ROW
   EXECUTE FUNCTION check_analytics_consent();
 
+
+
+

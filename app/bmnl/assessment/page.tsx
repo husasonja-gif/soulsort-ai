@@ -2,7 +2,43 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { supabase } from '@/lib/supabaseClient'
 import type { ChatMessage } from '@/lib/types'
+
+// Speech Recognition types
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start(): void
+  stop(): void
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onerror: ((event: any) => void) | null
+  onend: (() => void) | null
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number
+  results: SpeechRecognitionResultList
+}
+
+interface SpeechRecognitionResultList {
+  length: number
+  item(index: number): SpeechRecognitionResult
+  [index: number]: SpeechRecognitionResult
+}
+
+interface SpeechRecognitionResult {
+  length: number
+  item(index: number): SpeechRecognitionAlternative
+  [index: number]: SpeechRecognitionAlternative
+  isFinal: boolean
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string
+  confidence: number
+}
 
 const BMNL_QUESTIONS = [
   'Why do you want to join this event, and what do you understand about what it is?',
@@ -18,7 +54,7 @@ const BMNL_QUESTIONS = [
   'What do you hope others will bring or offer — to you or to the community?',
 ]
 
-export default function BMNLAssessmentPage() {
+function BMNLAssessmentPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
@@ -28,26 +64,121 @@ export default function BMNLAssessmentPage() {
   const [currentAnswer, setCurrentAnswer] = useState('')
   const [loading, setLoading] = useState(false)
   const [participantId, setParticipantId] = useState<string | null>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
+  const [gamingCount, setGamingCount] = useState(0)
+  const [phobicCount, setPhobicCount] = useState(0)
 
   useEffect(() => {
-    if (!token) {
-      router.push('/bmnl?error=no_token')
+    const loadParticipant = async () => {
+      // Check for participant_id in URL params first (from start page)
+      const participantIdParam = searchParams.get('participant_id')
+      if (participantIdParam) {
+        setParticipantId(participantIdParam)
+        startAssessment(participantIdParam)
+        return
+      }
+
+      // Otherwise, try to get from authenticated user
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError || !user) {
+        router.push('/bmnl/login')
+        return
+      }
+
+      // Find participant by auth_user_id
+      const { data: participant, error: participantError } = await supabase
+        .from('bmnl_participants')
+        .select('id')
+        .eq('auth_user_id', user.id)
+        .maybeSingle()
+
+      if (participantError || !participant) {
+        console.error('Error finding participant:', participantError)
+        router.push('/bmnl/start')
+        return
+      }
+
+      setParticipantId(participant.id)
+      startAssessment(participant.id)
+    }
+
+    loadParticipant()
+  }, [searchParams, router])
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+      if (SpeechRecognition) {
+        const recognitionInstance = new SpeechRecognition()
+        recognitionInstance.continuous = true
+        recognitionInstance.interimResults = true
+        recognitionInstance.lang = 'en-US'
+
+        // Use a ref-like pattern to track final transcript per recording session
+        let sessionFinalTranscript = ''
+        
+        recognitionInstance.onstart = () => {
+          // Reset transcript when starting a new recording session
+          sessionFinalTranscript = ''
+        }
+        
+        recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+          let interimTranscript = ''
+
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            const transcript = event.results[i][0].transcript
+            if (event.results[i].isFinal) {
+              sessionFinalTranscript += transcript + ' '
+            } else {
+              interimTranscript += transcript
+            }
+          }
+
+          setCurrentAnswer(sessionFinalTranscript + interimTranscript)
+        }
+
+        recognitionInstance.onerror = (event: any) => {
+          console.error('Speech recognition error:', event.error)
+          if (event.error === 'no-speech' || event.error === 'audio-capture') {
+            setIsRecording(false)
+          }
+        }
+
+        recognitionInstance.onend = () => {
+          setIsRecording(false)
+          // Reset transcript when recording ends
+          sessionFinalTranscript = ''
+        }
+
+        setRecognition(recognitionInstance)
+      }
+    }
+  }, [])
+
+  const toggleRecording = () => {
+    if (!recognition) {
+      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.')
       return
     }
 
-    // Decode token to get participant ID
-    try {
-      const decoded = Buffer.from(token, 'base64').toString('utf-8')
-      const [id] = decoded.split(':')
-      setParticipantId(id)
-
-      // Start assessment
-      startAssessment(id)
-    } catch (error) {
-      console.error('Error decoding token:', error)
-      router.push('/bmnl?error=invalid_token')
+    if (isRecording) {
+      recognition.stop()
+      setIsRecording(false)
+    } else {
+      setCurrentAnswer('') // Clear previous answer
+      try {
+        recognition.start()
+        setIsRecording(true)
+      } catch (error) {
+        console.error('Error starting recognition:', error)
+        alert('Could not start recording. Please try again.')
+      }
     }
-  }, [token, router])
+  }
 
   const startAssessment = async (id: string) => {
     setLoading(true)
@@ -68,11 +199,16 @@ export default function BMNLAssessmentPage() {
           },
         ])
       } else {
-        alert('Failed to start assessment')
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+        const errorMessage = error.error || error.details || 'Failed to start assessment'
+        alert(`Failed to start assessment: ${errorMessage}`)
+        // Redirect back to landing page on error
+        router.push('/bmnl?error=assessment_start_failed')
       }
     } catch (error) {
       console.error('Error starting assessment:', error)
-      alert('Failed to start assessment')
+      alert('Failed to start assessment. Please check your connection and try again.')
+      router.push('/bmnl?error=network_error')
     } finally {
       setLoading(false)
     }
@@ -113,14 +249,27 @@ export default function BMNLAssessmentPage() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to process answer')
+        let errorMessage = 'Failed to process answer'
+        try {
+          const error = await response.json()
+          errorMessage = error.error || error.details || errorMessage
+        } catch (e) {
+          // If response isn't JSON, use status text
+          errorMessage = `Server error: ${response.status} ${response.statusText}`
+        }
+        throw new Error(errorMessage)
       }
 
       const data = await response.json()
 
       // Check for garbage response
       if (data.signal?.is_garbage) {
+        // Stop any active recording
+        if (isRecording && recognition) {
+          recognition.stop()
+          setIsRecording(false)
+        }
+        // Don't clear answer - let them edit it
         setChatHistory([
           ...updatedHistory,
           {
@@ -133,34 +282,132 @@ export default function BMNLAssessmentPage() {
         return
       }
 
+      // Check for gaming response
+      if (data.signal?.is_gaming) {
+        const newGamingCount = gamingCount + 1
+        setGamingCount(newGamingCount)
+        
+        // Stop any active recording
+        if (isRecording && recognition) {
+          recognition.stop()
+          setIsRecording(false)
+        }
+        
+        if (newGamingCount >= 3) {
+          // After 3 gaming instances, stop assessment and redirect to dashboard
+          setChatHistory([
+            ...updatedHistory,
+            {
+              role: 'assistant',
+              content: 'Unfortunately, the system was unable to verify your responses. A human will be in touch with you to discuss further.',
+              timestamp: new Date(),
+            },
+          ])
+          setLoading(false)
+          
+          // Complete assessment early with flagged status
+          setTimeout(() => {
+            completeAssessment(participantId, [
+              ...updatedHistory,
+              {
+                role: 'assistant',
+                content: 'Unfortunately, the system was unable to verify your responses. A human will be in touch with you to discuss further.',
+                timestamp: new Date(),
+              },
+            ])
+          }, 2000)
+          return
+        } else {
+          // Call out gaming but allow continuation
+          setChatHistory([
+            ...updatedHistory,
+            {
+              role: 'assistant',
+              content: 'We\'re looking for authentic, personal responses. Please answer from your own experience rather than trying to optimize your answers.',
+              timestamp: new Date(),
+            },
+          ])
+          setLoading(false)
+          return
+        }
+      }
+
+      // Add commentary if available (before flag messages)
+      let historyWithCommentary = [...updatedHistory]
+      if (data.commentary) {
+        historyWithCommentary.push({
+          role: 'assistant',
+          content: data.commentary,
+          timestamp: new Date(),
+        })
+      }
+
       // Check for phobic language
       if (data.signal?.is_phobic) {
-        setChatHistory([
-          ...updatedHistory,
-          {
+        const newPhobicCount = phobicCount + 1
+        setPhobicCount(newPhobicCount)
+        
+        if (newPhobicCount >= 3) {
+          // After 3 phobic instances, stop assessment and redirect to dashboard
+          setChatHistory([
+            ...historyWithCommentary,
+            {
+              role: 'assistant',
+              content: 'Unfortunately, the system was unable to verify your responses. A human will be in touch with you to discuss further.',
+              timestamp: new Date(),
+            },
+          ])
+          setLoading(false)
+          
+          // Complete assessment early with flagged status
+          setTimeout(() => {
+            completeAssessment(participantId, [
+              ...historyWithCommentary,
+              {
+                role: 'assistant',
+                content: 'Unfortunately, the system was unable to verify your responses. A human will be in touch with you to discuss further.',
+                timestamp: new Date(),
+              },
+            ])
+          }, 2000)
+          return
+        } else {
+          // Call out phobic language but allow continuation
+          historyWithCommentary.push({
             role: 'assistant',
             content: 'This answer contains language that conflicts with our commitment to radical inclusion. A human organizer will review this with you.',
             timestamp: new Date(),
-          },
-        ])
-        // Continue to next question but flag for review
+          })
+        }
       }
 
       // Move to next question or complete
       if (currentQuestionIndex < BMNL_QUESTIONS.length - 1) {
         const nextIndex = currentQuestionIndex + 1
         setCurrentQuestionIndex(nextIndex)
-        setChatHistory([
-          ...updatedHistory,
-          {
-            role: 'assistant',
-            content: BMNL_QUESTIONS[nextIndex],
-            timestamp: new Date(),
-          },
-        ])
+        
+        // Stop any active recording and clear answer for next question
+        if (isRecording && recognition) {
+          recognition.stop()
+          setIsRecording(false)
+        }
+        setCurrentAnswer('') // Clear answer for next question
+        
+        historyWithCommentary.push({
+          role: 'assistant',
+          content: BMNL_QUESTIONS[nextIndex],
+          timestamp: new Date(),
+        })
+        setChatHistory(historyWithCommentary)
       } else {
         // All questions answered - complete assessment
-        await completeAssessment(participantId, updatedHistory)
+        // Stop any active recording
+        if (isRecording && recognition) {
+          recognition.stop()
+          setIsRecording(false)
+        }
+        setChatHistory(historyWithCommentary)
+        await completeAssessment(participantId, historyWithCommentary)
       }
     } catch (error) {
       console.error('Error processing answer:', error)
@@ -184,15 +431,21 @@ export default function BMNLAssessmentPage() {
 
       if (response.ok) {
         const data = await response.json()
-        // Redirect to dashboard with token
-        router.push(`/bmnl/dashboard?token=${token}`)
+        // Redirect to dashboard (uses authentication)
+        router.push('/bmnl/dashboard')
       } else {
-        const error = await response.json()
-        alert(error.error || 'Failed to complete assessment')
+        let errorMessage = 'Failed to complete assessment'
+        try {
+          const error = await response.json()
+          errorMessage = error.error || error.details || errorMessage
+        } catch (e) {
+          errorMessage = `Server error: ${response.status} ${response.statusText}`
+        }
+        alert(errorMessage)
       }
     } catch (error) {
       console.error('Error completing assessment:', error)
-      alert('Failed to complete assessment')
+      alert('Failed to complete assessment. Please check your connection and try again.')
     } finally {
       setLoading(false)
     }
@@ -200,10 +453,11 @@ export default function BMNLAssessmentPage() {
 
   if (!participantId) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading assessment...</p>
+          <p className="text-sm text-gray-500 mt-2">If this takes too long, please go back and try again.</p>
         </div>
       </div>
     )
@@ -252,17 +506,81 @@ export default function BMNLAssessmentPage() {
 
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="bg-white dark:bg-white rounded-lg p-4 sm:p-6">
-          <textarea
-            value={currentAnswer}
-            onChange={(e) => setCurrentAnswer(e.target.value)}
-            placeholder="Type your answer here..."
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 mb-4 min-h-[100px] sm:min-h-[120px]"
-            disabled={loading}
-            required
-          />
+          {/* Input Mode Toggle */}
+          <div className="flex gap-2 mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                setInputMode('text')
+                if (isRecording && recognition) {
+                  recognition.stop()
+                  setIsRecording(false)
+                }
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                inputMode === 'text'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              📝 Text
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setInputMode('voice')
+                if (!recognition) {
+                  alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.')
+                  return
+                }
+              }}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                inputMode === 'voice'
+                  ? 'bg-purple-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              🎤 Voice
+            </button>
+          </div>
+
+          {inputMode === 'text' ? (
+            <textarea
+              value={currentAnswer}
+              onChange={(e) => setCurrentAnswer(e.target.value)}
+              placeholder="Type your answer here..."
+              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 mb-4 min-h-[100px] sm:min-h-[120px]"
+              disabled={loading || isRecording}
+              required
+            />
+          ) : (
+            <div className="mb-4">
+              <textarea
+                value={currentAnswer}
+                onChange={(e) => setCurrentAnswer(e.target.value)}
+                placeholder="Click the microphone to start recording, or type your answer here..."
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 mb-2 min-h-[100px] sm:min-h-[120px]"
+                disabled={loading}
+                required
+              />
+              <button
+                type="button"
+                onClick={toggleRecording}
+                disabled={loading}
+                className={`w-full px-6 py-2 rounded-lg font-medium transition-colors ${
+                  isRecording
+                    ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
+                } disabled:bg-gray-300 disabled:cursor-not-allowed`}
+              >
+                {isRecording ? '🛑 Stop Recording' : '🎤 Start Recording'}
+              </button>
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={!currentAnswer.trim() || loading}
+            disabled={!currentAnswer.trim() || loading || isRecording}
             className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
           >
             {loading ? 'Processing...' : currentQuestionIndex < BMNL_QUESTIONS.length - 1 ? 'Next Question' : 'Complete Assessment'}

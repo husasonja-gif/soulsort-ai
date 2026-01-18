@@ -18,3 +18,7 @@ DELETE FROM public.user_profiles WHERE id = 'YOUR_USER_ID';
 -- To find your user ID, run this first:
 -- SELECT id, email FROM auth.users WHERE email = 'your-email@example.com';
 
+
+
+
+

@@ -4,6 +4,23 @@ import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
+/**
+ * Auth Callback Handler
+ * 
+ * ARCHITECTURE NOTE: Multi-Context User Support
+ * ==============================================
+ * The same email/auth_user_id can have MULTIPLE independent contexts:
+ * 1. Regular SoulSort app (user_profiles) - dating context radar
+ * 2. Event-specific participants (bmnl_participants, future events) - event-specific radars
+ * 
+ * Routing is determined by the redirect parameter, NOT by existing records.
+ * This allows users to:
+ * - Access regular app AND participate in events independently
+ * - Participate in multiple events (BMNL, future festivals, etc.)
+ * - Each context has its own assessment, radar, and dashboard
+ * 
+ * The redirect parameter is the SOURCE OF TRUTH for routing.
+ */
 function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -12,6 +29,15 @@ function AuthCallbackContent() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // IMPORTANT: Check sessionStorage FIRST before Supabase processes the callback
+        // This ensures we capture the redirect intent even if Supabase strips it from URL
+        const storedRedirect = typeof window !== 'undefined' ? sessionStorage.getItem('redirect') : null
+        const storedBmnlContext = typeof window !== 'undefined' ? sessionStorage.getItem('bmnl_login') : null
+        
+        console.log('=== AUTH CALLBACK START ===')
+        console.log('Stored redirect:', storedRedirect)
+        console.log('Stored BMNL context:', storedBmnlContext)
+        
         // Check for hash fragments (implicit flow) - these are client-side only
         const hashParams = new URLSearchParams(window.location.hash.substring(1))
         const accessToken = hashParams.get('access_token')
@@ -22,6 +48,7 @@ function AuthCallbackContent() {
 
         console.log('Auth callback - code:', code ? 'present' : 'missing')
         console.log('Auth callback - hash tokens:', accessToken ? 'present' : 'missing')
+        console.log('Current URL:', typeof window !== 'undefined' ? window.location.href : 'N/A')
 
         const redirectAfterAuth = async () => {
           // Wait a bit for session to be set and cookies to be written
@@ -74,6 +101,125 @@ function AuthCallbackContent() {
 
           console.log('User authenticated:', user.email)
 
+          // CRITICAL: Redirect parameter is the source of truth for routing
+          // Same user can have both regular app profile AND event participants
+          // Check multiple sources with PRIORITY: sessionStorage (most reliable) > URL params > hash params
+          const redirectFromStorage = typeof window !== 'undefined' 
+            ? sessionStorage.getItem('redirect')
+            : null
+          const redirectFromParams = searchParams.get('redirect')
+          const redirectFromHash = typeof window !== 'undefined' 
+            ? new URLSearchParams(window.location.hash.substring(1)).get('redirect')
+            : null
+          
+          // Priority: sessionStorage first (most reliable), then URL params, then hash
+          const redirect = redirectFromStorage || redirectFromParams || redirectFromHash
+          
+          // Also check for BMNL context in sessionStorage as fallback
+          const bmnlContext = typeof window !== 'undefined' ? sessionStorage.getItem('bmnl_login') : null
+          
+          console.log('=== REDIRECT CHECK ===')
+          console.log('Redirect sources:', { 
+            storage: redirectFromStorage, 
+            params: redirectFromParams, 
+            hash: redirectFromHash,
+            final: redirect 
+          })
+          console.log('BMNL context from storage:', bmnlContext)
+          console.log('Full URL:', typeof window !== 'undefined' ? window.location.href : 'N/A')
+          console.log('Search params:', typeof window !== 'undefined' ? window.location.search : 'N/A')
+          console.log('Hash:', typeof window !== 'undefined' ? window.location.hash : 'N/A')
+          
+          // ============================================================================
+          // EVENT-SPECIFIC ROUTING (BMNL, future events, etc.)
+          // ============================================================================
+          // If redirect is set to an event path, route to that event context
+          // This allows same user to access multiple events independently
+          if (redirect && redirect.startsWith('/bmnl')) {
+            console.log('=== BMNL EVENT ROUTING ===')
+            console.log('BMNL event redirect detected:', redirect)
+            
+            try {
+              // Check if user has a BMNL participant record for this event
+              const { data: participant, error: participantError } = await supabase
+                .from('bmnl_participants')
+                .select('id, status')
+                .eq('auth_user_id', user.id)
+                .maybeSingle()
+              
+              console.log('BMNL participant check:', { participant, participantError })
+              
+              if (participantError) {
+                console.error('Error checking BMNL participant:', participantError)
+                // Continue anyway - might be a new participant
+              }
+              
+              if (participant) {
+                // User has BMNL participant - route based on status
+                if (participant.status === 'completed') {
+                  console.log('BMNL participant - completed, redirecting to dashboard')
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('redirect')
+                    sessionStorage.removeItem('bmnl_login')
+                  }
+                  window.location.href = '/bmnl/dashboard'
+                  return
+                } else {
+                  // Assessment in progress - go to assessment
+                  console.log('BMNL participant - in progress, redirecting to assessment')
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.removeItem('redirect')
+                    sessionStorage.removeItem('bmnl_login')
+                  }
+                  window.location.href = `/bmnl/assessment?participant_id=${participant.id}`
+                  return
+                }
+              } else {
+                // No participant record yet - go to start page to create one
+                console.log('BMNL redirect - no participant yet, redirecting to start')
+                if (typeof window !== 'undefined') {
+                  sessionStorage.removeItem('redirect')
+                  sessionStorage.removeItem('bmnl_login')
+                }
+                window.location.href = '/bmnl/start'
+                return
+              }
+            } catch (error) {
+              console.error('Error in BMNL routing:', error)
+              // Fallback: redirect to start page
+              console.log('Error in BMNL routing, falling back to /bmnl/start')
+              if (typeof window !== 'undefined') {
+                sessionStorage.removeItem('redirect')
+                sessionStorage.removeItem('bmnl_login')
+              }
+              window.location.href = '/bmnl/start'
+              return
+            }
+          }
+          
+          // Fallback: If no redirect but sessionStorage has BMNL context
+          if (!redirect && bmnlContext === 'true') {
+            console.log('=== BMNL FALLBACK: No redirect param but BMNL context found ===')
+            console.log('Redirecting to /bmnl/start based on sessionStorage context')
+            if (typeof window !== 'undefined') {
+              sessionStorage.removeItem('bmnl_login')
+              sessionStorage.removeItem('redirect')
+            }
+            window.location.href = '/bmnl/start'
+            return
+          }
+          
+          // If we still don't have a redirect, log warning
+          if (!redirect) {
+            console.warn('=== WARNING: No redirect parameter found anywhere ===')
+            console.warn('This might be a regular app login or redirect was lost')
+          }
+
+          // ============================================================================
+          // REGULAR APP ROUTING (SoulSort dating context)
+          // ============================================================================
+          // Only route to regular app if NOT an event redirect
+          // Same user can have both regular app profile AND event participants
           const { data: profile, error: profileError } = await supabase
             .from('user_profiles')
             .select('onboarding_completed')
@@ -96,8 +242,6 @@ function AuthCallbackContent() {
           } else {
             console.log('Redirecting after auth')
             // Check for redirect parameter
-            const redirect = searchParams.get('redirect') || 
-              (typeof window !== 'undefined' ? sessionStorage.getItem('redirect') : null)
             if (typeof window !== 'undefined' && redirect) {
               sessionStorage.removeItem('redirect') // Clear after use
             }

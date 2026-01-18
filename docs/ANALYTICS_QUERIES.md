@@ -248,3 +248,6 @@ FROM vector_analytics
 WHERE created_at >= NOW() - INTERVAL '30 days';
 ```
 
+
+
+

@@ -8,3 +8,7 @@ DROP POLICY IF EXISTS "Public can view active links by link_id" ON public.user_l
 CREATE POLICY "Public can view active links by link_id" ON public.user_links
   FOR SELECT USING (is_active = true);
 
+
+
+
+

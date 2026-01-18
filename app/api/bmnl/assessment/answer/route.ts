@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { extractSignalFromAnswer, getBMNLQuestion } from '@/lib/bmnl-llm'
+import { extractSignalFromAnswer, getBMNLQuestion, generateCommentary, QUESTION_AXIS_MAP } from '@/lib/bmnl-llm'
+import { encryptText, isSensitiveContent } from '@/lib/bmnl-crypto'
 import type { ChatMessage } from '@/lib/types'
 
 export async function POST(request: Request) {
@@ -15,39 +16,31 @@ export async function POST(request: Request) {
     }
 
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    
     if (!serviceRoleKey) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        { error: 'Server configuration error: SUPABASE_SERVICE_ROLE_KEY is missing' },
+        { status: 500 }
+      )
+    }
+
+    if (!supabaseUrl) {
+      console.error('NEXT_PUBLIC_SUPABASE_URL is not set')
+      return NextResponse.json(
+        { error: 'Server configuration error: NEXT_PUBLIC_SUPABASE_URL is missing' },
         { status: 500 }
       )
     }
 
     const { createClient } = await import('@supabase/supabase-js')
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseUrl,
       serviceRoleKey
     )
 
-    // Save raw answer
-    const { error: answerError } = await supabaseAdmin
-      .from('bmnl_answers')
-      .insert({
-        participant_id,
-        question_number,
-        question_text: question_text || getBMNLQuestion(question_number),
-        raw_answer: answer,
-        is_sensitive: false, // Could be enhanced to detect sensitive content
-      })
-
-    if (answerError) {
-      console.error('Error saving answer:', answerError)
-      return NextResponse.json(
-        { error: 'Failed to save answer', details: answerError.message },
-        { status: 500 }
-      )
-    }
-
-    // Extract signal using LLM
+    // Extract signal first (before encryption) to check for sensitive flags
     let signal
     try {
       signal = await extractSignalFromAnswer(
@@ -59,18 +52,71 @@ export async function POST(request: Request) {
     } catch (llmError) {
       console.error('Error extracting signal:', llmError)
       // Continue with default signal if LLM fails
+      const mappedAxes = QUESTION_AXIS_MAP[question_number] || []
       signal = {
         question_number,
-        signal_level: 'medium' as const,
+        signal_level: 'emerging' as const,
         is_garbage: false,
         is_gaming: false,
         is_phobic: false,
         is_defensive: false,
-        mapped_axes: [],
+        mapped_axes: mappedAxes,
       }
     }
 
-    // Save signal
+    // Encrypt answer at rest (always encrypt for GDPR compliance)
+    const encryptedAnswer = encryptText(answer)
+    const isSensitive = isSensitiveContent(answer, { is_phobic: signal.is_phobic })
+
+    // Save encrypted answer
+    const { error: answerError } = await supabaseAdmin
+      .from('bmnl_answers')
+      .insert({
+        participant_id,
+        question_number,
+        question_text: question_text || getBMNLQuestion(question_number),
+        raw_answer: encryptedAnswer, // Encrypted at rest
+        is_sensitive: isSensitive,
+        encrypted: true,
+      })
+
+    if (answerError) {
+      console.error('Error saving answer:', answerError)
+      // Check if it's a duplicate (unique constraint violation)
+      if (answerError.code === '23505' || answerError.message?.includes('duplicate') || answerError.message?.includes('unique')) {
+        // Try to update instead
+        const encryptedAnswer = encryptText(answer)
+        const isSensitive = isSensitiveContent(answer, { is_phobic: signal.is_phobic })
+        
+        const { error: updateError } = await supabaseAdmin
+          .from('bmnl_answers')
+          .update({
+            question_text: question_text || getBMNLQuestion(question_number),
+            raw_answer: encryptedAnswer, // Encrypted at rest
+            is_sensitive: isSensitive,
+            encrypted: true,
+            answered_at: new Date().toISOString(),
+          })
+          .eq('participant_id', participant_id)
+          .eq('question_number', question_number)
+
+        if (updateError) {
+          return NextResponse.json(
+            { error: 'Failed to save answer', details: updateError.message, code: updateError.code },
+            { status: 500 }
+          )
+        }
+      } else {
+        return NextResponse.json(
+          { error: 'Failed to save answer', details: answerError.message, code: answerError.code },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Signal already extracted above (before encryption)
+
+    // Save signal (mapped_axes is now an array of {axis, weight} objects)
     const { error: signalError } = await supabaseAdmin
       .from('bmnl_signals')
       .insert({
@@ -81,7 +127,7 @@ export async function POST(request: Request) {
         is_gaming: signal.is_gaming,
         is_phobic: signal.is_phobic,
         is_defensive: signal.is_defensive,
-        mapped_axes: signal.mapped_axes,
+        mapped_axes: signal.mapped_axes, // JSONB array of {axis, weight} objects
         llm_notes: signal.llm_notes || null,
       })
 
@@ -123,9 +169,26 @@ export async function POST(request: Request) {
         .eq('id', participant_id)
     }
 
+    // Generate commentary (unless it's garbage - skip commentary for garbage responses)
+    let commentary: string | null = null
+    if (!signal.is_garbage) {
+      try {
+        commentary = await generateCommentary(
+          question_number,
+          question_text || getBMNLQuestion(question_number),
+          answer,
+          (chat_history || []) as ChatMessage[]
+        )
+      } catch (commentaryError) {
+        console.error('Error generating commentary:', commentaryError)
+        // Continue without commentary if it fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       signal,
+      commentary,
     })
   } catch (error) {
     console.error('Error in assessment answer:', error)
@@ -136,4 +199,5 @@ export async function POST(request: Request) {
     )
   }
 }
+
 

@@ -80,3 +80,6 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
 
 
 
+
+
+

@@ -31,3 +31,7 @@ BEGIN
   RAISE NOTICE 'Note: You still need to delete the auth.users entry manually via Supabase Dashboard > Authentication > Users';
 END $$;
 
+
+
+
+

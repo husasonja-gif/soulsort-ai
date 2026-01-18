@@ -64,3 +64,6 @@ export default function FunnelChart({ data }: FunnelChartProps) {
   )
 }
 
+
+
+

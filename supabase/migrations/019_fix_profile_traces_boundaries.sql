@@ -12,3 +12,6 @@ ALTER TABLE public.profile_generation_traces
 CREATE INDEX IF NOT EXISTS idx_profile_traces_boundaries_scale_version 
   ON public.profile_generation_traces(boundaries_scale_version);
 
+
+
+

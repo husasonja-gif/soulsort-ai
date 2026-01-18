@@ -103,3 +103,6 @@ This document tracks the implementation of SoulSort v2 for Burning Man Netherlan
 - **Non-judgmental**: Learning-focused, not ranking
 - **BM NL Branding**: Orange/yellow/red, grounded, playful
 
+
+
+

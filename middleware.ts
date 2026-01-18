@@ -4,7 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // ✅ Never block the auth callback
+  // ✅ Never block the auth callback (including BMNL-specific callback)
   if (pathname.startsWith('/auth/callback')) {
     return NextResponse.next()
   }
@@ -38,10 +38,14 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // 🔒 Protect dashboard, onboarding, and analytics
-  if ((pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding') || pathname.startsWith('/analytics')) && !user) {
+  // 🔒 Protect dashboard, onboarding, analytics, and BMNL dashboard/assessment
+  if ((pathname.startsWith('/dashboard') || pathname.startsWith('/onboarding') || pathname.startsWith('/analytics') || pathname.startsWith('/bmnl/dashboard') || pathname.startsWith('/bmnl/assessment') || pathname.startsWith('/bmnl/start')) && !user) {
     const url = request.nextUrl.clone()
-    url.pathname = '/login'
+    if (pathname.startsWith('/bmnl')) {
+      url.pathname = '/bmnl/login'
+    } else {
+      url.pathname = '/login'
+    }
     return NextResponse.redirect(url)
   }
 
@@ -87,5 +91,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/onboarding/:path*', '/login', '/auth/callback', '/analytics/:path*', '/r/:path*'],
+  matcher: ['/dashboard/:path*', '/onboarding/:path*', '/login', '/auth/callback', '/analytics/:path*', '/r/:path*', '/bmnl/dashboard/:path*', '/bmnl/assessment/:path*', '/bmnl/start/:path*', '/bmnl/login/:path*'],
 }

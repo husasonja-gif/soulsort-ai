@@ -55,3 +55,6 @@ CREATE POLICY "No public access" ON public.profile_generation_traces
   USING (false)
   WITH CHECK (false);
 
+
+
+

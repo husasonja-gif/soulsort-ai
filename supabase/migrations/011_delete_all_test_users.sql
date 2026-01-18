@@ -12,3 +12,7 @@ DELETE FROM public.user_profiles;
 -- Note: auth.users entries will need to be deleted manually via Supabase Auth UI
 -- Or you can delete them via Supabase Dashboard > Authentication > Users
 
+
+
+
+
