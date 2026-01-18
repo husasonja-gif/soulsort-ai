@@ -217,7 +217,7 @@ export async function POST(request: Request) {
       : null
 
     // Update participant status
-    const { error: updateError } = await supabaseAdmin
+    const { data: updatedParticipant, error: updateError } = await supabaseAdmin
       .from('bmnl_participants')
       .update({
         status: 'completed',
@@ -226,10 +226,21 @@ export async function POST(request: Request) {
         review_notes: reviewReason,
       })
       .eq('id', participant_id)
+      .select('id, status')
+      .single()
 
     if (updateError) {
       console.error('Error updating participant status:', updateError)
-      // Don't fail if status update fails
+      // Log detailed error for debugging
+      console.error('Participant ID:', participant_id)
+      console.error('Update error details:', JSON.stringify(updateError, null, 2))
+      // Still return success for radar, but log the error
+    } else {
+      console.log('Successfully updated participant status to completed:', {
+        participant_id,
+        status: updatedParticipant?.status,
+        assessment_completed_at: new Date().toISOString()
+      })
     }
 
     return NextResponse.json({

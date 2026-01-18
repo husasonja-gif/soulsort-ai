@@ -46,7 +46,7 @@ export async function GET(request: Request) {
     // Get all participants
     const { data: allParticipants, error: participantsError } = await supabaseAdmin
       .from('bmnl_participants')
-      .select('id, email, status, assessment_completed_at, needs_human_review')
+      .select('id, email, status, assessment_completed_at, needs_human_review, created_at, auth_user_id')
       .order('created_at', { ascending: false })
 
     if (participantsError) {
@@ -56,6 +56,18 @@ export async function GET(request: Request) {
         { status: 500 }
       )
     }
+
+    // Log participants for debugging
+    console.log('Organizer overview - participants found:', {
+      total: allParticipants?.length || 0,
+      participants: allParticipants?.map(p => ({
+        id: p.id,
+        email: p.email,
+        status: p.status,
+        has_completed_at: !!p.assessment_completed_at,
+        needs_review: p.needs_human_review
+      }))
+    })
 
     // Get radar profiles for gate experience
     const { data: radarProfiles } = await supabaseAdmin
