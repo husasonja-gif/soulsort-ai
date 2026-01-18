@@ -15,17 +15,57 @@ export async function GET(request: Request) {
     }
 
     // Check if user is organizer
-    const { data: organizer } = await supabase
+    console.log('Checking organizer access for user:', {
+      user_id: user.id,
+      email: user.email
+    })
+
+    // First, check all organizers to see what's in the table
+    const { data: allOrganizers, error: orgsError } = await supabase
+      .from('bmnl_organizers')
+      .select('user_id, email, role')
+
+    console.log('All organizers in database:', allOrganizers)
+    if (orgsError) {
+      console.error('Error fetching organizers:', orgsError)
+    }
+
+    const { data: organizer, error: organizerError } = await supabase
       .from('bmnl_organizers')
       .select('*')
       .eq('user_id', user.id)
       .maybeSingle()
 
+    console.log('Organizer lookup result:', {
+      found: !!organizer,
+      organizer,
+      error: organizerError
+    })
+
     if (!organizer) {
-      return NextResponse.json(
-        { error: 'Not authorized as organizer' },
-        { status: 403 }
-      )
+      // Also try by email as fallback (in case user_id mismatch)
+      const { data: organizerByEmail } = await supabase
+        .from('bmnl_organizers')
+        .select('*')
+        .eq('email', user.email?.toLowerCase())
+        .maybeSingle()
+
+      console.log('Organizer lookup by email:', {
+        email: user.email?.toLowerCase(),
+        found: !!organizerByEmail,
+        organizerByEmail
+      })
+
+      if (!organizerByEmail) {
+        return NextResponse.json(
+          { 
+            error: 'Not authorized as organizer',
+            details: `User ID: ${user.id}, Email: ${user.email}`,
+            available_organizers: allOrganizers?.map(o => ({ user_id: o.user_id, email: o.email }))
+          },
+          { status: 403 }
+        )
+      }
     }
 
     // Use service role for full access
