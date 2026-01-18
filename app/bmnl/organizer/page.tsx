@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabaseClient'
 
 interface Participant {
   id: string
@@ -24,7 +26,9 @@ interface Flag {
 }
 
 export default function BMNLOrganizerDashboard() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
+  const [authenticating, setAuthenticating] = useState(true)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [flaggedParticipants, setFlaggedParticipants] = useState<Array<Participant & { flags: Flag[] }>>([])
   const [stats, setStats] = useState({
@@ -35,9 +39,25 @@ export default function BMNLOrganizerDashboard() {
     flagged: 0,
   })
 
+  // Check authentication first
   useEffect(() => {
-    loadDashboard()
-  }, [])
+    const checkAuth = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser()
+      
+      if (error || !user) {
+        // Not authenticated - redirect to login with return URL
+        console.log('Not authenticated, redirecting to login')
+        router.push(`/login?redirect=${encodeURIComponent('/bmnl/organizer')}`)
+        return
+      }
+
+      console.log('User authenticated:', user.email)
+      setAuthenticating(false)
+      loadDashboard()
+    }
+
+    checkAuth()
+  }, [router])
 
   const loadDashboard = async () => {
     setLoading(true)
@@ -70,12 +90,12 @@ export default function BMNLOrganizerDashboard() {
     }
   }
 
-  if (loading) {
+  if (authenticating || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">{authenticating ? 'Checking authentication...' : 'Loading...'}</p>
         </div>
       </div>
     )
