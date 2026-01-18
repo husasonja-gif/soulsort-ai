@@ -45,11 +45,21 @@ export default function BMNLOrganizerDashboard() {
       const response = await fetch('/api/bmnl/organizer/overview')
       if (response.ok) {
         const data = await response.json()
+        console.log('Organizer dashboard data received:', {
+          participantsCount: data.participants?.length || 0,
+          flaggedCount: data.flagged?.length || 0,
+          stats: data.stats
+        })
         setParticipants(data.participants || [])
         setFlaggedParticipants(data.flagged || [])
         setStats(data.stats || stats)
       } else {
-        const error = await response.json()
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Organizer dashboard API error:', {
+          status: response.status,
+          statusText: response.statusText,
+          error
+        })
         alert(error.error || 'Failed to load dashboard')
       }
     } catch (error) {

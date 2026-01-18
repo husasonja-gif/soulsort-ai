@@ -30,16 +30,27 @@ export async function GET(request: Request) {
 
     // Use service role for full access
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    
     if (!serviceRoleKey) {
+      console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
       return NextResponse.json(
-        { error: 'Server configuration error' },
+        { error: 'Server configuration error: SUPABASE_SERVICE_ROLE_KEY is missing' },
+        { status: 500 }
+      )
+    }
+
+    if (!supabaseUrl) {
+      console.error('NEXT_PUBLIC_SUPABASE_URL is not set')
+      return NextResponse.json(
+        { error: 'Server configuration error: NEXT_PUBLIC_SUPABASE_URL is missing' },
         { status: 500 }
       )
     }
 
     const { createClient } = await import('@supabase/supabase-js')
     const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      supabaseUrl,
       serviceRoleKey
     )
 
