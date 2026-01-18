@@ -133,14 +133,14 @@ export default function BMNLOrganizerDashboard() {
             <div className="text-sm text-gray-600">Needs Orientation</div>
           </div>
           <div className="bg-white border border-gray-200 rounded-lg p-4 col-span-2 sm:col-span-1">
-            <div className="text-2xl font-bold text-orange-600">{stats.flagged}</div>
+            <div className="text-2xl font-bold text-purple-600">{stats.flagged}</div>
             <div className="text-sm text-gray-600">Flagged for Review</div>
           </div>
         </div>
 
         {/* Disclaimer */}
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
-          <p className="text-sm text-yellow-800">
+        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-8">
+          <p className="text-sm text-purple-800">
             <strong>Important:</strong> AI flags → humans decide. No automatic exclusion. All flagged participants require human review.
           </p>
         </div>
@@ -171,7 +171,7 @@ export default function BMNLOrganizerDashboard() {
                           {participant.flags.map((flag) => (
                             <span
                               key={flag.id}
-                              className="inline-block mr-2 px-2 py-1 text-xs rounded bg-orange-100 text-orange-800"
+                              className="inline-block mr-2 px-2 py-1 text-xs rounded bg-purple-100 text-purple-800"
                             >
                               {flag.flag_type}: {flag.flag_reason}
                             </span>
@@ -182,7 +182,7 @@ export default function BMNLOrganizerDashboard() {
                         {participant.flags.some(f => f.severity === 'high') ? (
                           <span className="text-red-600 font-semibold">High</span>
                         ) : participant.flags.some(f => f.severity === 'medium') ? (
-                          <span className="text-orange-600 font-semibold">Medium</span>
+                          <span className="text-purple-600 font-semibold">Medium</span>
                         ) : (
                           <span className="text-gray-600">Low</span>
                         )}
@@ -191,7 +191,7 @@ export default function BMNLOrganizerDashboard() {
                         {participant.flags.some(f => f.reviewed_at) ? (
                           <span className="text-green-600">Reviewed</span>
                         ) : (
-                          <span className="text-orange-600">Pending</span>
+                          <span className="text-purple-600">Pending</span>
                         )}
                       </td>
                       <td className="py-3 px-4">
@@ -233,7 +233,7 @@ export default function BMNLOrganizerDashboard() {
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 text-xs rounded ${
                         participant.status === 'completed' ? 'bg-green-100 text-green-800' :
-                        participant.status === 'flagged' ? 'bg-orange-100 text-orange-800' :
+                        participant.status === 'flagged' ? 'bg-purple-100 text-purple-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
                         {participant.status}
@@ -241,7 +241,7 @@ export default function BMNLOrganizerDashboard() {
                     </td>
                     <td className="py-3 px-4">
                       {participant.gate_experience === 'needs_orientation' ? (
-                        <span className="text-orange-600">Needs Orientation</span>
+                        <span className="text-purple-600">Needs Orientation</span>
                       ) : (
                         <span className="text-gray-600">Basic</span>
                       )}
