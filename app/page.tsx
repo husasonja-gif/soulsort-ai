@@ -88,6 +88,8 @@ function WaitlistForm() {
 }
 
 export default function LandingPage() {
+  const [pillHover, setPillHover] = useState<{ [key: string]: boolean }>({})
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: flipCardStyles }} />
@@ -129,27 +131,22 @@ export default function LandingPage() {
         <div className="flex flex-wrap gap-4 justify-center mb-12">
           <Link
             href="/login"
-            className="group relative px-6 py-3 bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 rounded-full font-semibold text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
+            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full font-semibold hover:from-purple-700 hover:to-purple-800 transition-all min-w-[180px] text-center"
+            onMouseEnter={() => setPillHover({ ...pillHover, dating: true })}
+            onMouseLeave={() => setPillHover({ ...pillHover, dating: false })}
           >
-            Dating
-            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              (create profile)
-            </span>
+            {pillHover.dating ? 'Create profile' : 'Dating'}
           </Link>
           <Link
             href="/bmnl"
-            className="group relative px-6 py-3 bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 rounded-full font-semibold text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
+            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-full font-semibold hover:from-purple-700 hover:to-purple-800 transition-all min-w-[180px] text-center"
+            onMouseEnter={() => setPillHover({ ...pillHover, festivals: true })}
+            onMouseLeave={() => setPillHover({ ...pillHover, festivals: false })}
           >
-            Festivals & Events
-            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              (ask for demo)
-            </span>
+            {pillHover.festivals ? 'Ask for demo' : 'Festivals & Events'}
           </Link>
-          <div className="group relative px-6 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-full font-semibold text-gray-500 dark:text-gray-400 cursor-not-allowed">
+          <div className="px-8 py-3 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-full font-semibold cursor-not-allowed min-w-[180px] text-center">
             Shared spaces (soon)
-            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              (get in touch)
-            </span>
           </div>
         </div>
 
@@ -158,12 +155,12 @@ export default function LandingPage() {
           {/* Dating Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col justify-center">
-                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Dating</h3>
-                <p className="text-gray-700 dark:text-gray-300">Save energy. Reduce noise. Reward maturity.</p>
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <h3 className="text-xl font-bold mb-2 text-white">Dating</h3>
+                <p className="text-white/90">Save energy. Reduce noise. Reward maturity.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6 flex flex-col justify-center">
-                <p className="text-gray-700 dark:text-gray-300">
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-white">
                   AI asks the questions people usually avoid. You only share what you see. Raw answers not stored.
                 </p>
               </div>
@@ -173,12 +170,12 @@ export default function LandingPage() {
           {/* Festivals & Events Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col justify-center">
-                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Festivals & Events</h3>
-                <p className="text-gray-700 dark:text-gray-300">Name your culture. Set standards early. Create safer spaces.</p>
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <h3 className="text-xl font-bold mb-2 text-white">Festivals & Events</h3>
+                <p className="text-white/90">Name your culture. Set standards early. Create safer spaces.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6 flex flex-col justify-center">
-                <p className="text-gray-700 dark:text-gray-300">
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-white">
                   AI facilitates at scale. Humans decide. Raw answers encrypted.
                 </p>
               </div>
@@ -188,49 +185,16 @@ export default function LandingPage() {
           {/* Shared Spaces Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col justify-center">
-                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Shared Spaces</h3>
-                <p className="text-gray-700 dark:text-gray-300">Atmosphere isn't accidental. Name core, expectations, boundaries.</p>
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <h3 className="text-xl font-bold mb-2 text-white">Shared Spaces</h3>
+                <p className="text-white/90">Atmosphere isn't accidental. Name core, expectations, boundaries.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6 flex flex-col justify-center">
-                <p className="text-gray-700 dark:text-gray-300">
-                  In development. Get in touch!
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-white">
+                  In development. Get in touch at <a href="mailto:soulsort.ai.official@gmail.com" className="underline font-semibold">soulsort.ai.official@gmail.com</a>!
                 </p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Mechanisms */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-purple-700 flex items-center justify-center">
-              <span className="text-2xl" style={{ filter: 'grayscale(100%) brightness(200%)' }}>🔒</span>
-            </div>
-            <h3 className="font-semibold text-lg mb-2 dark:text-gray-100">Privacy first</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Your raw responses are never stored - only your anonymized scores. 
-            </p>
-          </div>
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <span className="text-2xl" style={{ filter: 'grayscale(100%) brightness(200%)' }}>✨</span>
-            </div>
-            <h3 className="font-semibold text-lg mb-2 dark:text-gray-100">AI Powered</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Quick and friendly chat instead of a stale form.
-            </p>
-          </div>
-          <div className="text-center p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-pink-500 to-purple-500 flex items-center justify-center">
-              <span className="text-2xl" style={{ filter: 'grayscale(100%) brightness(200%)' }}>🌈</span>
-            </div>
-            <h3 className="font-semibold text-lg mb-2 dark:text-gray-100">Inclusive by design</h3>
-            <p className="text-gray-600 dark:text-gray-300 text-sm">
-              Built for women, queers and good guys who seek real connection.
-            </p>
           </div>
         </div>
       </section>
@@ -240,24 +204,24 @@ export default function LandingPage() {
         <h2 className="text-4xl font-bold text-center mb-8 dark:text-gray-100">How It Works</h2>
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="flex gap-6 items-start">
-            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300 text-xl">
-              ①
+            <div className="flex-shrink-0 w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+              1
             </div>
             <div>
               <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Create your profile & name your vibe</h3>
             </div>
           </div>
           <div className="flex gap-6 items-start">
-            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300 text-xl">
-              ②
+            <div className="flex-shrink-0 w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+              2
             </div>
             <div>
               <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Invite participants or applicants</h3>
             </div>
           </div>
           <div className="flex gap-6 items-start">
-            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300 text-xl">
-              ③
+            <div className="flex-shrink-0 w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-xl">
+              3
             </div>
             <div>
               <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Compare alignment visually</h3>
@@ -291,8 +255,11 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="container mx-auto px-4 py-12 text-center">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xl text-gray-700 dark:text-gray-300 mb-8">
+          <p className="text-xl text-gray-700 dark:text-gray-300 mb-4">
             Ready to create your profile? It's fun, easy and informative → <Link href="/login" className="text-purple-600 dark:text-purple-400 font-semibold hover:underline">get started for free</Link>
+          </p>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+            Questions? Get in touch at <a href="mailto:soulsort.ai.official@gmail.com" className="text-purple-600 dark:text-purple-400 font-semibold hover:underline">soulsort.ai.official@gmail.com</a>
           </p>
         </div>
       </section>
