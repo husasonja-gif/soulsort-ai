@@ -155,7 +155,7 @@ export default function LandingPage() {
           {/* Dating Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 opacity-70 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Dating</h3>
                 <p className="text-white/90">Save energy. Reduce noise. Reward maturity.</p>
               </div>
@@ -170,7 +170,7 @@ export default function LandingPage() {
           {/* Festivals & Events Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-purple-500 opacity-70 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-purple-500 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Festivals & Events</h3>
                 <p className="text-white/90">Name your culture. Set standards early. Create safer spaces.</p>
               </div>
@@ -185,7 +185,7 @@ export default function LandingPage() {
           {/* Shared Spaces Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-purple-500 opacity-70 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-orange-300 to-pink-300 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Shared Spaces</h3>
                 <p className="text-white/90">Atmosphere isn't accidental. Name care, expectations, boundaries.</p>
               </div>
