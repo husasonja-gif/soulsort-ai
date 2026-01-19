@@ -69,7 +69,7 @@ function BMNLLoginContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-600"
               />
             </div>
 

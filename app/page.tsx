@@ -145,8 +145,8 @@ export default function LandingPage() {
           >
             {pillHover.festivals ? 'Email us' : 'Festivals & Events'}
           </button>
-          <div className="px-8 py-3 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-full font-semibold cursor-not-allowed min-w-[180px] text-center">
-            Shared spaces (soon)
+          <div className="px-8 py-3 bg-gradient-to-r from-purple-300 to-purple-400 text-white rounded-full font-semibold cursor-not-allowed min-w-[180px] text-center">
+            Shared Spaces (soon)
           </div>
         </div>
 
@@ -155,12 +155,12 @@ export default function LandingPage() {
           {/* Dating Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 opacity-70 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Dating</h3>
                 <p className="text-white/90">Save energy. Reduce noise. Reward maturity.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-white">
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gray-100 dark:bg-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-gray-900 dark:text-gray-900">
                   AI asks the questions people usually avoid. You only share what you see. Raw answers not stored.
                 </p>
               </div>
@@ -170,12 +170,12 @@ export default function LandingPage() {
           {/* Festivals & Events Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-pink-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-purple-500 opacity-70 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Festivals & Events</h3>
                 <p className="text-white/90">Name your culture. Set standards early. Create safer spaces.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-white">
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gray-100 dark:bg-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-gray-900 dark:text-gray-900">
                   AI facilitates at scale. Humans decide. Raw answers encrypted.
                 </p>
               </div>
@@ -185,13 +185,13 @@ export default function LandingPage() {
           {/* Shared Spaces Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-purple-500 opacity-70 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Shared Spaces</h3>
                 <p className="text-white/90">Atmosphere isn't accidental. Name care, expectations, boundaries.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gradient-to-br from-gray-400 to-gray-500 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-white">
-                  In development. Get in touch at <a href="mailto:soulsort.ai.official@gmail.com" className="underline font-semibold">soulsort.ai.official@gmail.com</a>!
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gray-100 dark:bg-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-gray-900 dark:text-gray-900">
+                  In development. Get in touch at <a href="mailto:soulsort.ai.official@gmail.com" className="underline font-semibold text-gray-900 dark:text-gray-900">soulsort.ai.official@gmail.com</a>!
                 </p>
               </div>
             </div>
