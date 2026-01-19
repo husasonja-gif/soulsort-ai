@@ -23,6 +23,11 @@ interface ParticipantData {
     raw_answer: string
     answered_at: string
   }>
+  chat_history?: Array<{
+    role: 'user' | 'assistant'
+    content: string
+    timestamp: string
+  }>
   flags?: Array<{
     id: string
     flag_type: string
@@ -95,6 +100,7 @@ function ParticipantDetailContent() {
           participant: exportData.participant,
           radar: exportData.radar,
           answers: exportData.answers || [],
+          chat_history: exportData.chat_history || null,
           flags: flags
         })
       } else {
@@ -215,8 +221,39 @@ function ParticipantDetailContent() {
           </div>
         )}
 
-        {/* Answers */}
-        {data.answers && data.answers.length > 0 && (
+        {/* Full Chat History */}
+        {data.chat_history && data.chat_history.length > 0 && (
+          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4 text-gray-900">Full Conversation History</h2>
+            <div className="space-y-4 max-h-[600px] overflow-y-auto">
+              {data.chat_history.map((message, index) => (
+                <div
+                  key={index}
+                  className={`p-4 rounded-lg ${
+                    message.role === 'user'
+                      ? 'bg-purple-50 border border-purple-200 ml-8'
+                      : 'bg-gray-50 border border-gray-200 mr-8'
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span className={`text-xs font-semibold ${
+                      message.role === 'user' ? 'text-purple-700' : 'text-gray-700'
+                    }`}>
+                      {message.role === 'user' ? 'Participant' : 'System'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {new Date(message.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="text-gray-900 whitespace-pre-wrap">{message.content}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Answers (fallback if no chat history) */}
+        {!data.chat_history && data.answers && data.answers.length > 0 && (
           <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
             <h2 className="text-xl font-bold mb-4 text-gray-900">Assessment Answers</h2>
             <div className="space-y-6">

@@ -73,29 +73,116 @@ function WaitlistForm() {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle />
-      </div>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: flipCardStyles }} />
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="absolute top-4 right-4 z-10">
+          <ThemeToggle />
+        </div>
       {/* Hero Section */}
       <section className="container mx-auto px-4 py-12 text-center">
-        <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        <h1 className="text-5xl sm:text-6xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
           SoulSort AI
         </h1>
-        <p className="text-2xl text-gray-700 dark:text-gray-200 mb-3 max-w-2xl mx-auto font-semibold">
-          Save energy. Reduce noise. Reward maturity.
+        <p className="text-2xl sm:text-3xl text-gray-700 dark:text-gray-200 mb-3 max-w-3xl mx-auto font-semibold">
+          A vibe-check engine for those who seek & build presence.
         </p>
-        <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 max-w-xl mx-auto">
-          A vibe-check engine designed to prevent selection fatigue. Get informed - let AI ask the important questions.
+        <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
+          Create radar. Share link. Compare alignment.
         </p>
 
-        <div className="flex gap-4 justify-center flex-wrap mb-8">
+        {/* Core Principles */}
+        <div className="flex flex-wrap gap-4 justify-center mb-8 text-sm text-gray-600 dark:text-gray-400">
+          <span>AI powered</span>
+          <span>•</span>
+          <span>Privacy First</span>
+          <span>•</span>
+          <span>Consent-led</span>
+          <span>•</span>
+          <span>Inclusive</span>
+        </div>
+      </section>
+
+      {/* Create Your Vibe-Check Section */}
+      <section className="container mx-auto px-4 py-8">
+        <h2 className="text-2xl font-bold text-center mb-8 text-gray-900 dark:text-gray-100">
+          Create your vibe-check:
+        </h2>
+        
+        {/* Pill Tags */}
+        <div className="flex flex-wrap gap-4 justify-center mb-12">
           <Link
             href="/login"
-            className="px-8 py-4 bg-purple-600 text-white rounded-full font-semibold hover:bg-purple-700 transition-colors shadow-lg"
+            className="group relative px-6 py-3 bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 rounded-full font-semibold text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
           >
-            Create Your Profile
+            Dating
+            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              (create profile)
+            </span>
           </Link>
+          <Link
+            href="/bmnl"
+            className="group relative px-6 py-3 bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-700 rounded-full font-semibold text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 transition-colors"
+          >
+            Festivals & Events
+            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              (ask for demo)
+            </span>
+          </Link>
+          <div className="group relative px-6 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 rounded-full font-semibold text-gray-500 dark:text-gray-400 cursor-not-allowed">
+            Shared spaces (soon)
+            <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs text-gray-500 dark:text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              (get in touch)
+            </span>
+          </div>
+        </div>
+
+        {/* Flip Cards */}
+        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
+          {/* Dating Card */}
+          <div className="group perspective-1000">
+            <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
+              <div className="absolute inset-0 backface-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col justify-center">
+                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Dating</h3>
+                <p className="text-gray-700 dark:text-gray-300">Save energy. Reduce noise. Reward maturity.</p>
+              </div>
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6 flex flex-col justify-center">
+                <p className="text-gray-700 dark:text-gray-300">
+                  AI asks the questions people usually avoid. You only share what you see. Raw answers not stored.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Festivals & Events Card */}
+          <div className="group perspective-1000">
+            <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
+              <div className="absolute inset-0 backface-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col justify-center">
+                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Festivals & Events</h3>
+                <p className="text-gray-700 dark:text-gray-300">Name your culture. Set standards early. Create safer spaces.</p>
+              </div>
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6 flex flex-col justify-center">
+                <p className="text-gray-700 dark:text-gray-300">
+                  AI facilitates at scale. Humans decide. Raw answers encrypted.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Shared Spaces Card */}
+          <div className="group perspective-1000">
+            <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
+              <div className="absolute inset-0 backface-hidden bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 flex flex-col justify-center">
+                <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-gray-100">Shared Spaces</h3>
+                <p className="text-gray-700 dark:text-gray-300">Atmosphere isn't accidental. Name core, expectations, boundaries.</p>
+              </div>
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700 rounded-lg p-6 flex flex-col justify-center">
+                <p className="text-gray-700 dark:text-gray-300">
+                  In development. Get in touch!
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -137,36 +224,27 @@ export default function LandingPage() {
         <h2 className="text-4xl font-bold text-center mb-8 dark:text-gray-100">How It Works</h2>
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="flex gap-6 items-start">
-            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300">
-              1
+            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300 text-xl">
+              ①
             </div>
             <div>
-              <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Create your profile</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Complete a quick survey and chat with our AI to define your SoulSort radar—your unique fingerprint
-              </p>
+              <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Create your profile & name your vibe</h3>
             </div>
           </div>
           <div className="flex gap-6 items-start">
-            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300">
-              2
+            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300 text-xl">
+              ②
             </div>
             <div>
-              <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Share your link</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                Share your personalized link with someone you’re curious about — a date, a friend, or a room full of people.
-              </p>
+              <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Invite participants or applicants</h3>
             </div>
           </div>
           <div className="flex gap-6 items-start">
-            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300">
-              3
+            <div className="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center font-bold text-purple-600 dark:text-purple-300 text-xl">
+              ③
             </div>
             <div>
-              <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Check the vibe</h3>
-              <p className="text-gray-600 dark:text-gray-300">
-                See how your values, boundaries, and orientation toward connection align — visually, not performatively.
-              </p>
+              <h3 className="font-semibold text-xl mb-2 dark:text-gray-100">Compare alignment visually</h3>
             </div>
           </div>
         </div>
@@ -175,10 +253,21 @@ export default function LandingPage() {
       {/* Waitlist Section */}
       <section className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4 dark:text-gray-100">Join the Waitlist</h2>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Be the first to know about new features and early access.
-          </p>
+          <h2 className="text-2xl font-bold mb-6 dark:text-gray-100">Waitlist</h2>
+          <div className="flex flex-wrap gap-4 justify-center mb-6">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="w-4 h-4 text-purple-600" />
+              <span className="text-gray-700 dark:text-gray-300">Dating</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="w-4 h-4 text-purple-600" />
+              <span className="text-gray-700 dark:text-gray-300">Festivals & Events</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" className="w-4 h-4 text-purple-600" />
+              <span className="text-gray-700 dark:text-gray-300">Shared Spaces</span>
+            </label>
+          </div>
           <WaitlistForm />
         </div>
       </section>
@@ -194,8 +283,18 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 text-center text-sm text-gray-600 dark:text-gray-400">
+        <div className="flex flex-wrap gap-4 justify-center mb-4">
+          <Link href="/blog" className="text-purple-600 dark:text-purple-400 hover:underline">
+            Blog
+          </Link>
+          <span>•</span>
+          <Link href="/login" className="text-purple-600 dark:text-purple-400 hover:underline">
+            Login
+          </Link>
+        </div>
         <p>© 2025 SoulSort AI. Privacy-first vibe filtering.</p>
       </footer>
     </div>
+    </>
   )
 }

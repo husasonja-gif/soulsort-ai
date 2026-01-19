@@ -216,7 +216,7 @@ export async function POST(request: Request) {
           : null)
       : null
 
-    // Update participant status
+    // Update participant status and store chat history
     const { data: updatedParticipant, error: updateError } = await supabaseAdmin
       .from('bmnl_participants')
       .update({
@@ -224,6 +224,7 @@ export async function POST(request: Request) {
         assessment_completed_at: new Date().toISOString(),
         needs_human_review: needsHumanReview,
         review_notes: reviewReason,
+        chat_history: chat_history || null, // Store full chat history for organizer review
       })
       .eq('id', participant_id)
       .select('id, status')
