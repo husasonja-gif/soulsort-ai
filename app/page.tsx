@@ -267,10 +267,6 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="container mx-auto px-4 py-8 text-center text-sm text-gray-600 dark:text-gray-400">
         <div className="flex flex-wrap gap-4 justify-center mb-4">
-          <Link href="/blog" className="text-purple-600 dark:text-purple-400 hover:underline">
-            Blog
-          </Link>
-          <span>•</span>
           <Link href="/login" className="text-purple-600 dark:text-purple-400 hover:underline">
             Login
           </Link>
