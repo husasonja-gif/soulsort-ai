@@ -159,8 +159,8 @@ export default function LandingPage() {
                 <h3 className="text-xl font-bold mb-2 text-white">Dating</h3>
                 <p className="text-white/90">Save energy. Reduce noise. Reward maturity.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gray-100 dark:bg-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-gray-900 dark:text-gray-900">
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-2 border-purple-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-gray-900">
                   AI asks the questions people usually avoid. You only share what you see. Raw answers not stored.
                 </p>
               </div>
@@ -174,8 +174,8 @@ export default function LandingPage() {
                 <h3 className="text-xl font-bold mb-2 text-white">Festivals & Events</h3>
                 <p className="text-white/90">Name your culture. Set standards early. Create safer spaces.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gray-100 dark:bg-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-gray-900 dark:text-gray-900">
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-2 border-purple-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-gray-900">
                   AI facilitates at scale. Humans decide. Raw answers encrypted.
                 </p>
               </div>
@@ -185,13 +185,13 @@ export default function LandingPage() {
           {/* Shared Spaces Card */}
           <div className="group perspective-1000">
             <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-orange-300 to-pink-300 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+              <div className="absolute inset-0 backface-hidden opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(to bottom right, rgb(168, 85, 247), #DD97DB)' }}>
                 <h3 className="text-xl font-bold mb-2 text-white">Shared Spaces</h3>
                 <p className="text-white/90">Atmosphere isn't accidental. Name care, expectations, boundaries.</p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-gray-100 dark:bg-gray-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-gray-900 dark:text-gray-900">
-                  In development. Get in touch at <a href="mailto:soulsort.ai.official@gmail.com" className="underline font-semibold text-gray-900 dark:text-gray-900">soulsort.ai.official@gmail.com</a>!
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-2 border-purple-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
+                <p className="text-gray-900">
+                  In development. Get in touch at <a href="mailto:soulsort.ai.official@gmail.com" className="underline font-semibold text-gray-900">soulsort.ai.official@gmail.com</a>!
                 </p>
               </div>
             </div>
