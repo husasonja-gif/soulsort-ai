@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import type { ChatMessage } from '@/lib/types'
@@ -69,6 +69,7 @@ function BMNLAssessmentPageContent() {
   const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
   const [gamingCount, setGamingCount] = useState(0)
   const [phobicCount, setPhobicCount] = useState(0)
+  const chatEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const loadParticipant = async () => {
@@ -107,6 +108,13 @@ function BMNLAssessmentPageContent() {
 
     loadParticipant()
   }, [searchParams, router])
+
+  // Always keep the latest messages in view (especially important on mobile)
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [chatHistory, loading])
 
   // Initialize speech recognition
   useEffect(() => {
@@ -501,6 +509,7 @@ function BMNLAssessmentPageContent() {
                 </div>
               </div>
             )}
+            <div ref={chatEndRef} />
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { ChatMessage } from '@/lib/types'
 
@@ -27,6 +27,14 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   const [currentMessage, setCurrentMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [chatComplete, setChatComplete] = useState(false)
+  const chatEndRef = useRef<HTMLDivElement | null>(null)
+
+  // Always keep the latest messages in view (especially important on mobile)
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [chatHistory, loading])
 
   const dealbreakerOptions = [
     'Communication avoidance',
@@ -341,6 +349,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                 </div>
               </div>
             )}
+            <div ref={chatEndRef} />
           </div>
 
           {!chatComplete ? (

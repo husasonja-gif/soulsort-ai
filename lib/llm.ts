@@ -132,6 +132,11 @@ CRITICAL:
 - If a construct is not evidenced, delta should be 0.0 (not random).
 - Deltas are small: each element ∈ [-0.2, +0.2].
 
+LANGUAGE:
+- Users may answer in ANY language. You are fluent in all major languages.
+- Do NOT penalize, down-score, or mark answers as garbage solely because they are not in English.
+- Focus on the meaning/content of the answers, independent of language.
+
 INPUT:
 A) BASE PRIORS (0.0–1.0 each). Do not recalculate.
 B) Q1–Q4 answers.

@@ -15,7 +15,7 @@ const flipCardStyles = `
   .backface-hidden {
     backface-visibility: hidden;
   }
-  .group:hover .preserve-3d {
+  .rotate-y-180 {
     transform: rotateY(180deg);
   }
 `
@@ -89,6 +89,11 @@ function WaitlistForm() {
 
 export default function LandingPage() {
   const [pillHover, setPillHover] = useState<{ [key: string]: boolean }>({})
+  const [cardFlipped, setCardFlipped] = useState<{ dating: boolean; festivals: boolean; shared: boolean }>({
+    dating: false,
+    festivals: false,
+    shared: false,
+  })
 
   return (
     <>
@@ -153,8 +158,11 @@ export default function LandingPage() {
         {/* Flip Cards */}
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
           {/* Dating Card */}
-          <div className="group perspective-1000">
-            <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
+          <div
+            className="group perspective-1000 cursor-pointer"
+            onClick={() => setCardFlipped(prev => ({ ...prev, dating: !prev.dating }))}
+          >
+            <div className={`relative h-64 preserve-3d transition-transform duration-500 ${cardFlipped.dating ? 'rotate-y-180' : ''}`}>
               <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Dating</h3>
                 <p className="text-white/90">Save energy. Reduce noise. Reward maturity.</p>
@@ -168,8 +176,11 @@ export default function LandingPage() {
           </div>
 
           {/* Festivals & Events Card */}
-          <div className="group perspective-1000">
-            <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
+          <div
+            className="group perspective-1000 cursor-pointer"
+            onClick={() => setCardFlipped(prev => ({ ...prev, festivals: !prev.festivals }))}
+          >
+            <div className={`relative h-64 preserve-3d transition-transform duration-500 ${cardFlipped.festivals ? 'rotate-y-180' : ''}`}>
               <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-purple-500 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
                 <h3 className="text-xl font-bold mb-2 text-white">Festivals & Events</h3>
                 <p className="text-white/90">Name your culture. Set standards early. Create safer spaces.</p>
@@ -183,8 +194,11 @@ export default function LandingPage() {
           </div>
 
           {/* Shared Spaces Card */}
-          <div className="group perspective-1000">
-            <div className="relative h-64 preserve-3d transition-transform duration-500 group-hover:rotate-y-180">
+          <div
+            className="group perspective-1000 cursor-pointer"
+            onClick={() => setCardFlipped(prev => ({ ...prev, shared: !prev.shared }))}
+          >
+            <div className={`relative h-64 preserve-3d transition-transform duration-500 ${cardFlipped.shared ? 'rotate-y-180' : ''}`}>
               <div className="absolute inset-0 backface-hidden opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(to bottom right, rgb(168, 85, 247), #DD97DB)' }}>
                 <h3 className="text-xl font-bold mb-2 text-white">Shared Spaces</h3>
                 <p className="text-white/90">Atmosphere isn't accidental. Name care, expectations, boundaries.</p>
