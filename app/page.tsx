@@ -163,12 +163,19 @@ export default function LandingPage() {
             onClick={() => setCardFlipped(prev => ({ ...prev, dating: !prev.dating }))}
           >
             <div className={`relative h-64 preserve-3d transition-transform duration-500 ${cardFlipped.dating ? 'rotate-y-180' : ''}`}>
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-purple-500 to-purple-700 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <h3 className="text-xl font-bold mb-2 text-white">Dating</h3>
-                <p className="text-white/90">Save energy. Reduce noise. Reward maturity.</p>
+              {/* Front */}
+              <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
+                <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-3 text-white text-2xl">
+                  ❤️
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-gray-900">Dating</h3>
+                <p className="text-gray-600 text-sm max-w-xs">
+                  Save energy. Reduce noise. Reward maturity.
+                </p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-2 border-purple-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-gray-900">
+              {/* Back */}
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
+                <p className="text-gray-900 text-sm">
                   AI asks the questions people usually avoid. You only share what you see. Raw answers not stored.
                 </p>
               </div>
@@ -181,12 +188,19 @@ export default function LandingPage() {
             onClick={() => setCardFlipped(prev => ({ ...prev, festivals: !prev.festivals }))}
           >
             <div className={`relative h-64 preserve-3d transition-transform duration-500 ${cardFlipped.festivals ? 'rotate-y-180' : ''}`}>
-              <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-pink-500 to-purple-500 opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <h3 className="text-xl font-bold mb-2 text-white">Festivals & Events</h3>
-                <p className="text-white/90">Name your culture. Set standards early. Create safer spaces.</p>
+              {/* Front */}
+              <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
+                <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-3 text-white text-2xl">
+                  ✨
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-gray-900">Festivals & Events</h3>
+                <p className="text-gray-600 text-sm max-w-xs">
+                  Name your culture. Set standards early. Create safer spaces.
+                </p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-2 border-purple-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-gray-900">
+              {/* Back */}
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
+                <p className="text-gray-900 text-sm">
                   AI facilitates at scale. Humans decide. Raw answers encrypted.
                 </p>
               </div>
@@ -199,13 +213,27 @@ export default function LandingPage() {
             onClick={() => setCardFlipped(prev => ({ ...prev, shared: !prev.shared }))}
           >
             <div className={`relative h-64 preserve-3d transition-transform duration-500 ${cardFlipped.shared ? 'rotate-y-180' : ''}`}>
-              <div className="absolute inset-0 backface-hidden opacity-80 rounded-2xl p-6 flex flex-col items-center justify-center text-center" style={{ background: 'linear-gradient(to bottom right, rgb(168, 85, 247), #DD97DB)' }}>
-                <h3 className="text-xl font-bold mb-2 text-white">Shared Spaces</h3>
-                <p className="text-white/90">Atmosphere isn't accidental. Name care, expectations, boundaries.</p>
+              {/* Front */}
+              <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
+                <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-3 text-white text-2xl">
+                  🏡
+                </div>
+                <h3 className="text-xl font-bold mb-2 text-gray-900">Shared Spaces</h3>
+                <p className="text-gray-600 text-sm max-w-xs">
+                  Atmosphere isn't accidental. Name care, expectations, boundaries.
+                </p>
               </div>
-              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white border-2 border-purple-200 rounded-2xl p-6 flex flex-col items-center justify-center text-center">
-                <p className="text-gray-900">
-                  In development. Get in touch at <a href="mailto:soulsort.ai.official@gmail.com" className="underline font-semibold text-gray-900">soulsort.ai.official@gmail.com</a>!
+              {/* Back */}
+              <div className="absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
+                <p className="text-gray-900 text-sm">
+                  In development. Get in touch at{' '}
+                  <a
+                    href="mailto:soulsort.ai.official@gmail.com"
+                    className="underline font-semibold text-gray-900"
+                  >
+                    soulsort.ai.official@gmail.com
+                  </a>
+                  !
                 </p>
               </div>
             </div>

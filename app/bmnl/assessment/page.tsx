@@ -66,7 +66,6 @@ function BMNLAssessmentPageContent() {
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
-  const [inputMode, setInputMode] = useState<'text' | 'voice'>('text')
   const [gamingCount, setGamingCount] = useState(0)
   const [phobicCount, setPhobicCount] = useState(0)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
@@ -124,7 +123,7 @@ function BMNLAssessmentPageContent() {
         const recognitionInstance = new SpeechRecognition()
         recognitionInstance.continuous = true
         recognitionInstance.interimResults = true
-        recognitionInstance.lang = 'en-US'
+        recognitionInstance.lang = navigator.language || 'en-US'
 
         // Use a ref-like pattern to track final transcript per recording session
         let sessionFinalTranscript = ''
@@ -515,77 +514,32 @@ function BMNLAssessmentPageContent() {
 
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="bg-white dark:bg-white rounded-lg p-4 sm:p-6">
-          {/* Input Mode Toggle */}
-          <div className="flex gap-2 mb-4">
-            <button
-              type="button"
-              onClick={() => {
-                setInputMode('text')
-                if (isRecording && recognition) {
-                  recognition.stop()
-                  setIsRecording(false)
-                }
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                inputMode === 'text'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              📝 Text
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setInputMode('voice')
-                if (!recognition) {
-                  alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.')
-                  return
-                }
-              }}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                inputMode === 'voice'
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-              }`}
-            >
-              🎤 Voice
-            </button>
+          <div className="mb-2 text-xs text-gray-500">
+            You can answer in any language. Type or tap the mic to dictate.
           </div>
-
-          {inputMode === 'text' ? (
+          <div className="flex items-end gap-2 mb-4">
             <textarea
               value={currentAnswer}
               onChange={(e) => setCurrentAnswer(e.target.value)}
-              placeholder="Type your answer here..."
-              className="w-full px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 mb-4 min-h-[100px] sm:min-h-[120px]"
-              disabled={loading || isRecording}
+              placeholder="Share your answer..."
+              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 min-h-[100px] sm:min-h-[120px]"
+              disabled={loading}
               required
             />
-          ) : (
-            <div className="mb-4">
-              <textarea
-                value={currentAnswer}
-                onChange={(e) => setCurrentAnswer(e.target.value)}
-                placeholder="Click the microphone to start recording, or type your answer here..."
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 mb-2 min-h-[100px] sm:min-h-[120px]"
-                disabled={loading}
-                required
-              />
-              <button
-                type="button"
-                onClick={toggleRecording}
-                disabled={loading}
-                className={`w-full px-6 py-2 rounded-lg font-medium transition-colors ${
-                  isRecording
-                    ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse'
-                    : 'bg-purple-600 hover:bg-purple-700 text-white'
-                } disabled:bg-gray-300 disabled:cursor-not-allowed`}
-              >
-                {isRecording ? '🛑 Stop Recording' : '🎤 Start Recording'}
-              </button>
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={toggleRecording}
+              disabled={loading}
+              className={`w-11 h-11 rounded-full flex items-center justify-center text-white text-xl ${
+                isRecording
+                  ? 'bg-red-600 hover:bg-red-700 animate-pulse'
+                  : 'bg-purple-600 hover:bg-purple-700'
+              } disabled:bg-gray-300 disabled:cursor-not-allowed`}
+              aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+            >
+              {isRecording ? '■' : '🎤'}
+            </button>
+          </div>
 
           <button
             type="submit"

@@ -9,6 +9,41 @@ interface OnboardingClientProps {
   skipChat?: boolean
 }
 
+// Basic Speech Recognition types (browser-only)
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start(): void
+  stop(): void
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  onerror: ((event: any) => void) | null
+  onend: (() => void) | null
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number
+  results: SpeechRecognitionResultList
+}
+
+interface SpeechRecognitionResultList {
+  length: number
+  item(index: number): SpeechRecognitionResult
+  [index: number]: SpeechRecognitionResult
+}
+
+interface SpeechRecognitionResult {
+  length: number
+  item(index: number): SpeechRecognitionAlternative
+  [index: number]: SpeechRecognitionAlternative
+  isFinal: boolean
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string
+  confidence: number
+}
+
 type SurveySection = 'dealbreakers' | 'preferences' | 'chat' | 'complete'
 
 export default function OnboardingClient({ userId, skipChat = false }: OnboardingClientProps) {
@@ -28,6 +63,8 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   const [loading, setLoading] = useState(false)
   const [chatComplete, setChatComplete] = useState(false)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
 
   // Always keep the latest messages in view (especially important on mobile)
   useEffect(() => {
@@ -35,6 +72,73 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
       chatEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
     }
   }, [chatHistory, loading])
+
+  // Initialise speech recognition for audio answering (where supported)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const AnyWindow = window as any
+    const SR = AnyWindow.webkitSpeechRecognition || AnyWindow.SpeechRecognition
+    if (!SR) return
+
+    const recognitionInstance: SpeechRecognition = new SR()
+    recognitionInstance.continuous = true
+    recognitionInstance.interimResults = true
+    recognitionInstance.lang = navigator.language || 'en-US'
+
+    let sessionFinalTranscript = ''
+
+    recognitionInstance.onstart = () => {
+      sessionFinalTranscript = ''
+    }
+
+    recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+      let interimTranscript = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript
+        if (event.results[i].isFinal) {
+          sessionFinalTranscript += transcript + ' '
+        } else {
+          interimTranscript += transcript
+        }
+      }
+      setCurrentMessage((sessionFinalTranscript + interimTranscript).trimStart())
+    }
+
+    recognitionInstance.onerror = (event: any) => {
+      console.error('Speech recognition error (onboarding):', event.error)
+      if (event.error === 'no-speech' || event.error === 'audio-capture') {
+        setIsRecording(false)
+      }
+    }
+
+    recognitionInstance.onend = () => {
+      setIsRecording(false)
+      sessionFinalTranscript = ''
+    }
+
+    setRecognition(recognitionInstance)
+  }, [])
+
+  const toggleRecording = () => {
+    if (!recognition) {
+      alert('Voice input is not supported in this browser. Please use a recent version of Chrome or Edge.')
+      return
+    }
+
+    if (isRecording) {
+      recognition.stop()
+      setIsRecording(false)
+    } else {
+      setCurrentMessage('')
+      try {
+        recognition.start()
+        setIsRecording(true)
+      } catch (error) {
+        console.error('Error starting onboarding recognition:', error)
+        alert('Could not start recording. Please try again.')
+      }
+    }
+  }
 
   const dealbreakerOptions = [
     'Communication avoidance',
@@ -106,6 +210,12 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!currentMessage.trim() || loading) return
+
+    // Stop recording when sending
+    if (isRecording && recognition) {
+      recognition.stop()
+      setIsRecording(false)
+    }
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -353,20 +463,35 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
           </div>
 
           {!chatComplete ? (
-            <form onSubmit={handleChatSubmit} className="flex gap-2 pb-safe">
-              <input
-                type="text"
-                value={currentMessage}
-                onChange={(e) => setCurrentMessage(e.target.value)}
-                placeholder="Type your response..."
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-                disabled={loading}
-                autoComplete="off"
-              />
+            <form onSubmit={handleChatSubmit} className="flex gap-2 items-end pb-safe">
+              <div className="flex-1 flex items-center border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700">
+                <input
+                  type="text"
+                  value={currentMessage}
+                  onChange={(e) => setCurrentMessage(e.target.value)}
+                  placeholder="Type or dictate your response..."
+                  className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+                  disabled={loading}
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  onClick={toggleRecording}
+                  disabled={loading}
+                  className={`ml-2 w-9 h-9 rounded-full flex items-center justify-center text-white text-lg ${
+                    isRecording
+                      ? 'bg-red-600 hover:bg-red-700 animate-pulse'
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  } disabled:bg-gray-400`}
+                  aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+                >
+                  {isRecording ? '■' : '🎤'}
+                </button>
+              </div>
               <button
                 type="submit"
                 disabled={loading || !currentMessage.trim()}
-                className="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+                className="px-5 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
               >
                 Send
               </button>
