@@ -1,15 +1,7 @@
-// LLM integration utilities for SoulSort AI
-import OpenAI from 'openai'
-import { trackOpenAIUsage } from './trackOpenAIUsage'
+// LLM integration utilities for SoulSort AI V4 - Claude Sonnet 4.5
+import { claude, CURRENT_MODEL_VERSION, CURRENT_SCORING_VERSION, CURRENT_SCHEMA_VERSION, convertMessagesToClaude } from './claudeClient'
+import { trackLLMUsage } from './trackLLMUsage'
 import type { ChatMessage, RadarDimensions } from './types'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-})
-
-const CURRENT_MODEL_VERSION = 'gpt-4o'
-const CURRENT_SCORING_VERSION = 'v3.1'
-const CURRENT_SCHEMA_VERSION = 3
 
 export { CURRENT_MODEL_VERSION, CURRENT_SCORING_VERSION, CURRENT_SCHEMA_VERSION }
 
@@ -50,8 +42,8 @@ export async function generateUserRadarProfile(
   userId?: string | null,
   linkId?: string | null
 ): Promise<CanonicalVectors & { chart: RadarChart; dealbreakers: string[] }> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured')
+  if (!process.env.CLAUDE_API_KEY) {
+    throw new Error('Claude API key not configured')
   }
 
   try {
@@ -291,12 +283,12 @@ CHAT QUESTIONS AND ANSWERS:`
     // Note: Prompt always includes answers (required for LLM), but we only log in dev
     if (enableDebugEvidence) {
       const promptForLogging = userPrompt.replace(/sk-[a-zA-Z0-9]+/g, 'sk-REDACTED')
-      console.log('=== PROMPT SENT TO OPENAI (DEV ONLY) ===')
+      console.log('=== PROMPT SENT TO CLAUDE (DEV ONLY) ===')
       console.log(promptForLogging)
       console.log('=== END PROMPT ===')
     } else if (process.env.NODE_ENV !== 'production') {
       // In non-prod, log word counts only (privacy-safe)
-      console.log('=== PROMPT SENT TO OPENAI (word counts only) ===')
+      console.log('=== PROMPT SENT TO CLAUDE (word counts only) ===')
       extractedAnswers.forEach((ans, idx) => {
         const wordCount = answerWordCounts[idx] || 0
         const status = extractionStatus[`q${idx + 1}` as keyof typeof extractionStatus]
@@ -306,37 +298,43 @@ CHAT QUESTIONS AND ANSWERS:`
     }
 
     if (process.env.NODE_ENV !== 'production') {
-      console.log('Calling OpenAI API for radar generation...')
+      console.log('Calling Claude API for radar generation...')
     }
     const startTime = Date.now()
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o', // Use GPT-4o for profile generation
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
+    
+    const claudeMessages = convertMessagesToClaude([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ])
+    
+    const response = await claude.messages.create({
+      model: CURRENT_MODEL_VERSION,
+      max_tokens: 4096,
       temperature: 0.25, // 0.2-0.3 range for deterministic output
-      response_format: { type: 'json_object' },
+      ...claudeMessages,
     })
     const responseTime = Date.now() - startTime
 
-    // Track OpenAI usage
+    // Track Claude usage
     if (response.usage) {
-      await trackOpenAIUsage({
+      await trackLLMUsage({
         userId: userId || null,
         linkId: linkId || null,
         endpoint: 'generate_profile',
-        model: 'gpt-4o',
-        usage: response.usage,
+        model: CURRENT_MODEL_VERSION,
+        usage: {
+          input_tokens: response.usage.input_tokens,
+          output_tokens: response.usage.output_tokens,
+        },
         responseTimeMs: responseTime,
         success: true,
       })
     }
 
-    console.log('OpenAI response received')
-    const content = response.choices[0].message.content
+    console.log('Claude response received')
+    const content = response.content[0].type === 'text' ? response.content[0].text : ''
     if (!content) {
-      throw new Error('No content returned from OpenAI')
+      throw new Error('No content returned from Claude')
     }
 
     console.log('Parsing JSON response...')
@@ -744,8 +742,8 @@ export async function assessRequester(
   abuseFlags: string[]
   dealbreakerHits: Array<{ ruleId: string; label: string; reason: string; evidence: Array<{ field: string; value: string | number }>; capScoreTo: number }>
 }> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured')
+  if (!process.env.CLAUDE_API_KEY) {
+    throw new Error('Claude API key not configured')
   }
 
   const systemPrompt = `You are a compatibility assessment AI for SoulSort.
@@ -857,45 +855,51 @@ Assess compatibility based on these responses.`
 
   try {
     if (!logRaw) {
-      console.log('Calling OpenAI for requester assessment... (raw answers not logged, set LOG_RAW=true to enable)')
+      console.log('Calling Claude for requester assessment... (raw answers not logged, set LOG_RAW=true to enable)')
     } else {
-      console.log('Calling OpenAI for requester assessment...')
+      console.log('Calling Claude for requester assessment...')
     }
     const startTime = Date.now()
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
+    
+    const claudeMessages = convertMessagesToClaude([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ])
+    
+    const response = await claude.messages.create({
+      model: CURRENT_MODEL_VERSION,
+      max_tokens: 4096,
       temperature: 0.2,
-      response_format: { type: 'json_object' },
+      ...claudeMessages,
     })
     const responseTime = Date.now() - startTime
 
-    // Track OpenAI usage
+    // Track Claude usage
     if (response.usage) {
-      await trackOpenAIUsage({
+      await trackLLMUsage({
         userId: userId || null,
         linkId: linkId || null,
         requesterSessionId: requesterSessionId || null,
         endpoint: 'requester_assess',
-        model: 'gpt-4o-mini',
-        usage: response.usage,
+        model: CURRENT_MODEL_VERSION,
+        usage: {
+          input_tokens: response.usage.input_tokens,
+          output_tokens: response.usage.output_tokens,
+        },
         responseTimeMs: responseTime,
         success: true,
       })
     }
 
-    const content = response.choices[0].message.content
+    const content = response.content[0].type === 'text' ? response.content[0].text : ''
     if (!content) {
-      throw new Error('No content returned from OpenAI')
+      throw new Error('No content returned from Claude')
     }
 
     if (!logRaw) {
-      console.log('OpenAI response received, parsing JSON... (raw response not logged, set LOG_RAW=true to enable)')
+      console.log('Claude response received, parsing JSON... (raw response not logged, set LOG_RAW=true to enable)')
     } else {
-      console.log('OpenAI response received, parsing JSON...')
+      console.log('Claude response received, parsing JSON...')
     }
     let result: any
     try {
@@ -905,7 +909,7 @@ Assess compatibility based on these responses.`
       if (logRaw) {
         console.error('Content that failed to parse:', content.substring(0, 500))
       }
-      throw new Error(`Failed to parse OpenAI response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`)
+      throw new Error(`Failed to parse Claude response as JSON: ${parseError instanceof Error ? parseError.message : 'Unknown error'}`)
     }
 
     if (logRaw && process.env.NODE_ENV !== 'production') {
@@ -1193,8 +1197,8 @@ export async function generateOnboardingChatMessage(
   chatHistory: ChatMessage[],
   surveyProgress: Record<string, any>
 ): Promise<string> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured')
+  if (!process.env.CLAUDE_API_KEY) {
+    throw new Error('Claude API key not configured')
   }
 
   const systemPrompt = `You are a warm, supportive AI helping someone create their SoulSort profile through conversation.
@@ -1204,38 +1208,41 @@ Ask thoughtful questions, model healthy communication, and be affirming of diver
 
 Keep responses concise (1-2 sentences) and conversational.`
 
-  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+  const claudeMessages = convertMessagesToClaude([
     { role: 'system', content: systemPrompt },
     ...chatHistory.slice(-10).map(m => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     })),
-  ]
+  ])
 
   try {
     const startTime = Date.now()
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      temperature: 0.8,
+    const response = await claude.messages.create({
+      model: CURRENT_MODEL_VERSION,
       max_tokens: 150,
+      temperature: 0.8,
+      ...claudeMessages,
     })
     const responseTime = Date.now() - startTime
 
-    // Track OpenAI usage (optional - for onboarding chat)
+    // Track Claude usage (optional - for onboarding chat)
     if (response.usage) {
-      await trackOpenAIUsage({
+      await trackLLMUsage({
         userId: null, // Onboarding chat doesn't have userId yet
         linkId: null,
         endpoint: 'onboarding_chat_message',
-        model: 'gpt-4o-mini',
-        usage: response.usage,
+        model: CURRENT_MODEL_VERSION,
+        usage: {
+          input_tokens: response.usage.input_tokens,
+          output_tokens: response.usage.output_tokens,
+        },
         responseTimeMs: responseTime,
         success: true,
-      }).catch(err => console.error('Error tracking OpenAI usage:', err))
+      }).catch(err => console.error('Error tracking Claude usage:', err))
     }
 
-    return response.choices[0].message.content || 'Tell me more about what you\'re looking for.'
+    return response.content[0].type === 'text' ? response.content[0].text : 'Tell me more about what you\'re looking for.'
   } catch (error) {
     console.error('Error in generateOnboardingChatMessage:', error)
     throw error
@@ -1254,8 +1261,8 @@ export async function generateRequesterQuestion(
     return 'Thank you for sharing! I have enough information to assess compatibility. Generating your results...'
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured')
+  if (!process.env.CLAUDE_API_KEY) {
+    throw new Error('Claude API key not configured')
   }
 
   const systemPrompt = `You are conducting a compatibility assessment. Ask thoughtful questions that help understand values, boundaries, and relationship style.
@@ -1263,38 +1270,41 @@ export async function generateRequesterQuestion(
 You've asked ${questionsAsked} questions so far. Ask one more question that feels natural in the conversation flow.
 Keep it conversational and supportive.`
 
-  const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+  const claudeMessages = convertMessagesToClaude([
     { role: 'system', content: systemPrompt },
     ...chatHistory.slice(-6).map(m => ({
       role: m.role as 'user' | 'assistant',
       content: m.content,
     })),
-  ]
+  ])
 
   try {
     const startTime = Date.now()
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      temperature: 0.8,
+    const response = await claude.messages.create({
+      model: CURRENT_MODEL_VERSION,
       max_tokens: 100,
+      temperature: 0.8,
+      ...claudeMessages,
     })
     const responseTime = Date.now() - startTime
 
-    // Track OpenAI usage (optional - for requester commentary)
+    // Track Claude usage (optional - for requester commentary)
     if (response.usage) {
-      await trackOpenAIUsage({
+      await trackLLMUsage({
         userId: null,
         linkId: null,
         endpoint: 'requester_commentary',
-        model: 'gpt-4o-mini',
-        usage: response.usage,
+        model: CURRENT_MODEL_VERSION,
+        usage: {
+          input_tokens: response.usage.input_tokens,
+          output_tokens: response.usage.output_tokens,
+        },
         responseTimeMs: responseTime,
         success: true,
-      }).catch(err => console.error('Error tracking OpenAI usage:', err))
+      }).catch(err => console.error('Error tracking Claude usage:', err))
     }
 
-    return response.choices[0].message.content || 'What matters most to you in a relationship?'
+    return response.content[0].type === 'text' ? response.content[0].text : 'What matters most to you in a relationship?'
   } catch (error) {
     console.error('Error in generateRequesterQuestion:', error)
     throw error

@@ -6,3 +6,4 @@ ADD COLUMN IF NOT EXISTS chat_history JSONB;
 
 CREATE INDEX IF NOT EXISTS idx_bmnl_participants_chat_history ON public.bmnl_participants USING GIN (chat_history);
 
+

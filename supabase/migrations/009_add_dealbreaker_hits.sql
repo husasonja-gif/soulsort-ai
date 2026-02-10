@@ -11,3 +11,4 @@ COMMENT ON COLUMN requester_assessments.dealbreaker_hits IS 'Private dealbreaker
 
 
 
+

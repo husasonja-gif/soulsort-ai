@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { claude, CURRENT_MODEL_VERSION, convertMessagesToClaude } from '@/lib/claudeClient'
+import { trackLLMUsage } from '@/lib/trackLLMUsage'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import type { ChatMessage } from '@/lib/types'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-})
 
 // Pre-prompted responses for each question
 const questionCommentaries = [
@@ -73,9 +70,9 @@ Avoid: "I appreciate your self-awareness" or "That demonstrates healthy boundary
 
 export async function POST(request: Request) {
   try {
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.CLAUDE_API_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'Claude API key not configured' },
         { status: 500 }
       )
     }
@@ -95,37 +92,39 @@ export async function POST(request: Request) {
 
 CRITICAL: You MUST ONLY provide commentary/reflection. You MUST NEVER ask questions, generate questions, or continue the conversation with new questions. Your ONLY role is to provide brief reflections on the user's answer.`
 
-    const messages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+    const claudeMessages = convertMessagesToClaude([
       { role: 'system', content: enhancedSystemPrompt },
       { role: 'user', content: `Question: "${question}"\n\nTheir answer: "${answer}"` },
-    ]
+    ])
 
     const startTime = Date.now()
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages,
-      temperature: 0.8,
+    const response = await claude.messages.create({
+      model: CURRENT_MODEL_VERSION,
       max_tokens: 100,
+      temperature: 0.8,
+      ...claudeMessages,
     })
     const responseTime = Date.now() - startTime
 
-    // Track OpenAI usage
+    // Track Claude usage
     if (response.usage) {
-      const { trackOpenAIUsage } = await import('@/lib/trackOpenAIUsage')
       const supabase = await createSupabaseServerClient()
       const { data: { user } } = await supabase.auth.getUser()
       
-      await trackOpenAIUsage({
+      await trackLLMUsage({
         userId: user?.id || null,
         endpoint: 'onboarding_chat',
-        model: 'gpt-4o-mini',
-        usage: response.usage,
+        model: CURRENT_MODEL_VERSION,
+        usage: {
+          input_tokens: response.usage.input_tokens,
+          output_tokens: response.usage.output_tokens,
+        },
         responseTimeMs: responseTime,
         success: true,
       })
     }
 
-    let commentary = response.choices[0].message.content || ''
+    let commentary = response.content[0].type === 'text' ? response.content[0].text : ''
 
     // Validate: Ensure commentary is not a question
     if (commentary) {

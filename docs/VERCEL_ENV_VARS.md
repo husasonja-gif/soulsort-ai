@@ -53,3 +53,4 @@ After the TypeScript fix is deployed:
 3. Test assessment completion
 4. Check that summaries are generated (requires `OPENAI_API_KEY`)
 
+

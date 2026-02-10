@@ -12,3 +12,4 @@ CREATE POLICY "Users can insert own profile" ON public.user_profiles
 
 
 
+

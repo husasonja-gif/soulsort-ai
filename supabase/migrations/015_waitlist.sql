@@ -29,3 +29,4 @@ CREATE POLICY "No public access" ON public.waitlist
 
 
 
+

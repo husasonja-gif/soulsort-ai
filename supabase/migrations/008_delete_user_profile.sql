@@ -22,3 +22,4 @@ DELETE FROM public.user_profiles WHERE id = 'YOUR_USER_ID';
 
 
 
+

@@ -1,16 +1,12 @@
-// LLM integration for SoulSort v2: Burning Man Netherlands
+// LLM integration for SoulSort v4: Burning Man Netherlands
 // Signal extraction only - no numeric scores
+// Migrated to Claude Sonnet 4.5
 
-import OpenAI from 'openai'
-import { trackOpenAIUsage } from './trackOpenAIUsage'
+import { claude, CURRENT_MODEL_VERSION, convertMessagesToClaude } from './claudeClient'
+import { trackLLMUsage } from './trackLLMUsage'
 import type { ChatMessage } from './types'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-})
-
-const CURRENT_MODEL_VERSION = 'gpt-4o'
-const CURRENT_SCORING_VERSION = 'v2-bmnl'
+const CURRENT_SCORING_VERSION = 'v4.0-bmnl-claude'
 
 export interface BMNLSignal {
   question_number: number
@@ -109,8 +105,8 @@ export async function extractSignalFromAnswer(
   answer: string,
   chatHistory: ChatMessage[]
 ): Promise<BMNLSignal> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured')
+  if (!process.env.CLAUDE_API_KEY) {
+    throw new Error('Claude API key not configured')
   }
 
   const mappedAxes = QUESTION_AXIS_MAP[questionNumber] || []
@@ -180,17 +176,21 @@ ${chatHistory.slice(-3).map(m => `${m.role}: ${m.content}`).join('\n')}
 Extract signals for this answer.`
 
   try {
-    const completion = await openai.chat.completions.create({
+    const startTime = Date.now()
+    const claudeMessages = convertMessagesToClaude([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ])
+    
+    const completion = await claude.messages.create({
       model: CURRENT_MODEL_VERSION,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
+      max_tokens: 4096,
       temperature: 0.2,
-      response_format: { type: 'json_object' },
+      ...claudeMessages,
     })
 
-    const result = JSON.parse(completion.choices[0].message.content || '{}')
+    const content = completion.content[0].type === 'text' ? completion.content[0].text : ''
+    const result = JSON.parse(content || '{}')
 
     // Validate and ensure defaults
     const validLevels = ['low', 'emerging', 'stable', 'mastering'] as const
@@ -208,15 +208,13 @@ Extract signals for this answer.`
     }
 
     // Track usage
-    const startTime = Date.now()
-    await trackOpenAIUsage({
+    await trackLLMUsage({
       userId: null,
       endpoint: 'bmnl_signal_extraction',
       model: CURRENT_MODEL_VERSION,
       usage: {
-        prompt_tokens: completion.usage?.prompt_tokens || 0,
-        completion_tokens: completion.usage?.completion_tokens || 0,
-        total_tokens: completion.usage?.total_tokens || 0,
+        input_tokens: completion.usage.input_tokens,
+        output_tokens: completion.usage.output_tokens,
       },
       responseTimeMs: Date.now() - startTime,
       success: true,
@@ -437,8 +435,8 @@ export async function generateCommentary(
   answer: string,
   chatHistory: ChatMessage[]
 ): Promise<string> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key not configured')
+  if (!process.env.CLAUDE_API_KEY) {
+    throw new Error('Claude API key not configured')
   }
 
   // Question-specific steering prompts based on the table
@@ -482,29 +480,31 @@ ${chatHistory.slice(-4).map(m => `${m.role}: ${m.content}`).join('\n\n')}
 Provide brief commentary (1-2 sentences) that acknowledges their answer and uses the steering guidance to gently guide cultural understanding if needed. Adapt the steering guidance to their specific answer - don't just repeat it verbatim.`
 
   try {
-    const completion = await openai.chat.completions.create({
+    const startTime = Date.now()
+    const claudeMessages = convertMessagesToClaude([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ])
+    
+    const completion = await claude.messages.create({
       model: CURRENT_MODEL_VERSION,
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.7,
       max_tokens: 150,
+      temperature: 0.7,
+      ...claudeMessages,
     })
 
-    const commentary = completion.choices[0].message.content?.trim() || ''
+    const commentary = completion.content[0].type === 'text' ? completion.content[0].text.trim() : ''
     
     // Track usage
-    await trackOpenAIUsage({
+    await trackLLMUsage({
       userId: null,
       endpoint: 'bmnl_commentary',
       model: CURRENT_MODEL_VERSION,
       usage: {
-        prompt_tokens: completion.usage?.prompt_tokens || 0,
-        completion_tokens: completion.usage?.completion_tokens || 0,
-        total_tokens: completion.usage?.total_tokens || 0,
+        input_tokens: completion.usage.input_tokens,
+        output_tokens: completion.usage.output_tokens,
       },
-      responseTimeMs: 0,
+      responseTimeMs: Date.now() - startTime,
       success: true,
     })
 

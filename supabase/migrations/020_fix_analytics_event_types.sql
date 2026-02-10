@@ -24,3 +24,4 @@ ALTER TABLE IF EXISTS public.analytics_events
 
 
 
+

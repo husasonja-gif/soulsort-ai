@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { claude, CURRENT_MODEL_VERSION, convertMessagesToClaude } from '@/lib/claudeClient'
+import { trackLLMUsage } from '@/lib/trackLLMUsage'
 import type { ChatMessage } from '@/lib/types'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-})
 
 export async function POST(request: Request) {
   try {
     const { questionIndex, question, answer, chatHistory, communicationStyle } = await request.json()
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.CLAUDE_API_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'Claude API key not configured' },
         { status: 500 }
       )
     }
@@ -78,21 +75,39 @@ Answer: ${answer}
 
 Provide a brief reflection if needed. If the answer is healthy and thoughtful, you may say nothing or provide minimal acknowledgment.`
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        ...chatHistory.slice(-4).map((m: ChatMessage) => ({
-          role: m.role as 'user' | 'assistant',
-          content: m.content,
-        })),
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.7,
+    const claudeMessages = convertMessagesToClaude([
+      { role: 'system', content: systemPrompt },
+      ...chatHistory.slice(-4).map((m: ChatMessage) => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      })),
+      { role: 'user', content: userPrompt },
+    ])
+    
+    const startTime = Date.now()
+    const response = await claude.messages.create({
+      model: CURRENT_MODEL_VERSION,
       max_tokens: 100,
+      temperature: 0.7,
+      ...claudeMessages,
     })
+    const responseTime = Date.now() - startTime
 
-    let commentary = response.choices[0].message.content?.trim() || ''
+    // Track Claude usage
+    if (response.usage) {
+      await trackLLMUsage({
+        endpoint: 'requester_commentary',
+        model: CURRENT_MODEL_VERSION,
+        usage: {
+          input_tokens: response.usage.input_tokens,
+          output_tokens: response.usage.output_tokens,
+        },
+        responseTimeMs: responseTime,
+        success: true,
+      }).catch(err => console.error('Error tracking Claude usage:', err))
+    }
+
+    let commentary = response.content[0].type === 'text' ? response.content[0].text.trim() : ''
 
     // Validate: Remove any question marks and check if it looks like a question
     if (commentary) {
@@ -138,6 +153,8 @@ Provide a brief reflection if needed. If the answer is healthy and thoughtful, y
     )
   }
 }
+
+
 
 
 

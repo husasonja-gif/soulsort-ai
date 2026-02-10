@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
-import OpenAI from 'openai'
+import { claude, CURRENT_MODEL_VERSION, convertMessagesToClaude } from '@/lib/claudeClient'
 import type { ChatMessage } from '@/lib/types'
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '',
-})
 
 export async function POST(request: Request) {
   try {
@@ -51,9 +47,9 @@ export async function POST(request: Request) {
       }
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    if (!process.env.CLAUDE_API_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'Claude API key not configured' },
         { status: 500 }
       )
     }
@@ -112,17 +108,19 @@ Generate a relaxed, friendly summary. Be explicit about 2-3 growth areas where t
 
 CRITICAL: Only mention gate experience if the person needs orientation at the gate. This cultural check happens BEFORE the gate, never after. Do NOT mention "gate experience" or "basic gate experience" unless they need orientation.`
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt },
-      ],
-      temperature: 0.8,
+    const claudeMessages = convertMessagesToClaude([
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ])
+    
+    const completion = await claude.messages.create({
+      model: CURRENT_MODEL_VERSION,
       max_tokens: 300,
+      temperature: 0.8,
+      ...claudeMessages,
     })
 
-    const summary = completion.choices[0].message.content?.trim() || ''
+    const summary = completion.content[0].type === 'text' ? completion.content[0].text.trim() : ''
 
     return NextResponse.json({
       success: true,
