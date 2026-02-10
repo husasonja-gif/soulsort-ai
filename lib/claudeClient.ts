@@ -36,8 +36,6 @@ export function convertMessagesToClaude(
 }
 
 /**
-
-/**
  * Calculate Claude API cost (approximate, based on current pricing)
  * Claude Sonnet 4.5 pricing (as of 2025):
  * - Input: $3.00 per 1M tokens
@@ -55,4 +53,3 @@ export function calculateClaudeCost(
 
   return inputCost + outputCost
 }
-
