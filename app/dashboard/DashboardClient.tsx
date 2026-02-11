@@ -122,25 +122,22 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
               <h3 className="font-semibold mb-3 text-purple-600 dark:text-purple-400">Dimension Meanings</h3>
               <div className="grid md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-200">
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Self Transcendence</b> — How much you orient toward meaning and making the world a better place.
+                  <b className="text-gray-900 dark:text-gray-100">Meaning & Values</b> — Built mainly from values signals (`self_transcendence`, `self_enhancement`, `rooting`, `searching`).
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Self Enhancement</b> — Drive for intensity, ambition, erotic charge, and self-expression.
+                  <b className="text-gray-900 dark:text-gray-100">Regulation & Nervous System</b> — How you settle down, repair, and stay connected under emotional load.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Rooting</b> — Your grounding in tradition, conformity, and security.
+                  <b className="text-gray-900 dark:text-gray-100">Erotic Attunement</b> — Desire rhythm, turn-on/turn-off patterns, and erotic responsiveness.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Searching</b> — Your appetite for novelty, exploration, spontaneity, and change.
+                  <b className="text-gray-900 dark:text-gray-100">Autonomy Orientation</b> — How you balance freedom, closeness, and exclusivity.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Relational Alignment</b> — Your strengths in communication, repair, empathy, and emotional clarity.
+                  <b className="text-gray-900 dark:text-gray-100">Consent Orientation</b> — Boundary awareness, non-coerciveness, and self-advocacy.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Erotic Alignment</b> — Your ability to read, respond to, and co-create erotic connection.
-                </div>
-                <div>
-                  <b className="text-gray-900 dark:text-gray-100">Consent Alignment</b> — Your non-coerciveness, boundary negotiation and self-advocacy comfort
+                  <b className="text-gray-900 dark:text-gray-100">Conflict & Repair</b> — Your default move after rupture and your ability to restore trust.
                 </div>
               </div>
             </div>

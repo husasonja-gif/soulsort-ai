@@ -54,8 +54,8 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   const [section, setSection] = useState<SurveySection>('dealbreakers')
   const [dealbreakers, setDealbreakers] = useState<string[]>([])
   const [preferences, setPreferences] = useState<Record<string, number>>({
-    pace: 50,
-    connection_chemistry: 50,
+    erotic_pace: 50,
+    novelty_depth_preference: 50,
     vanilla_kinky: 50,
     open_monogamous: 50,
     boundaries_ease: 50, // New: 0 = Hard, 100 = Easy
@@ -155,8 +155,8 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   ]
 
   const preferenceLabels = [
-    { id: 'pace', label: 'Slow pace', opposite: 'Fast pace' },
-    { id: 'connection_chemistry', label: 'Connection first', opposite: 'Chemistry first' },
+    { id: 'erotic_pace', label: 'Slow pace', opposite: 'Fast pace' },
+    { id: 'novelty_depth_preference', label: 'Depth first', opposite: 'Novelty first' },
     { id: 'vanilla_kinky', label: 'Vanilla', opposite: 'Kinky' },
     { id: 'open_monogamous', label: 'Open relationship', opposite: 'Monogamous' },
     { id: 'boundaries_ease', label: 'Hard', opposite: 'Easy', title: 'Ease of setting boundaries' },
@@ -484,7 +484,9 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                       : 'bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-800 dark:text-gray-100'
                   }`}
                 >
-                  {msg.content}
+                  {msg.role === 'assistant'
+                    ? msg.content.replace(/^\[\[Q\d+\]\]\s*/, '')
+                    : msg.content}
                 </div>
               </div>
             ))}

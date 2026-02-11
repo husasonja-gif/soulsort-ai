@@ -55,10 +55,10 @@ export async function generateUserRadarProfile(
     const preferences = surveyResponses.preferences || {}
 
     // Compute priors deterministically from sliders
-    const pace = preferences.pace || 50
-    const connectionChemistry = preferences.connection_chemistry || 50
-    const kink = preferences.vanilla_kinky || 50
-    const monogamy = preferences.open_monogamous || 50
+    const eroticPace = preferences.erotic_pace ?? preferences.pace ?? 50
+    const noveltyDepthPreference = preferences.novelty_depth_preference ?? (preferences.connection_chemistry ?? 50)
+    const kink = preferences.vanilla_kinky ?? 50
+    const monogamy = preferences.open_monogamous ?? 50
     
     // BOUNDARIES SCALE V2: Unified computation for backward compatibility
     // Old users: boundaries (0-100) represents difficulty (0=easy, 100=hard)
@@ -71,7 +71,7 @@ export async function generateUserRadarProfile(
       boundariesEase = preferences.boundaries_ease
     } else {
       // Old scale: boundaries represents difficulty, invert to get ease
-      const oldBoundaries = preferences.boundaries || 50
+      const oldBoundaries = preferences.boundaries ?? 50
       boundariesEase = 100 - oldBoundaries
     }
 
@@ -87,7 +87,7 @@ export async function generateUserRadarProfile(
       stability_orientation: 0.5,
 
       // EROTIC_VECTOR (5)
-      erotic_pace: pace / 100.0, // slider
+      erotic_pace: eroticPace / 100.0, // slider
       desire_intensity: 0.5, // no slider
       fantasy_openness: kink / 100.0, // slider
       erotic_attunement: 0.5, // no slider
@@ -97,7 +97,7 @@ export async function generateUserRadarProfile(
       enm_openness: (100 - monogamy) / 100.0, // slider
       exclusivity_comfort: monogamy / 100.0, // slider
       freedom_orientation: 0.5, // no slider
-      attraction_depth_preference: (100 - connectionChemistry) / 100.0, // slider
+      attraction_depth_preference: (100 - noveltyDepthPreference) / 100.0, // slider
       communication_style: 0.5, // no slider
 
       // CONSENT_VECTOR (4)
@@ -135,53 +135,62 @@ A) BASE PRIORS (0.0–1.0 each). Do not recalculate.
 B) Q1–Q9 answers.
 
 SIGNAL RULES (language-agnostic):
-Q1 Values:
-- self_transcendence: care, impact, growth, other-centeredness, meaning -> +0.05 to +0.20
-- rooting: commitment, long-term, stability, building together -> +0.05 to +0.20
-- searching: autonomy, options, space, exploration, flexibility -> +0.05 to +0.20
-- self_enhancement: ambition/status/competition/intensity focus -> +0.05 to +0.20 only if clearly present
-- stability_orientation: explicit preference for structure/predictability -> +0.05 to +0.20 only if clearly present
+Q1 What drains them:
+- self_transcendence: empathy, care, concern for impact -> +0.05 to +0.20
+- rooting: preference for steady, dependable relating -> +0.05 to +0.20
+- searching: desire for flexibility/space/change -> +0.05 to +0.20
+- self_enhancement: status/ego/competitiveness focus -> +0.05 to +0.20 if explicit
 
-Q2 Relationship intent:
-- rooting: intentional commitment, long-horizon building -> +0.05 to +0.20
-- searching: exploratory/open process orientation -> +0.05 to +0.20
-- stability_orientation: preference for clear structure and predictability -> +0.05 to +0.20
+Q2 Post-breakup change:
+- self_transcendence: reflective growth and accountability -> +0.05 to +0.20
+- rooting: clearer standards for healthy stability -> +0.05 to +0.20
+- searching: intentional exploration and learning -> +0.05 to +0.20
+- self_enhancement: image/performance orientation if explicit -> +0.05 to +0.20
 
-Q3 Conflict style (skills):
-- communication_style: clarity, reflective communication, early repair, "I statements", non-hostile, collaborative -> +0.05 to +0.20
-- negotiation_comfort: names needs/limits, pauses, repair, can discuss boundaries -> +0.05 to +0.20
-- non_coerciveness: accountability, listening, non-blaming, de-escalation -> +0.05 to +0.20
-- self_advocacy: speaks up, states needs, self-soothes, takes space -> +0.05 to +0.20
+Q3 First move after hurt:
+- LINKED SLIDER: boundaries_ease
+- communication_style: direct repair-oriented communication -> +0.05 to +0.20
+- negotiation_comfort: can discuss rupture and repair process -> +0.05 to +0.20
+- non_coerciveness: takes responsibility without blame/defensiveness -> +0.05 to +0.20
+- self_advocacy: can name state and own part clearly -> +0.05 to +0.20
 
-Q4 Regulation under activation:
-- communication_style: regulated response, reflective timing, collaborative repair -> +0.05 to +0.20
-- negotiation_comfort: can pause, re-engage, and discuss needs clearly -> +0.05 to +0.20
-- self_advocacy: can name own state and ask for space/support -> +0.05 to +0.20
+Q4 Feeling safe while tense:
+- LINKED SLIDER: erotic_pace
+- communication_style: co-regulation, clarity, emotional pacing -> +0.05 to +0.20
+- self_advocacy: ability to request what helps in activation -> +0.05 to +0.20
+- stability_orientation: preference for predictable grounding behaviours -> +0.05 to +0.20
 
-Q5 Boundaries and consent:
-- consent_awareness: explicit consent mindset and ongoing check-ins -> +0.05 to +0.20
-- negotiation_comfort: comfort discussing limits and changing agreements -> +0.05 to +0.20
-- non_coerciveness: non-pressuring language and respect for "no"/"not now" -> +0.05 to +0.20
-- self_advocacy: confidence stating boundaries and needs -> +0.05 to +0.20
+Q5 Erotic connection:
+- LINKED SLIDERS: vanilla_kinky, novelty_depth_preference
+- erotic_attunement: trust, presence, pacing, responsiveness -> +0.05 to +0.20
+- desire_intensity: explicit intensity/frequency/drive -> +0.05 to +0.20
+- fantasy_openness: explicit openness to novelty/fantasy/kink -> +0.05 to +0.20
+- attraction_depth_preference: depth/meaning as erotic catalyst -> +0.05 to +0.20
 
-Q6 Pace for intimacy:
-- erotic_pace: explicit preference for slow/medium/fast relational and physical pacing -> +0.05 to +0.20
-- erotic_attunement: attuned pacing with partner cues -> +0.05 to +0.20
+Q6 Autonomy vs closeness:
+- LINKED SLIDER: open_monogamous
+- freedom_orientation: explicit need for autonomy and sovereignty -> +0.05 to +0.20
+- enm_openness: openness to multiple romantic/sexual bonds -> +0.05 to +0.20
+- exclusivity_comfort: preference for exclusivity and contained pair-bond -> +0.05 to +0.20
 
-Q7 Erotic connection:
-- erotic_attunement: trust, presence, safety, attunement, responsiveness -> +0.05 to +0.20
-- desire_intensity: high drive, novelty-seeking, explicit intensity -> +0.05 to +0.20
-- fantasy_openness: explicit openness to exploration/fantasy/kink -> +0.05 to +0.20
+Q7 Crossing boundaries:
+- LINKED SLIDER: boundaries_ease
+- consent_awareness: explicit consent awareness and repair intent -> +0.05 to +0.20
+- negotiation_comfort: can discuss boundary repair and future agreements -> +0.05 to +0.20
+- non_coerciveness: non-defensive, non-pressuring response to feedback -> +0.05 to +0.20
+- self_advocacy: can express own perspective without overriding consent -> +0.05 to +0.20
 
-Q8 Autonomy / exclusivity:
-- freedom_orientation: autonomy within relationship, choice, abundance vs desperation, selfhood -> +0.05 to +0.20
-- searching: exploration/choice/agency -> +0.05 to +0.20
-- rooting may also increase if they emphasize building a future together.
+Q8 Misunderstood self:
+- communication_style: can clarify patterns and intentions -> +0.05 to +0.20
+- self_enhancement: if emphasis is image/status being misunderstood -> +0.05 to +0.20
+- searching: identity complexity, non-linearity, exploration -> +0.05 to +0.20
 
-Q9 Growth edge:
-- self_transcendence: accountability, reflection, growth orientation -> +0.05 to +0.20
-- communication_style: willingness to learn and repair -> +0.05 to +0.20
-- self_advocacy: asks for support and expresses needs directly -> +0.05 to +0.20
+Q9 Attraction fading:
+- LINKED SLIDER: novelty_depth_preference
+- desire_intensity: how they sustain/recover desire energy -> +0.05 to +0.20
+- fantasy_openness: experimentation/novelty practices -> +0.05 to +0.20
+- attraction_depth_preference: prioritizing emotional depth to restore attraction -> +0.05 to +0.20
+- erotic_attunement: attuned recalibration with partner -> +0.05 to +0.20
 
 LOW-EVIDENCE BEHAVIOR:
 If any answer is "Not answered" or extremely short, do not give large positive deltas (cap at +0.10 per dimension). Otherwise score normally.
@@ -289,6 +298,13 @@ OUTPUT JSON FORMAT:
 ${JSON.stringify(basePriors, null, 2)}
 
 Dealbreakers: ${dealbreakers.length > 0 ? dealbreakers.length + ' selected' : 'None'}
+
+Linked sliders (0-100):
+- boundaries_ease: ${boundariesEase}
+- erotic_pace: ${eroticPace}
+- vanilla_kinky: ${kink}
+- novelty_depth_preference: ${noveltyDepthPreference}
+- open_monogamous: ${monogamy}
 
 CHAT QUESTIONS AND ANSWERS:`
     
@@ -578,8 +594,10 @@ CHAT QUESTIONS AND ANSWERS:`
           model_version: CURRENT_MODEL_VERSION,
           scoring_version: CURRENT_SCORING_VERSION,
           schema_version: CURRENT_SCHEMA_VERSION,
-          pace: preferences.pace || null,
-          connection_chemistry: preferences.connection_chemistry || null,
+          pace: preferences.pace || null, // legacy
+          connection_chemistry: preferences.connection_chemistry || null, // legacy
+          erotic_pace: preferences.erotic_pace ?? preferences.pace ?? null,
+          novelty_depth_preference: preferences.novelty_depth_preference ?? preferences.connection_chemistry ?? null,
           vanilla_kinky: preferences.vanilla_kinky || null,
           open_monogamous: preferences.open_monogamous || null,
           boundaries_raw: boundariesScaleVersion === 1 ? (preferences.boundaries || null) : null, // old field if present

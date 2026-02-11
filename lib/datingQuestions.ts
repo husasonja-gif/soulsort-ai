@@ -1,13 +1,13 @@
 export const CANONICAL_DATING_QUESTIONS = [
-  'What are three values you try to practice in your relationships?',
-  'What kind of relationship are you trying to build in this season of your life?',
-  'How do you usually navigate disagreement, repair, or misunderstanding?',
-  'When you feel emotionally activated, what helps you regulate and stay connected?',
-  'How do you communicate boundaries, consent, and changing needs over time?',
-  'What pace feels right for emotional and physical intimacy to build?',
+  'What kind of behaviour drains you fastest, even if the other person means well?',
+  "After your last breakup, what's one thing you do differently now, even in early dating?",
+  "If you realize you've hurt someone you care about, what's your first move?",
+  "What is something a partner can do to make you feel safe when you're tense or overwhelmed?",
   'What helps you feel erotically connected, and what tends to shut that down?',
-  'How do you relate to autonomy, freedom, and exclusivity in partnership?',
-  'Where are you currently growing in relationships, and what support helps you most?',
+  'In relationships, where do you need autonomy, and where do you actually like closeness?',
+  "How do you respond when you learn you crossed someone's boundary (even unintentionally)?",
+  'What do you think most people misunderstand about you?',
+  'When attraction starts to fade or plateau, what do you usually do?',
 ] as const
 
 export const DATING_QUESTION_COUNT = CANONICAL_DATING_QUESTIONS.length

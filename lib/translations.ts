@@ -11,7 +11,7 @@ export interface Translations {
 const translations: Record<string, Record<LanguageCode, string>> = {
   // Onboarding Chat Questions (Dating Flow)
   'onboarding.q1': {
-    en: 'What are three values you try to practice in your relationships?',
+    en: 'What kind of behaviour drains you fastest, even if the other person means well?',
     nl: 'Wat zijn drie waarden die je probeert na te leven in je relaties?',
     de: 'Welche drei Werte versuchst du in deinen Beziehungen zu praktizieren?',
     fr: 'Quelles sont les trois valeurs que vous essayez de pratiquer dans vos relations?',
@@ -20,7 +20,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'Quais são três valores que você tenta praticar em seus relacionamentos?',
   },
   'onboarding.q2': {
-    en: 'How do you like to navigate disagreements or misunderstandings?',
+    en: 'After your last breakup, what\'s one thing you do differently now, even in early dating?',
     nl: 'Hoe ga je om met meningsverschillen of misverstanden?',
     de: 'Wie gehst du mit Meinungsverschiedenheiten oder Missverständnissen um?',
     fr: 'Comment aimez-vous naviguer dans les désaccords ou les malentendus?',
@@ -29,7 +29,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'Como você gosta de lidar com desentendimentos ou mal-entendidos?',
   },
   'onboarding.q3': {
-    en: 'What helps you feel erotically connected to someone?',
+    en: 'If you realize you\'ve hurt someone you care about, what\'s your first move?',
     nl: 'Wat helpt je om je erotisch verbonden te voelen met iemand?',
     de: 'Was hilft dir, dich erotisch mit jemandem verbunden zu fühlen?',
     fr: 'Qu\'est-ce qui vous aide à vous sentir érotiquement connecté à quelqu\'un?',
@@ -38,7 +38,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'O que te ajuda a se sentir eroticamente conectado com alguém?',
   },
   'onboarding.q4': {
-    en: 'How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
+    en: 'What is something a partner can do to make you feel safe when you\'re tense or overwhelmed?',
     nl: 'Hoeveel vrijheid heb je nodig en zoek je in je romantische relaties en hoe ziet vrijheid er voor jou uit?',
     de: 'Wie viel Freiheit brauchst und suchst du in deinen romantischen Beziehungen und wie sieht Freiheit für dich aus?',
     fr: 'De combien de liberté avez-vous besoin et recherchez-vous dans vos relations romantiques et à quoi ressemble la liberté pour vous?',
@@ -47,7 +47,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'Quanta liberdade você precisa e busca em seus relacionamentos românticos e como a liberdade parece para você?',
   },
   'onboarding.q5': {
-    en: 'How do you communicate boundaries, consent, and changing needs over time?',
+    en: 'What helps you feel erotically connected, and what tends to shut that down?',
     nl: 'Hoe communiceer je grenzen, consent en veranderende behoeften in de loop van de tijd?',
     de: 'Wie kommunizierst du Grenzen, Zustimmung und sich im Laufe der Zeit verändernde Bedürfnisse?',
     fr: 'Comment communiquez-vous vos limites, le consentement et l\'évolution de vos besoins au fil du temps?',
@@ -56,7 +56,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'Como você comunica limites, consentimento e necessidades que mudam ao longo do tempo?',
   },
   'onboarding.q6': {
-    en: 'What pace feels right for emotional and physical intimacy to build?',
+    en: 'In relationships, where do you need autonomy, and where do you actually like closeness?',
     nl: 'Welk tempo voelt goed voor het opbouwen van emotionele en fysieke intimiteit?',
     de: 'Welches Tempo fühlt sich richtig an, damit emotionale und körperliche Intimität entstehen kann?',
     fr: 'Quel rythme vous semble juste pour construire l\'intimité émotionnelle et physique?',
@@ -65,7 +65,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'Que ritmo parece certo para construir intimidade emocional e física?',
   },
   'onboarding.q7': {
-    en: 'What helps you feel erotically connected, and what tends to shut that down?',
+    en: 'How do you respond when you learn you crossed someone\'s boundary (even unintentionally)?',
     nl: 'Wat helpt je om je erotisch verbonden te voelen, en wat remt dat juist af?',
     de: 'Was hilft dir, dich erotisch verbunden zu fühlen, und was blockiert das eher?',
     fr: 'Qu\'est-ce qui vous aide à vous sentir érotiquement connecté, et qu\'est-ce qui a tendance à freiner cela?',
@@ -74,7 +74,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'O que ajuda você a se sentir eroticamente conectado e o que tende a bloquear isso?',
   },
   'onboarding.q8': {
-    en: 'How do you relate to autonomy, freedom, and exclusivity in partnership?',
+    en: 'What do you think most people misunderstand about you?',
     nl: 'Hoe verhoud je je tot autonomie, vrijheid en exclusiviteit in een relatie?',
     de: 'Wie stehst du zu Autonomie, Freiheit und Exklusivität in einer Partnerschaft?',
     fr: 'Comment vous situez-vous par rapport à l\'autonomie, la liberté et l\'exclusivité en couple?',
@@ -83,7 +83,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     pt: 'Como você se relaciona com autonomia, liberdade e exclusividade na parceria?',
   },
   'onboarding.q9': {
-    en: 'Where are you currently growing in relationships, and what support helps you most?',
+    en: 'When attraction starts to fade or plateau, what do you usually do?',
     nl: 'Op welk vlak groei je nu in relaties, en welke steun helpt je het meest?',
     de: 'Worin entwickelst du dich aktuell in Beziehungen, und welche Unterstützung hilft dir am meisten?',
     fr: 'Dans quels domaines grandissez-vous actuellement en relation, et quel soutien vous aide le plus?',
