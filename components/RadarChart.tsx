@@ -2,6 +2,7 @@
 
 import { Radar, RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts'
 import type { RadarDimensions } from '@/lib/types'
+import { toV4RadarAxes } from '@/lib/radarAxes'
 
 interface RadarChartProps {
   data: RadarDimensions
@@ -11,40 +12,36 @@ interface RadarChartProps {
 }
 
 export default function RadarChart({ data, label = 'Profile', color = '#9333ea', showLegend = false }: RadarChartProps) {
+  const axes = toV4RadarAxes(data)
   const chartData = [
     {
-      dimension: 'Self Transcendence',
-      value: data.self_transcendence,
+      dimension: 'Meaning & Values',
+      value: axes.meaning_values,
       fullMark: 100,
     },
     {
-      dimension: 'Self Enhancement',
-      value: data.self_enhancement,
+      dimension: 'Regulation & Nervous System',
+      value: axes.regulation_nervous_system,
       fullMark: 100,
     },
     {
-      dimension: 'Rooting',
-      value: data.rooting,
+      dimension: 'Erotic Attunement',
+      value: axes.erotic_attunement,
       fullMark: 100,
     },
     {
-      dimension: 'Searching',
-      value: data.searching,
+      dimension: 'Autonomy Orientation',
+      value: axes.autonomy_orientation,
       fullMark: 100,
     },
     {
-      dimension: 'Relational',
-      value: data.relational,
+      dimension: 'Consent Orientation',
+      value: axes.consent_orientation,
       fullMark: 100,
     },
     {
-      dimension: 'Erotic',
-      value: data.erotic,
-      fullMark: 100,
-    },
-    {
-      dimension: 'Consent',
-      value: data.consent,
+      dimension: 'Conflict & Repair',
+      value: axes.conflict_repair,
       fullMark: 100,
     },
   ]
@@ -55,7 +52,7 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
         data={chartData}
         margin={{ top: 40, bottom: 40, left: 40, right: 40 }}
       >
-        <PolarGrid />
+        <PolarGrid gridType="circle" />
         <PolarAngleAxis 
           dataKey="dimension" 
           tick={{ fontSize: 9, fill: '#4b5563' }}

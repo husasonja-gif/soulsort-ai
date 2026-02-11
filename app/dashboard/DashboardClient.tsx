@@ -122,22 +122,22 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
               <h3 className="font-semibold mb-3 text-purple-600 dark:text-purple-400">Dimension Meanings</h3>
               <div className="grid md:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-200">
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Meaning & Values</b> — Built mainly from values signals (`self_transcendence`, `self_enhancement`, `rooting`, `searching`).
+                  <b className="text-gray-900 dark:text-gray-100">Meaning & Values</b> — How you find purpose: through making the world better, expressing your ambitions, staying grounded in what&apos;s familiar, or chasing what&apos;s new and unknown.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Regulation & Nervous System</b> — How you settle down, repair, and stay connected under emotional load.
+                  <b className="text-gray-900 dark:text-gray-100">Erotic Attunement</b> — Your relationship with desire: how you tune into the other, build chemistry, create heat, and discuss wants.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Erotic Attunement</b> — Desire rhythm, turn-on/turn-off patterns, and erotic responsiveness.
+                  <b className="text-gray-900 dark:text-gray-100">Consent Orientation</b> — How you navigate boundaries: speaking up for what you need, reading the room, and staying connected to yourself and the other.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Autonomy Orientation</b> — How you balance freedom, closeness, and exclusivity.
+                  <b className="text-gray-900 dark:text-gray-100">Regulation & Nervous System</b> — The way you settle: how you handle emotional flooding, repair after conflict, and find your way back to calm.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Consent Orientation</b> — Boundary awareness, non-coerciveness, and self-advocacy.
+                  <b className="text-gray-900 dark:text-gray-100">Autonomy Orientation</b> — Your dance between closeness and freedom: how much space you need, how you balance independence with intimacy, and whether you lean toward comfort or novelty.
                 </div>
                 <div>
-                  <b className="text-gray-900 dark:text-gray-100">Conflict & Repair</b> — Your default move after rupture and your ability to restore trust.
+                  <b className="text-gray-900 dark:text-gray-100">Conflict & Repair</b> — What happens after a rupture: whether you flee, fight, freeze, or find your way back to connection—and how trust gets rebuilt (or doesn&apos;t).
                 </div>
               </div>
             </div>

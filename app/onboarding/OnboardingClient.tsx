@@ -65,6 +65,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   const [currentMessage, setCurrentMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [chatComplete, setChatComplete] = useState(false)
+  const [openSliderInfo, setOpenSliderInfo] = useState<string | null>(null)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
@@ -155,11 +156,11 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   ]
 
   const preferenceLabels = [
-    { id: 'erotic_pace', label: 'Slow pace', opposite: 'Fast pace' },
-    { id: 'novelty_depth_preference', label: 'Depth first', opposite: 'Novelty first' },
-    { id: 'vanilla_kinky', label: 'Vanilla', opposite: 'Kinky' },
-    { id: 'open_monogamous', label: 'Open relationship', opposite: 'Monogamous' },
-    { id: 'boundaries_ease', label: 'Hard', opposite: 'Easy', title: 'Ease of setting boundaries' },
+    { id: 'erotic_pace', label: 'Slow pace', opposite: 'Fast pace', info: 'How quickly emotional/physical closeness feels right to you.' },
+    { id: 'novelty_depth_preference', label: 'Depth first', opposite: 'Novelty first', info: 'Whether attraction is sustained more by emotional depth or by novelty/variety.' },
+    { id: 'vanilla_kinky', label: 'Vanilla', opposite: 'Kinky', info: 'Your comfort with playful/edge-based erotic exploration.' },
+    { id: 'open_monogamous', label: 'Open relationship', opposite: 'Monogamous', info: 'Where you sit between openness and exclusivity in partnership.' },
+    { id: 'boundaries_ease', label: 'Hard', opposite: 'Easy', title: 'Ease of setting boundaries', info: 'How easy it feels to notice and communicate limits in real time.' },
   ]
 
   // Get user's language preference
@@ -426,10 +427,35 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
           <div className="space-y-6 mb-8">
             {preferenceLabels.map((pref) => (
-              <div key={pref.id} className="space-y-2">
+              <div key={pref.id} className="space-y-2 relative">
                 {pref.title && (
-                  <div className="text-center mb-2">
+                  <div className="text-center mb-2 flex items-center justify-center gap-2">
                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{pref.title}</span>
+                    <button
+                      type="button"
+                      onClick={() => setOpenSliderInfo(openSliderInfo === pref.id ? null : pref.id)}
+                      className="w-5 h-5 rounded-full border border-purple-400 text-purple-600 text-xs font-bold flex items-center justify-center hover:bg-purple-50 dark:hover:bg-gray-700"
+                      aria-label={`More info for ${pref.title || pref.id}`}
+                    >
+                      i
+                    </button>
+                  </div>
+                )}
+                {!pref.title && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => setOpenSliderInfo(openSliderInfo === pref.id ? null : pref.id)}
+                      className="w-5 h-5 rounded-full border border-purple-400 text-purple-600 text-xs font-bold flex items-center justify-center hover:bg-purple-50 dark:hover:bg-gray-700"
+                      aria-label={`More info for ${pref.id}`}
+                    >
+                      i
+                    </button>
+                  </div>
+                )}
+                {openSliderInfo === pref.id && (
+                  <div className="text-xs text-gray-700 dark:text-gray-200 bg-purple-50 dark:bg-gray-700 border border-purple-200 dark:border-gray-600 rounded-lg p-2">
+                    {pref.info}
                   </div>
                 )}
                 <div className="flex justify-between items-center">
@@ -502,15 +528,16 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
           {!chatComplete ? (
             <form onSubmit={handleChatSubmit} className="flex gap-2 items-end pb-safe">
-              <div className="flex-1 flex items-center border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700">
-                <input
-                  type="text"
+              <div className="flex-1 flex items-end border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700">
+                <textarea
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                   placeholder={t('ui.onboarding.chat.audio.hint', userLang)}
-                  className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
+                  className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
                   disabled={loading}
                   autoComplete="off"
+                  rows={1}
+                  wrap="soft"
                 />
                 <button
                   type="button"

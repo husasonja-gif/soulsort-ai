@@ -2,6 +2,7 @@
 
 import { Radar, RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts'
 import type { RadarDimensions } from '@/lib/types'
+import { toV4RadarAxes } from '@/lib/radarAxes'
 
 interface RadarOverlayProps {
   userData: RadarDimensions
@@ -9,47 +10,43 @@ interface RadarOverlayProps {
 }
 
 export default function RadarOverlay({ userData, requesterData }: RadarOverlayProps) {
+  const userAxes = toV4RadarAxes(userData)
+  const requesterAxes = toV4RadarAxes(requesterData)
   const chartData = [
     {
-      dimension: 'Self Transcendence',
-      user: userData.self_transcendence,
-      requester: requesterData.self_transcendence,
+      dimension: 'Meaning & Values',
+      user: userAxes.meaning_values,
+      requester: requesterAxes.meaning_values,
       fullMark: 100,
     },
     {
-      dimension: 'Self Enhancement',
-      user: userData.self_enhancement,
-      requester: requesterData.self_enhancement,
+      dimension: 'Regulation & Nervous System',
+      user: userAxes.regulation_nervous_system,
+      requester: requesterAxes.regulation_nervous_system,
       fullMark: 100,
     },
     {
-      dimension: 'Rooting',
-      user: userData.rooting,
-      requester: requesterData.rooting,
+      dimension: 'Erotic Attunement',
+      user: userAxes.erotic_attunement,
+      requester: requesterAxes.erotic_attunement,
       fullMark: 100,
     },
     {
-      dimension: 'Searching',
-      user: userData.searching,
-      requester: requesterData.searching,
+      dimension: 'Autonomy Orientation',
+      user: userAxes.autonomy_orientation,
+      requester: requesterAxes.autonomy_orientation,
       fullMark: 100,
     },
     {
-      dimension: 'Relational',
-      user: userData.relational,
-      requester: requesterData.relational,
+      dimension: 'Consent Orientation',
+      user: userAxes.consent_orientation,
+      requester: requesterAxes.consent_orientation,
       fullMark: 100,
     },
     {
-      dimension: 'Erotic',
-      user: userData.erotic,
-      requester: requesterData.erotic,
-      fullMark: 100,
-    },
-    {
-      dimension: 'Consent',
-      user: userData.consent,
-      requester: requesterData.consent,
+      dimension: 'Conflict & Repair',
+      user: userAxes.conflict_repair,
+      requester: requesterAxes.conflict_repair,
       fullMark: 100,
     },
   ]
@@ -57,7 +54,7 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
   return (
     <ResponsiveContainer width="100%" height={400}>
       <RechartsRadarChart data={chartData}>
-        <PolarGrid />
+        <PolarGrid gridType="circle" />
         <PolarAngleAxis 
           dataKey="dimension" 
           tick={{ fontSize: 12, fill: '#666' }}
