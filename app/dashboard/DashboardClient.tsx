@@ -148,6 +148,7 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
                 mode="user"
                 userRadar={radarData}
                 userPreferences={userPreferences}
+                userSignalScores={radarProfile?.signal_scores}
               />
             </div>
           </>

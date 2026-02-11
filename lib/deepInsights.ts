@@ -1,4 +1,4 @@
-import type { RadarDimensions } from './types'
+import type { CanonicalSignalScores, RadarDimensions } from './types'
 
 type PreferencesLike = Record<string, number | undefined> | null | undefined
 
@@ -10,6 +10,10 @@ export interface DeepInsightArea {
   rightLabel: string
   youValue: number
   themValue?: number
+  zoneStart?: number
+  zoneEnd?: number
+  themZoneStart?: number
+  themZoneEnd?: number
   descriptor: string
   insight: string
   secondary?: {
@@ -17,6 +21,10 @@ export interface DeepInsightArea {
     rightLabel: string
     youValue: number
     themValue?: number
+    zoneStart?: number
+    zoneEnd?: number
+    themZoneStart?: number
+    themZoneEnd?: number
     descriptor: string
   }
 }
@@ -28,6 +36,9 @@ export interface DeepInsightSummary {
 }
 
 const clamp = (v: number): number => Math.max(0, Math.min(100, Math.round(v)))
+const mean = (values: number[]): number => values.reduce((sum, value) => sum + value, 0) / values.length
+
+type SignalScoresLike = Partial<CanonicalSignalScores> | null | undefined
 
 function getPref(preferences: PreferencesLike, key: string, fallback: number): number {
   const value = preferences?.[key]
@@ -77,35 +88,101 @@ function axisDescriptor(value: number, low: string, high: string): string {
   return 'balanced'
 }
 
-function areaValues(radar: RadarDimensions, preferences?: PreferencesLike) {
+function varianceBand(values: number[]): { value: number; zoneStart: number; zoneEnd: number } {
+  const score = clamp(mean(values))
+  const variance = mean(values.map((value) => Math.pow(value - score, 2)))
+  const stdDev = Math.sqrt(variance)
+  // Low variance => tight band (aligned). High variance => wider band (tension).
+  const halfWidth = Math.max(2, Math.min(30, stdDev * 1.5 + 2))
+  return {
+    value: score,
+    zoneStart: clamp(score - halfWidth),
+    zoneEnd: clamp(score + halfWidth),
+  }
+}
+
+function signalOrFallback(
+  signals: SignalScoresLike,
+  key: keyof CanonicalSignalScores,
+  fallback: number
+): number {
+  const value = signals?.[key]
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    // signal scores are stored as 0..1
+    return clamp(value * 100)
+  }
+  return clamp(fallback)
+}
+
+function areaValuesFromRadar(radar: RadarDimensions, preferences?: PreferencesLike) {
   const p = effectivePreferences(radar, preferences)
 
-  const pacingRhythm = clamp(p.erotic_pace * 0.5 + p.novelty_depth_preference * 0.3 + radar.self_enhancement * 0.2)
-  const autonomyCloseness = clamp(p.open_monogamous * 0.5 + radar.relational * 0.3 + (100 - radar.searching) * 0.2)
-  const conflictStyle = clamp(radar.relational * 0.55 + radar.consent * 0.3 + radar.self_enhancement * 0.15)
-  const voicingListening = clamp(p.boundaries_ease * 0.5 + radar.consent * 0.3 + radar.relational * 0.2)
-  const eroticExpression = clamp(p.vanilla_kinky * 0.5 + p.novelty_depth_preference * 0.3 + radar.erotic * 0.2)
-  const emotionalRegulation = clamp(radar.relational * 0.45 + radar.consent * 0.35 + (100 - radar.self_enhancement) * 0.2)
-  const valuesAdventure = clamp(radar.searching * 0.6 + (100 - radar.rooting) * 0.4)
-  const valuesImpact = clamp(radar.self_transcendence * 0.6 + radar.self_enhancement * 0.4)
+  const pacingRhythmComponents = [p.erotic_pace, p.novelty_depth_preference, radar.self_enhancement]
+  const autonomyClosenessComponents = [p.open_monogamous, radar.relational, 100 - radar.searching]
+  const conflictStyleComponents = [radar.relational, radar.consent, radar.self_enhancement]
+  const voicingListeningComponents = [p.boundaries_ease, radar.consent, radar.relational]
+  const eroticExpressionComponents = [p.vanilla_kinky, p.novelty_depth_preference, radar.erotic]
+  const emotionalRegulationComponents = [radar.relational, radar.consent, 100 - radar.self_enhancement]
+  const valuesAdventureComponents = [radar.searching, 100 - radar.rooting]
+  const valuesImpactComponents = [radar.self_transcendence, radar.self_enhancement]
 
   return {
-    pacingRhythm,
-    autonomyCloseness,
-    conflictStyle,
-    voicingListening,
-    eroticExpression,
-    emotionalRegulation,
-    valuesAdventure,
-    valuesImpact,
+    pacingRhythmComponents,
+    autonomyClosenessComponents,
+    conflictStyleComponents,
+    voicingListeningComponents,
+    eroticExpressionComponents,
+    emotionalRegulationComponents,
+    valuesAdventureComponents,
+    valuesImpactComponents,
   }
 }
 
 export function buildUserDeepInsights(
   radar: RadarDimensions,
-  preferences?: PreferencesLike
+  preferences?: PreferencesLike,
+  signalScores?: SignalScoresLike
 ): DeepInsightArea[] {
-  const v = areaValues(radar, preferences)
+  const fallback = areaValuesFromRadar(radar, preferences)
+
+  const pacingRhythm = varianceBand([
+    signalOrFallback(signalScores, 'desire_regulation', fallback.pacingRhythmComponents[0]),
+    signalOrFallback(signalScores, 'desire_intensity', fallback.pacingRhythmComponents[1]),
+    signalOrFallback(signalScores, 'novelty_depth_preference', fallback.pacingRhythmComponents[2]),
+  ])
+  const voicingListening = varianceBand([
+    signalOrFallback(signalScores, 'communication_style', fallback.voicingListeningComponents[0]),
+    signalOrFallback(signalScores, 'self_advocacy', fallback.voicingListeningComponents[1]),
+    signalOrFallback(signalScores, 'negotiation_comfort', fallback.voicingListeningComponents[2]),
+  ])
+  const conflictStyle = varianceBand([
+    signalOrFallback(signalScores, 'conflict_navigation', fallback.conflictStyleComponents[0]),
+    signalOrFallback(signalScores, 'repair_motivation', fallback.conflictStyleComponents[1]),
+    signalOrFallback(signalScores, 'self_regulation_awareness', fallback.conflictStyleComponents[2]),
+  ])
+  const autonomyCloseness = varianceBand([
+    signalOrFallback(signalScores, 'freedom_orientation', fallback.autonomyClosenessComponents[0]),
+    signalOrFallback(signalScores, 'enm_openness', fallback.autonomyClosenessComponents[1]),
+    100 - signalOrFallback(signalScores, 'exclusivity_comfort', 100 - fallback.autonomyClosenessComponents[2]),
+  ])
+  const eroticExpression = varianceBand([
+    signalOrFallback(signalScores, 'erotic_attunement', fallback.eroticExpressionComponents[0]),
+    signalOrFallback(signalScores, 'fantasy_openness', fallback.eroticExpressionComponents[1]),
+    signalOrFallback(signalScores, 'attraction_depth_preference', fallback.eroticExpressionComponents[2]),
+  ])
+  const emotionalRegulation = varianceBand([
+    signalOrFallback(signalScores, 'self_regulation_awareness', fallback.emotionalRegulationComponents[0]),
+    signalOrFallback(signalScores, 'stability_orientation', fallback.emotionalRegulationComponents[1]),
+    signalOrFallback(signalScores, 'communication_style', fallback.emotionalRegulationComponents[2]),
+  ])
+  const valuesAdventure = varianceBand([
+    signalOrFallback(signalScores, 'searching', fallback.valuesAdventureComponents[0]),
+    100 - signalOrFallback(signalScores, 'rooting', 100 - fallback.valuesAdventureComponents[1]),
+  ])
+  const valuesImpact = varianceBand([
+    signalOrFallback(signalScores, 'self_transcendence', fallback.valuesImpactComponents[0]),
+    signalOrFallback(signalScores, 'self_enhancement', fallback.valuesImpactComponents[1]),
+  ])
 
   return [
     {
@@ -114,8 +191,10 @@ export function buildUserDeepInsights(
       icon: '🔥',
       leftLabel: 'Slow burn',
       rightLabel: 'Fast ignition',
-      youValue: v.pacingRhythm,
-      descriptor: axisDescriptor(v.pacingRhythm, 'Slow burn', 'Fast ignition'),
+      youValue: pacingRhythm.value,
+      zoneStart: pacingRhythm.zoneStart,
+      zoneEnd: pacingRhythm.zoneEnd,
+      descriptor: axisDescriptor(pacingRhythm.value, 'Slow burn', 'Fast ignition'),
       insight:
         "How fast you move from stranger to intimate. Mismatch here can feel like rejection in both directions when one person needs runway and the other feels ready now.",
     },
@@ -125,8 +204,10 @@ export function buildUserDeepInsights(
       icon: '🗣️',
       leftLabel: 'Subtle cues',
       rightLabel: 'Direct asks',
-      youValue: v.voicingListening,
-      descriptor: axisDescriptor(v.voicingListening, 'Subtle cues', 'Direct asks'),
+      youValue: voicingListening.value,
+      zoneStart: voicingListening.zoneStart,
+      zoneEnd: voicingListening.zoneEnd,
+      descriptor: axisDescriptor(voicingListening.value, 'Subtle cues', 'Direct asks'),
       insight:
         "How you express needs and receive what is unsaid. Clear communication reduces friction, but different signaling styles can still create missed intentions.",
     },
@@ -136,8 +217,10 @@ export function buildUserDeepInsights(
       icon: '⚡',
       leftLabel: 'Withdraw',
       rightLabel: 'Pursue',
-      youValue: v.conflictStyle,
-      descriptor: axisDescriptor(v.conflictStyle, 'Withdraw', 'Pursue'),
+      youValue: conflictStyle.value,
+      zoneStart: conflictStyle.zoneStart,
+      zoneEnd: conflictStyle.zoneEnd,
+      descriptor: axisDescriptor(conflictStyle.value, 'Withdraw', 'Pursue'),
       insight:
         "What happens when you disagree. Relationships usually survive conflict when repair is intentional, paced, and explicitly initiated.",
     },
@@ -147,8 +230,10 @@ export function buildUserDeepInsights(
       icon: '🫶',
       leftLabel: 'Need space',
       rightLabel: 'Need closeness',
-      youValue: v.autonomyCloseness,
-      descriptor: axisDescriptor(v.autonomyCloseness, 'Need space', 'Need closeness'),
+      youValue: autonomyCloseness.value,
+      zoneStart: autonomyCloseness.zoneStart,
+      zoneEnd: autonomyCloseness.zoneEnd,
+      descriptor: axisDescriptor(autonomyCloseness.value, 'Need space', 'Need closeness'),
       insight:
         "How much space you need versus togetherness. This is often the attachment dance: do you regenerate alone, together, or with deliberate alternation?",
     },
@@ -158,8 +243,10 @@ export function buildUserDeepInsights(
       icon: '🌙',
       leftLabel: 'Familiar',
       rightLabel: 'Exploratory',
-      youValue: v.eroticExpression,
-      descriptor: axisDescriptor(v.eroticExpression, 'Familiar', 'Exploratory'),
+      youValue: eroticExpression.value,
+      zoneStart: eroticExpression.zoneStart,
+      zoneEnd: eroticExpression.zoneEnd,
+      descriptor: axisDescriptor(eroticExpression.value, 'Familiar', 'Exploratory'),
       insight:
         "The kind of desire and intimacy you are drawn to. Differences here are workable when there is explicit negotiation instead of silent assumptions.",
     },
@@ -169,8 +256,10 @@ export function buildUserDeepInsights(
       icon: '🌊',
       leftLabel: 'Self-soothe',
       rightLabel: 'Co-regulate',
-      youValue: v.emotionalRegulation,
-      descriptor: axisDescriptor(v.emotionalRegulation, 'Self-soothe', 'Co-regulate'),
+      youValue: emotionalRegulation.value,
+      zoneStart: emotionalRegulation.zoneStart,
+      zoneEnd: emotionalRegulation.zoneEnd,
+      descriptor: axisDescriptor(emotionalRegulation.value, 'Self-soothe', 'Co-regulate'),
       insight:
         "How you handle big feelings. Naming your regulation style in real time lowers misread abandonment/smothering loops.",
     },
@@ -180,13 +269,17 @@ export function buildUserDeepInsights(
       icon: '🧭',
       leftLabel: 'Stability',
       rightLabel: 'Adventure',
-      youValue: v.valuesAdventure,
-      descriptor: axisDescriptor(v.valuesAdventure, 'Stability', 'Adventure'),
+      youValue: valuesAdventure.value,
+      zoneStart: valuesAdventure.zoneStart,
+      zoneEnd: valuesAdventure.zoneEnd,
+      descriptor: axisDescriptor(valuesAdventure.value, 'Stability', 'Adventure'),
       secondary: {
         leftLabel: 'Meaning through roots',
         rightLabel: 'Meaning through impact',
-        youValue: v.valuesImpact,
-        descriptor: axisDescriptor(v.valuesImpact, 'roots', 'impact'),
+        youValue: valuesImpact.value,
+        zoneStart: valuesImpact.zoneStart,
+        zoneEnd: valuesImpact.zoneEnd,
+        descriptor: axisDescriptor(valuesImpact.value, 'roots', 'impact'),
       },
       insight:
         "What drives you and what you are building toward. Long-term fit improves when shared direction is explicit even if paths differ.",
@@ -198,10 +291,14 @@ export function buildComparisonDeepInsights(
   youRadar: RadarDimensions,
   themRadar: RadarDimensions,
   youPreferences?: PreferencesLike,
-  themPreferences?: PreferencesLike
+  themPreferences?: PreferencesLike,
+  youSignals?: SignalScoresLike,
+  themSignals?: SignalScoresLike
 ): { areas: DeepInsightArea[]; summary: DeepInsightSummary } {
-  const y = areaValues(youRadar, youPreferences)
-  const t = areaValues(themRadar, themPreferences)
+  const yAreas = buildUserDeepInsights(youRadar, youPreferences, youSignals)
+  const tAreas = buildUserDeepInsights(themRadar, themPreferences, themSignals)
+  const areaById = (areas: DeepInsightArea[], id: string): DeepInsightArea =>
+    areas.find((area) => area.id === id) || areas[0]
 
   const areas: DeepInsightArea[] = [
     {
@@ -210,9 +307,13 @@ export function buildComparisonDeepInsights(
       icon: '🔥',
       leftLabel: 'Slow pace',
       rightLabel: 'High intensity',
-      youValue: y.pacingRhythm,
-      themValue: t.pacingRhythm,
-      descriptor: descriptorFromDelta(y.pacingRhythm - t.pacingRhythm),
+      youValue: areaById(yAreas, 'pacing-rhythm').youValue,
+      themValue: areaById(tAreas, 'pacing-rhythm').youValue,
+      zoneStart: areaById(yAreas, 'pacing-rhythm').zoneStart,
+      zoneEnd: areaById(yAreas, 'pacing-rhythm').zoneEnd,
+      themZoneStart: areaById(tAreas, 'pacing-rhythm').zoneStart,
+      themZoneEnd: areaById(tAreas, 'pacing-rhythm').zoneEnd,
+      descriptor: descriptorFromDelta(areaById(yAreas, 'pacing-rhythm').youValue - areaById(tAreas, 'pacing-rhythm').youValue),
       insight:
         "Pacing mismatch can feel like rejection in both directions. Make timing explicit: who leads tempo, who leads intensity, and when you re-sync.",
     },
@@ -222,9 +323,13 @@ export function buildComparisonDeepInsights(
       icon: '🗣️',
       leftLabel: 'Subtle cues',
       rightLabel: 'Direct asks',
-      youValue: y.voicingListening,
-      themValue: t.voicingListening,
-      descriptor: descriptorFromDelta(y.voicingListening - t.voicingListening),
+      youValue: areaById(yAreas, 'voicing-listening').youValue,
+      themValue: areaById(tAreas, 'voicing-listening').youValue,
+      zoneStart: areaById(yAreas, 'voicing-listening').zoneStart,
+      zoneEnd: areaById(yAreas, 'voicing-listening').zoneEnd,
+      themZoneStart: areaById(tAreas, 'voicing-listening').zoneStart,
+      themZoneEnd: areaById(tAreas, 'voicing-listening').zoneEnd,
+      descriptor: descriptorFromDelta(areaById(yAreas, 'voicing-listening').youValue - areaById(tAreas, 'voicing-listening').youValue),
       insight:
         "Different signaling styles are common friction. One direct ask + one reflection per conflict cycle can dramatically improve understanding.",
     },
@@ -234,9 +339,13 @@ export function buildComparisonDeepInsights(
       icon: '⚡',
       leftLabel: 'Withdraw',
       rightLabel: 'Pursue',
-      youValue: y.conflictStyle,
-      themValue: t.conflictStyle,
-      descriptor: descriptorFromDelta(y.conflictStyle - t.conflictStyle),
+      youValue: areaById(yAreas, 'conflict-style').youValue,
+      themValue: areaById(tAreas, 'conflict-style').youValue,
+      zoneStart: areaById(yAreas, 'conflict-style').zoneStart,
+      zoneEnd: areaById(yAreas, 'conflict-style').zoneEnd,
+      themZoneStart: areaById(tAreas, 'conflict-style').zoneStart,
+      themZoneEnd: areaById(tAreas, 'conflict-style').zoneEnd,
+      descriptor: descriptorFromDelta(areaById(yAreas, 'conflict-style').youValue - areaById(tAreas, 'conflict-style').youValue),
       insight:
         "Conflict itself is not the threat. Delayed repair and silent assumptions are. Set a check-in time after cooldown.",
     },
@@ -246,9 +355,13 @@ export function buildComparisonDeepInsights(
       icon: '🫶',
       leftLabel: 'Need space',
       rightLabel: 'Need closeness',
-      youValue: y.autonomyCloseness,
-      themValue: t.autonomyCloseness,
-      descriptor: descriptorFromDelta(y.autonomyCloseness - t.autonomyCloseness),
+      youValue: areaById(yAreas, 'autonomy-closeness').youValue,
+      themValue: areaById(tAreas, 'autonomy-closeness').youValue,
+      zoneStart: areaById(yAreas, 'autonomy-closeness').zoneStart,
+      zoneEnd: areaById(yAreas, 'autonomy-closeness').zoneEnd,
+      themZoneStart: areaById(tAreas, 'autonomy-closeness').zoneStart,
+      themZoneEnd: areaById(tAreas, 'autonomy-closeness').zoneEnd,
+      descriptor: descriptorFromDelta(areaById(yAreas, 'autonomy-closeness').youValue - areaById(tAreas, 'autonomy-closeness').youValue),
       insight:
         "Attachment rhythm is workable when both people know the other's refill pattern and don't moralize it.",
     },
@@ -258,9 +371,13 @@ export function buildComparisonDeepInsights(
       icon: '🌙',
       leftLabel: 'Familiar',
       rightLabel: 'Exploratory',
-      youValue: y.eroticExpression,
-      themValue: t.eroticExpression,
-      descriptor: descriptorFromDelta(y.eroticExpression - t.eroticExpression),
+      youValue: areaById(yAreas, 'erotic-expression').youValue,
+      themValue: areaById(tAreas, 'erotic-expression').youValue,
+      zoneStart: areaById(yAreas, 'erotic-expression').zoneStart,
+      zoneEnd: areaById(yAreas, 'erotic-expression').zoneEnd,
+      themZoneStart: areaById(tAreas, 'erotic-expression').zoneStart,
+      themZoneEnd: areaById(tAreas, 'erotic-expression').zoneEnd,
+      descriptor: descriptorFromDelta(areaById(yAreas, 'erotic-expression').youValue - areaById(tAreas, 'erotic-expression').youValue),
       insight:
         "Erotic mismatch is a negotiation problem, not automatically incompatibility. Alternate comfort and novelty intentionally.",
     },
@@ -270,9 +387,13 @@ export function buildComparisonDeepInsights(
       icon: '🌊',
       leftLabel: 'Self-soothe',
       rightLabel: 'Co-regulate',
-      youValue: y.emotionalRegulation,
-      themValue: t.emotionalRegulation,
-      descriptor: descriptorFromDelta(y.emotionalRegulation - t.emotionalRegulation),
+      youValue: areaById(yAreas, 'emotional-regulation').youValue,
+      themValue: areaById(tAreas, 'emotional-regulation').youValue,
+      zoneStart: areaById(yAreas, 'emotional-regulation').zoneStart,
+      zoneEnd: areaById(yAreas, 'emotional-regulation').zoneEnd,
+      themZoneStart: areaById(tAreas, 'emotional-regulation').zoneStart,
+      themZoneEnd: areaById(tAreas, 'emotional-regulation').zoneEnd,
+      descriptor: descriptorFromDelta(areaById(yAreas, 'emotional-regulation').youValue - areaById(tAreas, 'emotional-regulation').youValue),
       insight:
         "When overwhelmed, name process in the moment: 'I need X minutes and I will return.' This protects both nervous systems.",
     },
@@ -282,15 +403,26 @@ export function buildComparisonDeepInsights(
       icon: '🧭',
       leftLabel: 'Stability',
       rightLabel: 'Adventure',
-      youValue: y.valuesAdventure,
-      themValue: t.valuesAdventure,
-      descriptor: descriptorFromDelta(y.valuesAdventure - t.valuesAdventure),
+      youValue: areaById(yAreas, 'values-alignment').youValue,
+      themValue: areaById(tAreas, 'values-alignment').youValue,
+      zoneStart: areaById(yAreas, 'values-alignment').zoneStart,
+      zoneEnd: areaById(yAreas, 'values-alignment').zoneEnd,
+      themZoneStart: areaById(tAreas, 'values-alignment').zoneStart,
+      themZoneEnd: areaById(tAreas, 'values-alignment').zoneEnd,
+      descriptor: descriptorFromDelta(areaById(yAreas, 'values-alignment').youValue - areaById(tAreas, 'values-alignment').youValue),
       secondary: {
         leftLabel: 'Meaning through roots',
         rightLabel: 'Meaning through impact',
-        youValue: y.valuesImpact,
-        themValue: t.valuesImpact,
-        descriptor: descriptorFromDelta(y.valuesImpact - t.valuesImpact),
+        youValue: areaById(yAreas, 'values-alignment').secondary?.youValue || areaById(yAreas, 'values-alignment').youValue,
+        themValue: areaById(tAreas, 'values-alignment').secondary?.youValue || areaById(tAreas, 'values-alignment').youValue,
+        zoneStart: areaById(yAreas, 'values-alignment').secondary?.zoneStart,
+        zoneEnd: areaById(yAreas, 'values-alignment').secondary?.zoneEnd,
+        themZoneStart: areaById(tAreas, 'values-alignment').secondary?.zoneStart,
+        themZoneEnd: areaById(tAreas, 'values-alignment').secondary?.zoneEnd,
+        descriptor: descriptorFromDelta(
+          (areaById(yAreas, 'values-alignment').secondary?.youValue || areaById(yAreas, 'values-alignment').youValue) -
+            (areaById(tAreas, 'values-alignment').secondary?.youValue || areaById(tAreas, 'values-alignment').youValue)
+        ),
       },
       insight:
         "Shared direction matters most long-term. Differences can become strength when translated into a joint roadmap.",

@@ -1,6 +1,6 @@
 // Database utilities for SoulSort AI
 import { createSupabaseServerClient } from './supabaseServer'
-import type { UserRadarProfile, ConsentRecord, UserLink, RequesterAssessment, RadarDimensions } from './types'
+import type { UserRadarProfile, ConsentRecord, UserLink, RequesterAssessment, RadarDimensions, CanonicalSignalScores } from './types'
 import { CURRENT_SCHEMA_VERSION, CURRENT_MODEL_VERSION, CURRENT_SCORING_VERSION } from './llm'
 
 /**
@@ -32,7 +32,8 @@ export async function upsertUserRadarProfile(
     autonomy_orientation: number
     consent_orientation: number
     conflict_repair: number
-  }
+  },
+  signalScores?: Partial<CanonicalSignalScores>
 ) {
   const supabase = await createSupabaseServerClient()
   
@@ -58,21 +59,36 @@ export async function upsertUserRadarProfile(
     .upsert({
       ...basePayload,
       ...(v4Axes ? { v4_axes: v4Axes } : {}),
+      ...(signalScores ? { signal_scores: signalScores } : {}),
     }, {
       onConflict: 'user_id',
     })
     .select()
     .single()
 
-  // Backward-compatible retry for environments where v4_axes column is not migrated yet.
-  if (error && v4Axes && error.message?.includes('v4_axes')) {
-    ;({ data, error } = await supabase
-      .from('user_radar_profiles')
-      .upsert(basePayload, {
-        onConflict: 'user_id',
-      })
-      .select()
-      .single())
+  // Backward-compatible retry for environments where optional columns are not migrated yet.
+  if (error) {
+    const payload = {
+      ...basePayload,
+      ...(v4Axes ? { v4_axes: v4Axes } : {}),
+      ...(signalScores ? { signal_scores: signalScores } : {}),
+    } as Record<string, unknown>
+
+    const missingColumnMatch = /column\s+"?([a-zA-Z0-9_]+)"?\s+of relation|Could not find the '([^']+)' column/i.exec(
+      error.message || ''
+    )
+    const missingColumn = missingColumnMatch?.[1] || missingColumnMatch?.[2]
+
+    if (missingColumn && missingColumn in payload) {
+      delete payload[missingColumn]
+      ;({ data, error } = await supabase
+        .from('user_radar_profiles')
+        .upsert(payload, {
+          onConflict: 'user_id',
+        })
+        .select()
+        .single())
+    }
   }
 
   if (error) throw error

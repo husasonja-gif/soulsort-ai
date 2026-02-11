@@ -14,6 +14,31 @@ export interface RadarDimensions {
   consent: number
 }
 
+export interface CanonicalSignalScores {
+  self_transcendence: number
+  self_enhancement: number
+  rooting: number
+  searching: number
+  communication_style: number
+  conflict_navigation: number
+  repair_motivation: number
+  self_regulation_awareness: number
+  stability_orientation: number
+  erotic_attunement: number
+  desire_intensity: number
+  fantasy_openness: number
+  attraction_depth_preference: number
+  desire_regulation: number
+  novelty_depth_preference: number
+  freedom_orientation: number
+  enm_openness: number
+  exclusivity_comfort: number
+  consent_awareness: number
+  negotiation_comfort: number
+  non_coerciveness: number
+  self_advocacy: number
+}
+
 export interface UserProfile {
   id: string
   email: string
@@ -40,6 +65,7 @@ export interface UserRadarProfile {
     consent_orientation: number
     conflict_repair: number
   } | null
+  signal_scores?: Partial<CanonicalSignalScores> | null
   dealbreakers: string[]
   schema_version: number
   model_version: string
@@ -86,6 +112,7 @@ export interface RequesterAssessment {
     consent_orientation: number
     conflict_repair: number
   } | null
+  signal_scores?: Partial<CanonicalSignalScores> | null
   compatibility_score: number
   summary_text?: string
   schema_version: number

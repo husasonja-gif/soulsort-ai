@@ -1,7 +1,7 @@
 // LLM integration utilities for SoulSort AI V4 - Claude Sonnet 4.5
 import { claude, CURRENT_MODEL_VERSION, CURRENT_SCORING_VERSION, CURRENT_SCHEMA_VERSION, convertMessagesToClaude } from './claudeClient'
 import { trackLLMUsage } from './trackLLMUsage'
-import type { ChatMessage, RadarDimensions } from './types'
+import type { CanonicalSignalScores, ChatMessage, RadarDimensions } from './types'
 import { CANONICAL_DATING_QUESTIONS } from './datingQuestions'
 
 export { CURRENT_MODEL_VERSION, CURRENT_SCORING_VERSION, CURRENT_SCHEMA_VERSION }
@@ -36,31 +36,6 @@ function detectGamingIntent(text: string): boolean {
     0
   )
   return weakHits >= 2
-}
-
-export interface CanonicalSignalScores {
-  self_transcendence: number
-  self_enhancement: number
-  rooting: number
-  searching: number
-  communication_style: number
-  conflict_navigation: number
-  repair_motivation: number
-  self_regulation_awareness: number
-  stability_orientation: number
-  erotic_attunement: number
-  desire_intensity: number
-  fantasy_openness: number
-  attraction_depth_preference: number
-  desire_regulation: number
-  novelty_depth_preference: number
-  freedom_orientation: number
-  enm_openness: number
-  exclusivity_comfort: number
-  consent_awareness: number
-  negotiation_comfort: number
-  non_coerciveness: number
-  self_advocacy: number
 }
 
 export interface SixAxisScores {
@@ -620,9 +595,9 @@ CHAT QUESTIONS AND ANSWERS:`
       console.log('=== END FINAL SIGNALS + AXES ===')
     }
     
-    // Log radar chart (dev only)
+    // Log compatibility radar chart (dev only)
     if (process.env.NODE_ENV !== 'production') {
-      console.log('=== COMPUTED RADAR CHART FROM VECTORS ===')
+      console.log('=== COMPUTED LEGACY COMPATIBILITY CHART (FROM CANONICAL SIGNALS/AXES) ===')
       console.log(JSON.stringify(radarChart, null, 2))
       console.log('=== END RADAR CHART ===')
     }
@@ -646,6 +621,7 @@ CHAT QUESTIONS AND ANSWERS:`
           schema_version: CURRENT_SCHEMA_VERSION,
           pace: preferences.pace ?? null, // legacy
           connection_chemistry: preferences.connection_chemistry ?? null, // legacy
+          boundaries: preferences.boundaries ?? null, // legacy
           erotic_pace: preferences.erotic_pace ?? preferences.pace ?? null,
           novelty_depth_preference: preferences.novelty_depth_preference ?? preferences.connection_chemistry ?? null,
           vanilla_kinky: preferences.vanilla_kinky ?? null,
@@ -671,10 +647,34 @@ CHAT QUESTIONS AND ANSWERS:`
           low_evidence: finalLowEvidenceFlag,
         }
         
-        const { error: traceError } = await supabaseAdmin
-          .from('profile_generation_traces')
-          .insert(traceData)
-        
+        let payload: Record<string, unknown> = { ...traceData }
+        let traceError: { code?: string; message?: string } | null = null
+
+        for (let attempt = 0; attempt < 8; attempt++) {
+          const insertResult = await supabaseAdmin
+            .from('profile_generation_traces')
+            .insert(payload)
+
+          if (!insertResult.error) {
+            traceError = null
+            break
+          }
+
+          traceError = insertResult.error
+          const missingColumnMatch = /Could not find the '([^']+)' column/i.exec(insertResult.error.message || '')
+          const missingColumn = missingColumnMatch?.[1]
+
+          // Gracefully handle schema drift across environments by dropping unknown optional columns.
+          if (insertResult.error.code === 'PGRST204' && missingColumn && missingColumn in payload) {
+            delete payload[missingColumn]
+            if (process.env.NODE_ENV !== 'production') {
+              console.warn(`profile_generation_traces missing column '${missingColumn}', retrying insert without it`)
+            }
+            continue
+          }
+          break
+        }
+
         if (traceError) {
           console.error('Error writing profile generation trace:', traceError)
           // Don't throw - trace writing is non-blocking

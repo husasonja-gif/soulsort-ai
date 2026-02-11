@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import type { RadarDimensions } from '@/lib/types'
+import type { CanonicalSignalScores, RadarDimensions } from '@/lib/types'
 import { buildComparisonDeepInsights, buildUserDeepInsights, type DeepInsightArea } from '@/lib/deepInsights'
 
 interface DeepInsightsSectionProps {
@@ -10,6 +10,8 @@ interface DeepInsightsSectionProps {
   requesterRadar?: RadarDimensions
   userPreferences?: Record<string, number | undefined> | null
   requesterPreferences?: Record<string, number | undefined> | null
+  userSignalScores?: Partial<CanonicalSignalScores> | null
+  requesterSignalScores?: Partial<CanonicalSignalScores> | null
 }
 
 function DotBar({
@@ -32,9 +34,9 @@ function DotBar({
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[3px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 h-[4px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
-            className="absolute top-1/2 -translate-y-1/2 h-[7px] bg-purple-200 dark:bg-purple-500/40 rounded"
+            className="absolute top-1/2 -translate-y-1/2 h-[4px] bg-purple-300 dark:bg-purple-500/50 rounded"
             style={{
               left: `${safeStart}%`,
               width: `${safeEnd - safeStart}%`,
@@ -87,15 +89,33 @@ function InsightCard({
           <>
             <div>
               <div className="text-xs text-gray-500 mb-1">You</div>
-              <DotBar value={area.youValue} leftLabel={area.leftLabel} rightLabel={area.rightLabel} />
+              <DotBar
+                value={area.youValue}
+                leftLabel={area.leftLabel}
+                rightLabel={area.rightLabel}
+                zoneStart={area.zoneStart}
+                zoneEnd={area.zoneEnd}
+              />
             </div>
             <div>
               <div className="text-xs text-gray-500 mb-1">Them</div>
-              <DotBar value={area.themValue ?? area.youValue} leftLabel={area.leftLabel} rightLabel={area.rightLabel} />
+              <DotBar
+                value={area.themValue ?? area.youValue}
+                leftLabel={area.leftLabel}
+                rightLabel={area.rightLabel}
+                zoneStart={area.themZoneStart ?? area.zoneStart}
+                zoneEnd={area.themZoneEnd ?? area.zoneEnd}
+              />
             </div>
           </>
         ) : (
-          <DotBar value={area.youValue} leftLabel={area.leftLabel} rightLabel={area.rightLabel} />
+          <DotBar
+            value={area.youValue}
+            leftLabel={area.leftLabel}
+            rightLabel={area.rightLabel}
+            zoneStart={area.zoneStart}
+            zoneEnd={area.zoneEnd}
+          />
         )}
 
         {area.secondary && (
@@ -107,12 +127,16 @@ function InsightCard({
                   value={area.secondary.youValue}
                   leftLabel={area.secondary.leftLabel}
                   rightLabel={area.secondary.rightLabel}
+                  zoneStart={area.secondary.zoneStart}
+                  zoneEnd={area.secondary.zoneEnd}
                 />
                 <div className="text-xs text-gray-500 mt-2 mb-1">Them</div>
                 <DotBar
                   value={area.secondary.themValue ?? area.secondary.youValue}
                   leftLabel={area.secondary.leftLabel}
                   rightLabel={area.secondary.rightLabel}
+                  zoneStart={area.secondary.themZoneStart ?? area.secondary.zoneStart}
+                  zoneEnd={area.secondary.themZoneEnd ?? area.secondary.zoneEnd}
                 />
               </>
             ) : (
@@ -120,6 +144,8 @@ function InsightCard({
                 value={area.secondary.youValue}
                 leftLabel={area.secondary.leftLabel}
                 rightLabel={area.secondary.rightLabel}
+                zoneStart={area.secondary.zoneStart}
+                zoneEnd={area.secondary.zoneEnd}
               />
             )}
           </div>
@@ -141,16 +167,25 @@ export default function DeepInsightsSection({
   requesterRadar,
   userPreferences,
   requesterPreferences,
+  userSignalScores,
+  requesterSignalScores,
 }: DeepInsightsSectionProps) {
   const [enabled, setEnabled] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const data = useMemo(() => {
     if (mode === 'requester' && requesterRadar) {
-      return buildComparisonDeepInsights(userRadar, requesterRadar, userPreferences, requesterPreferences)
+      return buildComparisonDeepInsights(
+        userRadar,
+        requesterRadar,
+        userPreferences,
+        requesterPreferences,
+        userSignalScores,
+        requesterSignalScores
+      )
     }
-    return { areas: buildUserDeepInsights(userRadar, userPreferences), summary: null }
-  }, [mode, userRadar, requesterRadar, userPreferences, requesterPreferences])
+    return { areas: buildUserDeepInsights(userRadar, userPreferences, userSignalScores), summary: null }
+  }, [mode, userRadar, requesterRadar, userPreferences, requesterPreferences, userSignalScores, requesterSignalScores])
 
   return (
     <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -174,6 +209,9 @@ export default function DeepInsightsSection({
         </p>
       ) : (
         <div className="space-y-4">
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            Purple band = tension spread from your underlying signals (wider means more variance). Black dot = your blended score.
+          </div>
           {mode === 'requester' && data.summary && (
             <div className="rounded-xl border border-purple-100 dark:border-purple-900 bg-purple-50/60 dark:bg-purple-950/30 p-4 space-y-3">
               <div>

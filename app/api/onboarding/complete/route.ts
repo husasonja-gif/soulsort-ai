@@ -86,7 +86,11 @@ export async function POST(request: Request) {
     console.log('Generating radar profile...')
     // Generate radar profile from survey and chat
     const profile = await generateUserRadarProfile(surveyData, chatHistory as ChatMessage[], userId, null)
-    console.log('Profile generated:', profile)
+    console.log('Profile generated (canonical):', {
+      signal_score_count: Object.keys(profile.signal_scores || {}).length,
+      axis_scores: profile.axis_scores,
+      dealbreaker_count: Array.isArray(profile.dealbreakers) ? profile.dealbreakers.length : 0,
+    })
 
     console.log('Saving to database...')
     // Extract chart values from the profile
@@ -114,7 +118,8 @@ export async function POST(request: Request) {
         consent: chart.Consent,
       },
       profile.dealbreakers,
-      v4Axes
+      v4Axes,
+      profile.signal_scores
     )
     console.log('Profile saved to database')
 
