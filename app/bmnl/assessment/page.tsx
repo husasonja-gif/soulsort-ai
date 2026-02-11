@@ -77,6 +77,7 @@ function BMNLAssessmentPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
+  const [userLang, setUserLang] = useState<'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt'>('en')
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
@@ -88,6 +89,13 @@ function BMNLAssessmentPageContent() {
   const [gamingCount, setGamingCount] = useState(0)
   const [phobicCount, setPhobicCount] = useState(0)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
+  const BMNL_QUESTIONS = getBMNLQuestions(userLang)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUserLang(detectLanguage())
+    }
+  }, [])
 
   useEffect(() => {
     const loadParticipant = async () => {
