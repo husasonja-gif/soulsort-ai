@@ -6,15 +6,17 @@ import { supabase } from '@/lib/supabaseClient'
 import RadarChart from '@/components/RadarChart'
 import ShareCard from '@/components/ShareCard'
 import ThemeToggle from '@/components/ThemeToggle'
+import DeepInsightsSection from '@/components/DeepInsightsSection'
 import type { UserRadarProfile, ConsentRecord } from '@/lib/types'
 
 interface DashboardClientProps {
   radarProfile: UserRadarProfile | null
   consents: ConsentRecord[]
   shareLink: string
+  userPreferences?: Record<string, number | undefined> | null
 }
 
-export default function DashboardClient({ radarProfile, consents, shareLink }: DashboardClientProps) {
+export default function DashboardClient({ radarProfile, consents, shareLink, userPreferences = null }: DashboardClientProps) {
   const router = useRouter()
 
   const publicRadarConsent = consents.find(c => c.consent_type === 'public_radar' && c.granted && !c.revoked_at)
@@ -140,6 +142,13 @@ export default function DashboardClient({ radarProfile, consents, shareLink }: D
                   <b className="text-gray-900 dark:text-gray-100">Conflict & Repair</b> — What happens after a rupture: whether you flee, fight, freeze, or find your way back to connection—and how trust gets rebuilt (or doesn&apos;t).
                 </div>
               </div>
+            </div>
+            <div className="mt-6">
+              <DeepInsightsSection
+                mode="user"
+                userRadar={radarData}
+                userPreferences={userPreferences}
+              />
             </div>
           </>
         ) : (

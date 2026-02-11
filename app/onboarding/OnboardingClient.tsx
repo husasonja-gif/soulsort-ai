@@ -156,11 +156,41 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   ]
 
   const preferenceLabels = [
-    { id: 'erotic_pace', label: 'Slow pace', opposite: 'Fast pace', info: 'How quickly emotional/physical closeness feels right to you.' },
-    { id: 'novelty_depth_preference', label: 'Depth first', opposite: 'Novelty first', info: 'Whether attraction is sustained more by emotional depth or by novelty/variety.' },
-    { id: 'vanilla_kinky', label: 'Vanilla', opposite: 'Kinky', info: 'Your comfort with playful/edge-based erotic exploration.' },
-    { id: 'open_monogamous', label: 'Open relationship', opposite: 'Monogamous', info: 'Where you sit between openness and exclusivity in partnership.' },
-    { id: 'boundaries_ease', label: 'Hard', opposite: 'Easy', title: 'Ease of setting boundaries', info: 'How easy it feels to notice and communicate limits in real time.' },
+    {
+      id: 'erotic_pace',
+      label: 'Slow pace',
+      opposite: 'Fast pace',
+      title: 'Erotic_pace',
+      info: 'Are you someone who likes to savor the build; long conversations, emotional connection first, or do you prefer to feel the spark and see where it goes?'
+    },
+    {
+      id: 'boundaries_ease',
+      label: 'Difficulty setting limits',
+      opposite: 'Easy to set boundaries',
+      title: 'Boundaries_ease',
+      info: 'How comfortable are you saying "no" or "not yet"? Are you able to express what you need, or does it feel awkward to speak up about it or easier to focus on others\' needs?'
+    },
+    {
+      id: 'vanilla_kinky',
+      label: 'Vanilla',
+      opposite: 'Kinky',
+      title: 'Vanilla_kinky',
+      info: 'Where do you land on the adult play spectrum? Are you drawn to tender intimacy-or do you crave edge, variety, and exploring fantasies?'
+    },
+    {
+      id: 'open_monogamous',
+      label: 'Open relationship',
+      opposite: 'Monogamous',
+      title: 'Open_monogamous',
+      info: 'Do you feel most secure with one person, or are you curious about (or already practicing) non-monogamy and multiple connections?'
+    },
+    {
+      id: 'novelty_depth_preference',
+      label: 'Connection first',
+      opposite: 'Chemistry first',
+      title: 'Novelty_depth_preference',
+      info: 'What pulls you in first-emotional resonance and shared values, or raw attraction and physical chemistry?'
+    },
   ]
 
   // Get user's language preference

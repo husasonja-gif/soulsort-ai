@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import RadarOverlay from '@/components/RadarOverlay'
+import DeepInsightsSection from '@/components/DeepInsightsSection'
 import type { ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
 
 interface RequesterClientProps {
@@ -801,6 +802,12 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               requesterData={assessment.requesterRadar}
             />
           </div>
+
+          <DeepInsightsSection
+            mode="requester"
+            userRadar={assessment.requesterRadar}
+            requesterRadar={assessment.userRadar}
+          />
 
           {/* Feedback Section */}
           <FeedbackSection linkId={linkId} />

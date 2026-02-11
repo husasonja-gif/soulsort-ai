@@ -19,7 +19,7 @@ export default async function DashboardPage() {
     // Check if onboarding is needed
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('id, onboarding_completed, email')
+      .select('id, onboarding_completed, email, preferences')
       .eq('id', user.id)
       .maybeSingle()
 
@@ -71,11 +71,17 @@ export default async function DashboardPage() {
       // Continue without share link if there's an error
     }
 
+    const userPreferences =
+      profile && typeof profile === 'object' && 'preferences' in profile
+        ? ((profile as { preferences?: Record<string, number | undefined> }).preferences ?? null)
+        : null
+
     return (
       <DashboardClient
         radarProfile={radarProfile}
         consents={consents}
         shareLink={shareLink}
+        userPreferences={userPreferences}
       />
     )
   } catch (error) {
