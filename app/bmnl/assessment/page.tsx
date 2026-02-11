@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense, useRef } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { t, getCanonicalText, detectLanguage } from '@/lib/translations'
 import type { ChatMessage } from '@/lib/types'
 
 // Speech Recognition types
@@ -40,7 +41,8 @@ interface SpeechRecognitionAlternative {
   confidence: number
 }
 
-const BMNL_QUESTIONS = [
+// Canonical English questions (for LLM - always English)
+const BMNL_QUESTIONS_CANONICAL = [
   'Why do you want to join this event, and what do you understand about what it is?',
   'Which Burning Man principle feels easiest for you to live by — and which one feels most challenging?',
   'Have you attended Burning Man–inspired events before? If so, which ones?',
@@ -53,6 +55,23 @@ const BMNL_QUESTIONS = [
   'What would you like to gift to the burn (time, skills, care, creativity)?',
   'What do you hope others will bring or offer — to you or to the community?',
 ]
+
+// Helper to get translated questions
+function getBMNLQuestions(lang: 'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt'): string[] {
+  return [
+    t('bmnl.q1', lang),
+    t('bmnl.q2', lang),
+    t('bmnl.q3', lang),
+    t('bmnl.q4', lang),
+    t('bmnl.q5', lang),
+    t('bmnl.q6', lang),
+    t('bmnl.q7', lang),
+    t('bmnl.q8', lang),
+    t('bmnl.q9', lang),
+    t('bmnl.q10', lang),
+    t('bmnl.q11', lang),
+  ]
+}
 
 function BMNLAssessmentPageContent() {
   const router = useRouter()
@@ -226,7 +245,8 @@ function BMNLAssessmentPageContent() {
     if (!currentAnswer.trim() || loading || !participantId) return
 
     const questionNumber = currentQuestionIndex + 1
-    const questionText = BMNL_QUESTIONS[currentQuestionIndex]
+    // Use canonical English question for LLM
+    const questionText = BMNL_QUESTIONS_CANONICAL[currentQuestionIndex]
 
     // Add user answer to chat
     const userMessage: ChatMessage = {
@@ -515,7 +535,7 @@ function BMNLAssessmentPageContent() {
         {/* Input Form */}
         <form onSubmit={handleSubmit} className="bg-white dark:bg-white rounded-lg p-4 sm:p-6">
           <div className="mb-2 text-xs text-gray-500">
-            You can answer in any language. Type or tap the mic to dictate.
+            {t('ui.onboarding.chat.audio.hint', userLang)}
           </div>
           <div className="flex items-end gap-2 mb-4">
             <textarea

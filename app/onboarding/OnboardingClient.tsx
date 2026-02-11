@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { t, getCanonicalText, detectLanguage } from '@/lib/translations'
 import type { ChatMessage } from '@/lib/types'
 
 interface OnboardingClientProps {
@@ -160,11 +161,29 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
     { id: 'boundaries_ease', label: 'Hard', opposite: 'Easy', title: 'Ease of setting boundaries' },
   ]
 
-  const chatQuestions = [
+  // Get user's language preference
+  const [userLang, setUserLang] = useState<'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt'>('en')
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUserLang(detectLanguage())
+    }
+  }, [])
+
+  // Canonical English questions (for LLM - always English)
+  const canonicalQuestions = [
     '[[Q1]] What are three values you try to practice in your relationships?',
     '[[Q2]] How do you like to navigate disagreements or misunderstandings?',
     '[[Q3]] What helps you feel erotically connected to someone?',
     '[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
+  ]
+  
+  // Translated questions (for UI display)
+  const chatQuestions = [
+    `[[Q1]] ${t('onboarding.q1', userLang)}`,
+    `[[Q2]] ${t('onboarding.q2', userLang)}`,
+    `[[Q3]] ${t('onboarding.q3', userLang)}`,
+    `[[Q4]] ${t('onboarding.q4', userLang)}`,
   ]
 
   const handleDealbreakerToggle = (option: string) => {
@@ -231,14 +250,27 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
     try {
       // Get AI commentary for this answer
+      // Use canonical English question for LLM, but translated for display
       const response = await fetch('/api/onboarding/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           questionIndex: currentQuestion,
-          question: chatQuestions[currentQuestion],
+          question: canonicalQuestions[currentQuestion], // Always send English to LLM
           answer: currentMessage,
-          chatHistory: updatedHistory,
+          chatHistory: updatedHistory.map(msg => {
+            // Replace translated questions with canonical English in chat history for LLM
+            if (msg.role === 'assistant' && msg.content.startsWith('[[')) {
+              const qMatch = msg.content.match(/\[\[Q(\d+)\]\]/)
+              if (qMatch) {
+                const qIndex = parseInt(qMatch[1]) - 1
+                if (qIndex >= 0 && qIndex < canonicalQuestions.length) {
+                  return { ...msg, content: canonicalQuestions[qIndex] }
+                }
+              }
+            }
+            return msg
+          }),
           dealbreakers,
           preferences,
         }),
@@ -272,7 +304,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
           ...prev,
           {
             role: 'assistant',
-            content: chatQuestions[nextQuestion],
+            content: chatQuestions[nextQuestion], // Display translated version
             timestamp: new Date(),
           },
         ])
@@ -341,12 +373,12 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
         <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">Create Your SoulSort Profile</h1>
+          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">{t('ui.onboarding.title', userLang)}</h1>
           <p className="text-gray-700 dark:text-gray-300 mb-6">
             {skipChat ? 'Section 1 of 1: Dealbreakers' : 'Section 1 of 2: Dealbreakers'}
           </p>
           <p className="text-lg font-medium mb-6 text-gray-900 dark:text-gray-100">
-            Check all boxes that would be dealbreakers for you in a partner:
+            {t('ui.onboarding.dealbreakers.title', userLang)}
           </p>
 
           <div className="space-y-3 mb-8">
@@ -381,12 +413,12 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
         <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">Create Your SoulSort Profile</h1>
+          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">{t('ui.onboarding.title', userLang)}</h1>
           <p className="text-gray-700 dark:text-gray-300 mb-6">
             {skipChat ? 'Section 1 of 1: Preferences' : 'Section 2 of 2: Preferences'}
           </p>
           <p className="text-lg font-medium mb-6 text-gray-900 dark:text-gray-100">
-            Use the sliders to select the spot that describes you best:
+            {t('ui.onboarding.preferences.title', userLang)}
           </p>
 
           <div className="space-y-6 mb-8">
@@ -433,7 +465,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
         <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col" style={{ minHeight: 'calc(100vh - 6rem)', maxHeight: 'calc(100vh - 6rem)' }}>
           <h1 className="text-2xl font-bold mb-4 dark:text-white">Let's Chat</h1>
           <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-            I'll ask you {chatQuestions.length} questions to understand what matters most to you in relationships.
+            {t('ui.onboarding.chat.intro', userLang, { count: chatQuestions.length })}
           </p>
 
           <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
@@ -470,7 +502,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                   type="text"
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
-                  placeholder="Type or dictate your response..."
+                  placeholder={t('ui.onboarding.chat.audio.hint', userLang)}
                   className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400"
                   disabled={loading}
                   autoComplete="off"
