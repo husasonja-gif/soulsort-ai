@@ -8,7 +8,7 @@ const claude = new Anthropic({
 })
 
 export const CURRENT_MODEL_VERSION = 'claude-sonnet-4-20250514' // Claude Sonnet 4.5
-export const CURRENT_SCORING_VERSION = 'v4.0-claude'
+export const CURRENT_SCORING_VERSION = 'v4.1-claude-6axis'
 export const CURRENT_SCHEMA_VERSION = 4
 
 export { claude }

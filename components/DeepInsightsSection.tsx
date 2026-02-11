@@ -16,17 +16,38 @@ function DotBar({
   value,
   leftLabel,
   rightLabel,
+  zoneStart = 35,
+  zoneEnd = 65,
 }: {
   value: number
   leftLabel: string
   rightLabel: string
+  zoneStart?: number
+  zoneEnd?: number
 }) {
   const clamped = Math.max(0, Math.min(100, value))
+  const safeStart = Math.max(0, Math.min(100, zoneStart))
+  const safeEnd = Math.max(safeStart, Math.min(100, zoneEnd))
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[2px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 h-[3px] bg-gray-700 dark:bg-gray-300 rounded">
+          <span
+            className="absolute top-1/2 -translate-y-1/2 h-[7px] bg-purple-200 dark:bg-purple-500/40 rounded"
+            style={{
+              left: `${safeStart}%`,
+              width: `${safeEnd - safeStart}%`,
+            }}
+          />
+          <span
+            className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400"
+            style={{ left: `calc(${safeStart}% - 4px)` }}
+          />
+          <span
+            className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400"
+            style={{ left: `calc(${safeEnd}% - 4px)` }}
+          />
           <span
             className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-900 dark:bg-white border-2 border-white dark:border-gray-900"
             style={{ left: `calc(${clamped}% - 6px)` }}
@@ -57,12 +78,8 @@ function InsightCard({
         className="w-full text-left flex items-center justify-between gap-3"
       >
         <div className="font-semibold text-gray-900 dark:text-gray-100">
-          <span className="mr-2">{area.icon}</span>
           {area.title}
         </div>
-        <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-200">
-          {area.descriptor}
-        </span>
       </button>
 
       <div className="mt-3 space-y-3">
@@ -163,7 +180,7 @@ export default function DeepInsightsSection({
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Where You Flow</h3>
                 <ul className="text-sm text-gray-700 dark:text-gray-300 list-disc pl-5 mt-1">
                   {(data.summary.flow.length ? data.summary.flow : ['✨ Build on your strongest overlap and keep naming what works.']).map((item, idx) => (
-                    <li key={`flow-${idx}`}>{item}</li>
+                      <li key={`flow-${idx}`}>{item.replace(/^[^\w]+/, '')}</li>
                   ))}
                 </ul>
               </div>
@@ -171,7 +188,7 @@ export default function DeepInsightsSection({
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Where You&apos;ll Feel Friction</h3>
                 <ul className="text-sm text-gray-700 dark:text-gray-300 list-disc pl-5 mt-1">
                   {(data.summary.friction.length ? data.summary.friction : ['⚡ Low visible friction right now; revisit after real-life stress or conflict.']).map((item, idx) => (
-                    <li key={`friction-${idx}`}>{item}</li>
+                      <li key={`friction-${idx}`}>{item.replace(/^[^\w]+/, '')}</li>
                   ))}
                 </ul>
               </div>
@@ -179,7 +196,7 @@ export default function DeepInsightsSection({
                 <h3 className="font-semibold text-gray-900 dark:text-gray-100">Creative Edges</h3>
                 <ul className="text-sm text-gray-700 dark:text-gray-300 list-disc pl-5 mt-1">
                   {data.summary.creativeEdges.map((item, idx) => (
-                    <li key={`edge-${idx}`}>{item}</li>
+                    <li key={`edge-${idx}`}>{item.replace(/^[^\w]+/, '')}</li>
                   ))}
                 </ul>
               </div>

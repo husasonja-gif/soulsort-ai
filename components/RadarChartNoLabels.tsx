@@ -2,6 +2,7 @@
 
 import { Radar, RadarChart as RechartsRadarChart, PolarGrid, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
 import type { RadarDimensions } from '@/lib/types'
+import { toV4RadarAxes } from '@/lib/radarAxes'
 
 interface RadarChartNoLabelsProps {
   data: RadarDimensions
@@ -10,40 +11,36 @@ interface RadarChartNoLabelsProps {
 }
 
 export default function RadarChartNoLabels({ data, label = 'Profile', color = '#9333ea' }: RadarChartNoLabelsProps) {
+  const axes = toV4RadarAxes(data)
   const chartData = [
     {
-      dimension: 'Self Transcendence',
-      value: data.self_transcendence,
+      dimension: 'Meaning & Values',
+      value: axes.meaning_values,
       fullMark: 100,
     },
     {
-      dimension: 'Self Enhancement',
-      value: data.self_enhancement,
+      dimension: 'Regulation & Nervous System',
+      value: axes.regulation_nervous_system,
       fullMark: 100,
     },
     {
-      dimension: 'Rooting',
-      value: data.rooting,
+      dimension: 'Erotic Attunement',
+      value: axes.erotic_attunement,
       fullMark: 100,
     },
     {
-      dimension: 'Searching',
-      value: data.searching,
+      dimension: 'Autonomy Orientation',
+      value: axes.autonomy_orientation,
       fullMark: 100,
     },
     {
-      dimension: 'Relational',
-      value: data.relational,
+      dimension: 'Consent Orientation',
+      value: axes.consent_orientation,
       fullMark: 100,
     },
     {
-      dimension: 'Erotic',
-      value: data.erotic,
-      fullMark: 100,
-    },
-    {
-      dimension: 'Consent',
-      value: data.consent,
+      dimension: 'Conflict & Repair',
+      value: axes.conflict_repair,
       fullMark: 100,
     },
   ]
@@ -51,7 +48,7 @@ export default function RadarChartNoLabels({ data, label = 'Profile', color = '#
   return (
     <ResponsiveContainer width="100%" height="100%">
       <RechartsRadarChart data={chartData}>
-        <PolarGrid />
+        <PolarGrid gridType="circle" />
         <PolarRadiusAxis 
           angle={90} 
           domain={[0, 100]} 

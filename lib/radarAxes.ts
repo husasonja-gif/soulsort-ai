@@ -11,11 +11,37 @@ export interface V4RadarAxes {
 
 const clamp0to100 = (value: number): number => Math.max(0, Math.min(100, Math.round(value)))
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value)
+}
+
 /**
  * Map legacy 7-dim radar values into V4 dashboard axes.
  * This keeps backward compatibility with stored profiles while rendering new axis language.
  */
-export function toV4RadarAxes(data: RadarDimensions): V4RadarAxes {
+export function toV4RadarAxes(
+  data: RadarDimensions & { v4_axes?: Partial<V4RadarAxes> | null }
+): V4RadarAxes {
+  const storedAxes = data.v4_axes
+  if (
+    storedAxes &&
+    isFiniteNumber(storedAxes.meaning_values) &&
+    isFiniteNumber(storedAxes.regulation_nervous_system) &&
+    isFiniteNumber(storedAxes.erotic_attunement) &&
+    isFiniteNumber(storedAxes.autonomy_orientation) &&
+    isFiniteNumber(storedAxes.consent_orientation) &&
+    isFiniteNumber(storedAxes.conflict_repair)
+  ) {
+    return {
+      meaning_values: clamp0to100(storedAxes.meaning_values),
+      regulation_nervous_system: clamp0to100(storedAxes.regulation_nervous_system),
+      erotic_attunement: clamp0to100(storedAxes.erotic_attunement),
+      autonomy_orientation: clamp0to100(storedAxes.autonomy_orientation),
+      consent_orientation: clamp0to100(storedAxes.consent_orientation),
+      conflict_repair: clamp0to100(storedAxes.conflict_repair),
+    }
+  }
+
   const meaningValues =
     (data.self_transcendence + data.self_enhancement + data.rooting + data.searching) / 4
 

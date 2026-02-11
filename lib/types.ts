@@ -32,6 +32,14 @@ export interface UserRadarProfile {
   relational: number
   erotic: number
   consent: number
+  v4_axes?: {
+    meaning_values: number
+    regulation_nervous_system: number
+    erotic_attunement: number
+    autonomy_orientation: number
+    consent_orientation: number
+    conflict_repair: number
+  } | null
   dealbreakers: string[]
   schema_version: number
   model_version: string
@@ -70,6 +78,14 @@ export interface RequesterAssessment {
   relational: number
   erotic: number
   consent: number
+  v4_axes?: {
+    meaning_values: number
+    regulation_nervous_system: number
+    erotic_attunement: number
+    autonomy_orientation: number
+    consent_orientation: number
+    conflict_repair: number
+  } | null
   compatibility_score: number
   summary_text?: string
   schema_version: number

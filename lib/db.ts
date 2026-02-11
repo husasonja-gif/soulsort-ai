@@ -24,7 +24,15 @@ export async function getUserProfile(userId: string) {
 export async function upsertUserRadarProfile(
   userId: string,
   radar: RadarDimensions,
-  dealbreakers: string[]
+  dealbreakers: string[],
+  v4Axes?: {
+    meaning_values: number
+    regulation_nervous_system: number
+    erotic_attunement: number
+    autonomy_orientation: number
+    consent_orientation: number
+    conflict_repair: number
+  }
 ) {
   const supabase = await createSupabaseServerClient()
   
@@ -35,21 +43,37 @@ export async function upsertUserRadarProfile(
     consent_dim: consent || (radar as any).consent_dim || 50, // Map consent to consent_dim for DB
   }
 
-  const { data, error } = await supabase
+  const basePayload = {
+    user_id: userId,
+    ...dbRadar,
+    dealbreakers,
+    schema_version: CURRENT_SCHEMA_VERSION,
+    model_version: CURRENT_MODEL_VERSION,
+    scoring_version: CURRENT_SCORING_VERSION,
+    updated_at: new Date().toISOString(),
+  }
+
+  let { data, error } = await supabase
     .from('user_radar_profiles')
     .upsert({
-      user_id: userId,
-      ...dbRadar,
-      dealbreakers,
-      schema_version: CURRENT_SCHEMA_VERSION,
-      model_version: CURRENT_MODEL_VERSION,
-      scoring_version: CURRENT_SCORING_VERSION,
-      updated_at: new Date().toISOString(),
+      ...basePayload,
+      ...(v4Axes ? { v4_axes: v4Axes } : {}),
     }, {
       onConflict: 'user_id',
     })
     .select()
     .single()
+
+  // Backward-compatible retry for environments where v4_axes column is not migrated yet.
+  if (error && v4Axes && error.message?.includes('v4_axes')) {
+    ;({ data, error } = await supabase
+      .from('user_radar_profiles')
+      .upsert(basePayload, {
+        onConflict: 'user_id',
+      })
+      .select()
+      .single())
+  }
 
   if (error) throw error
   return data
@@ -201,7 +225,15 @@ export async function createRequesterAssessment(
   compatibilityScore: number,
   summary: string,
   abuseFlags: string[] = [],
-  dealbreakerHits: Array<{ ruleId: string; label: string; reason: string; evidence: Array<{ field: string; value: string | number }>; capScoreTo: number }> = []
+  dealbreakerHits: Array<{ ruleId: string; label: string; reason: string; evidence: Array<{ field: string; value: string | number }>; capScoreTo: number }> = [],
+  v4Axes?: {
+    meaning_values: number
+    regulation_nervous_system: number
+    erotic_attunement: number
+    autonomy_orientation: number
+    consent_orientation: number
+    conflict_repair: number
+  }
 ) {
   // Use service role to bypass RLS for requester assessment inserts
   // Requesters are anonymous, so we need service role to insert on their behalf
@@ -267,22 +299,35 @@ export async function createRequesterAssessment(
 
   console.log('Link verified, inserting assessment for linkId:', linkId, 'userId:', userId)
   
-  const { data, error } = await supabase
+  const assessmentPayload = {
+    link_id: linkId,
+    user_id: userId,
+    ...radarInt,
+    compatibility_score: compatibilityScoreInt,
+    summary_text: summary,
+    abuse_flags: abuseFlags,
+    dealbreaker_hits: dealbreakerHitsJson,
+    schema_version: CURRENT_SCHEMA_VERSION,
+    model_version: CURRENT_MODEL_VERSION,
+    scoring_version: CURRENT_SCORING_VERSION,
+    ...(v4Axes ? { v4_axes: v4Axes } : {}),
+  }
+
+  let { data, error } = await supabase
     .from('requester_assessments')
-    .insert({
-      link_id: linkId,
-      user_id: userId,
-      ...radarInt,
-      compatibility_score: compatibilityScoreInt,
-      summary_text: summary,
-      abuse_flags: abuseFlags,
-      dealbreaker_hits: dealbreakerHitsJson,
-      schema_version: CURRENT_SCHEMA_VERSION,
-      model_version: CURRENT_MODEL_VERSION,
-      scoring_version: CURRENT_SCORING_VERSION,
-    })
+    .insert(assessmentPayload)
     .select()
     .single()
+
+  // Backward-compatible retry for environments where v4_axes column is not migrated yet.
+  if (error && v4Axes && error.message?.includes('v4_axes')) {
+    const { v4_axes: _omitV4Axes, ...legacyPayload } = assessmentPayload as typeof assessmentPayload & { v4_axes?: unknown }
+    ;({ data, error } = await supabase
+      .from('requester_assessments')
+      .insert(legacyPayload)
+      .select()
+      .single())
+  }
 
   if (error) {
     console.error('Error creating requester assessment:', error)

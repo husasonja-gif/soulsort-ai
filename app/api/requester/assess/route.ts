@@ -4,6 +4,8 @@ import { getUserRadarProfile, createRequesterAssessment } from '@/lib/db'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import { evaluateDealbreakers, applyDealbreakerCaps, type RequesterStructuredFields } from '@/lib/dealbreakerEngine'
 import type { ChatMessage } from '@/lib/types'
+import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
+import { toV4RadarAxes } from '@/lib/radarAxes'
 
 /**
  * REQUESTER VECTOR STORAGE AUDIT (Part C):
@@ -156,49 +158,11 @@ export async function POST(request: Request) {
     }
 
     // Extract requester responses from chat history with questions and answers paired
-    // Note: Q1-Q3 now use simplified questions with quick-reply chips
-    const QUESTIONS = [
-      'Do you consent to a short convo to check alignment?',
-      'What communication style do you prefer?',
-      'Is there anything you do NOT want to discuss?',
-      'What are three values you try to practice in your relationships?',
-      'How do you like to navigate disagreements or misunderstandings?',
-      'What helps you feel erotically connected to someone?',
-      'How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
-    ]
+    // Requester flow mirrors canonical 9-question free-text flow.
+    const QUESTIONS = [...CANONICAL_DATING_QUESTIONS]
 
-    // Use skippedQuestions array from client, or extract from exclusions as fallback
-    const skippedSet = new Set(skippedQuestions)
-    
-    // Extract exclusions from chat history as fallback
-    let exclusionsValue = ''
-    for (let i = 0; i < chatHistory.length; i++) {
-      const msg = chatHistory[i]
-      if (msg.role === 'assistant' && msg.content.includes(QUESTIONS[2].substring(0, 30))) {
-        const nextMsg = chatHistory[i + 1]
-        if (nextMsg && nextMsg.role === 'user') {
-          exclusionsValue = nextMsg.content
-          break
-        }
-      }
-    }
-
-    // If skippedQuestions not provided, check exclusions for erotic question
-    // Check both exclusionsValue (from chat) and structuredFields.exclusions
-    const exclusionValue = structuredFields?.exclusions || exclusionsValue
-    if (!skippedSet.has(5)) {
-      const shouldSkipErotic = exclusionValue && 
-        exclusionValue !== 'no_exclusions' && 
-        exclusionValue.toLowerCase() !== 'no exclusions' && 
-        exclusionValue.toLowerCase() !== 'none' && 
-        exclusionValue.toLowerCase() !== 'no' &&
-        ['sex', 'sexual', 'erotic', 'intimacy', 'kink', 'kinky'].some(term => 
-          exclusionValue.toString().toLowerCase().includes(term)
-        )
-      if (shouldSkipErotic) {
-        skippedSet.add(5)
-      }
-    }
+    // Canonical 9-question flow: no exclusions/skip logic.
+    const skippedSet = new Set<number>()
 
     // Pair questions with answers from chat history
     // Note: AI commentary may appear between questions and answers
@@ -212,10 +176,7 @@ export async function POST(request: Request) {
         // Check if this assistant message is one of our questions
         const matchingQuestion = QUESTIONS[questionIndex]
         // Check if message contains the question (allowing for partial matches)
-        // For simplified Q1-Q3 questions, match on shorter prefixes
-        const questionStart = questionIndex < 3 
-          ? matchingQuestion.substring(0, 20) // Shorter match for Q1-Q3
-          : matchingQuestion.substring(0, 30)
+        const questionStart = matchingQuestion.substring(0, 30)
         
         // Skip question if it was marked as skipped
         if (skippedSet.has(questionIndex)) {
@@ -266,51 +227,25 @@ export async function POST(request: Request) {
 
     console.log(`Extracted ${chatPairs.length} question-answer pairs from chat history`)
 
-    // Build requester responses with both questions and answers
-    // Use structured fields for Q1-Q3 if available, otherwise fall back to chat pairs
-    // For structured fields, map values to display labels
-    const consentAnswer = structuredFields?.consent 
-      ? (structuredFields.consent === 'yes' ? 'Yes' : 'No')
-      : chatPairs.find(p => p.index === 0)?.answer || ''
-      
-    const communicationStyleAnswer = structuredFields?.communication_style 
-      ? structuredFields.communication_style
-      : chatPairs.find(p => p.index === 1)?.answer || ''
-      
-    const exclusionsAnswer = structuredFields?.exclusions
-      ? (structuredFields.exclusions === 'no_exclusions' ? 'No exclusions' : structuredFields.exclusions)
-      : chatPairs.find(p => p.index === 2)?.answer || ''
-
     const requesterResponses: Record<string, any> = {
-      consent: consentAnswer,
-      communication_style: communicationStyleAnswer,
-      exclusions: exclusionsAnswer,
-      values: chatPairs.find(p => p.index === 3)?.answer || '',
-      conflict_navigation: chatPairs.find(p => p.index === 4)?.answer || '',
-      erotic_connection: chatPairs.find(p => p.index === 5 && !p.skipped)?.answer || '[SKIPPED - Topic excluded]',
-      freedom_needs: chatPairs.find(p => p.index === 6)?.answer || '',
-      // Include full question-answer pairs for context (excluding skipped ones)
-      // Use structured fields for Q1-Q3 if available
-      question_answer_pairs: [
-        ...(structuredFields?.consent ? [{
-          question: QUESTIONS[0],
-          answer: consentAnswer,
-        }] : chatPairs.filter(p => p.index === 0).map(p => ({ question: p.question, answer: p.answer }))),
-        ...(structuredFields?.communication_style ? [{
-          question: QUESTIONS[1],
-          answer: communicationStyleAnswer,
-        }] : chatPairs.filter(p => p.index === 1).map(p => ({ question: p.question, answer: p.answer }))),
-        ...(structuredFields?.exclusions ? [{
-          question: QUESTIONS[2],
-          answer: exclusionsAnswer,
-        }] : chatPairs.filter(p => p.index === 2).map(p => ({ question: p.question, answer: p.answer }))),
-        ...chatPairs
-          .filter(p => p.index > 2 && !p.skipped)
-          .map(p => ({
-            question: p.question,
-            answer: p.answer,
-          })),
-      ],
+      consent: 'N/A',
+      communication_style: '',
+      exclusions: '',
+      response_1: chatPairs.find(p => p.index === 0)?.answer || '',
+      response_2: chatPairs.find(p => p.index === 1)?.answer || '',
+      response_3: chatPairs.find(p => p.index === 2)?.answer || '',
+      response_4: chatPairs.find(p => p.index === 3)?.answer || '',
+      response_5: chatPairs.find(p => p.index === 4)?.answer || '',
+      response_6: chatPairs.find(p => p.index === 5 && !p.skipped)?.answer || '',
+      response_7: chatPairs.find(p => p.index === 6)?.answer || '',
+      response_8: chatPairs.find(p => p.index === 7)?.answer || '',
+      response_9: chatPairs.find(p => p.index === 8)?.answer || '',
+      question_answer_pairs: chatPairs
+        .filter(p => !p.skipped)
+        .map(p => ({
+          question: p.question,
+          answer: p.answer,
+        })),
     }
 
     // Convert structuredFields to RequesterStructuredFields format
@@ -362,6 +297,7 @@ export async function POST(request: Request) {
     }
 
     // Save assessment (including dealbreaker hits - private to profile owner)
+    const requesterV4Axes = toV4RadarAxes(assessment.radar)
     const savedAssessment = await createRequesterAssessment(
       linkId,
       userId,
@@ -369,7 +305,8 @@ export async function POST(request: Request) {
       assessment.compatibilityScore,
       assessment.summary,
       assessment.abuseFlags,
-      assessment.dealbreakerHits
+      assessment.dealbreakerHits,
+      requesterV4Axes
     )
 
     // Store requester trace if analytics_opt_in is true (privacy-first)

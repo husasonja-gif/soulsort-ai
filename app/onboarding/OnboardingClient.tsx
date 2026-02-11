@@ -160,35 +160,30 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
       id: 'erotic_pace',
       label: 'Slow pace',
       opposite: 'Fast pace',
-      title: 'Erotic_pace',
       info: 'Are you someone who likes to savor the build; long conversations, emotional connection first, or do you prefer to feel the spark and see where it goes?'
     },
     {
       id: 'boundaries_ease',
       label: 'Difficulty setting limits',
       opposite: 'Easy to set boundaries',
-      title: 'Boundaries_ease',
       info: 'How comfortable are you saying "no" or "not yet"? Are you able to express what you need, or does it feel awkward to speak up about it or easier to focus on others\' needs?'
     },
     {
       id: 'vanilla_kinky',
       label: 'Vanilla',
       opposite: 'Kinky',
-      title: 'Vanilla_kinky',
       info: 'Where do you land on the adult play spectrum? Are you drawn to tender intimacy-or do you crave edge, variety, and exploring fantasies?'
     },
     {
       id: 'open_monogamous',
       label: 'Open relationship',
       opposite: 'Monogamous',
-      title: 'Open_monogamous',
       info: 'Do you feel most secure with one person, or are you curious about (or already practicing) non-monogamy and multiple connections?'
     },
     {
       id: 'novelty_depth_preference',
       label: 'Connection first',
       opposite: 'Chemistry first',
-      title: 'Novelty_depth_preference',
       info: 'What pulls you in first-emotional resonance and shared values, or raw attraction and physical chemistry?'
     },
   ]
@@ -458,21 +453,15 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
           <div className="space-y-6 mb-8">
             {preferenceLabels.map((pref) => (
               <div key={pref.id} className="space-y-2 relative">
-                {pref.title && (
-                  <div className="text-center mb-2 flex items-center justify-center gap-2">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{pref.title}</span>
-                    <button
-                      type="button"
-                      onClick={() => setOpenSliderInfo(openSliderInfo === pref.id ? null : pref.id)}
-                      className="w-5 h-5 rounded-full border border-purple-400 text-purple-600 text-xs font-bold flex items-center justify-center hover:bg-purple-50 dark:hover:bg-gray-700"
-                      aria-label={`More info for ${pref.title || pref.id}`}
-                    >
-                      i
-                    </button>
+                {openSliderInfo === pref.id && (
+                  <div className="text-xs text-gray-700 dark:text-gray-200 bg-purple-50 dark:bg-gray-700 border border-purple-200 dark:border-gray-600 rounded-lg p-2">
+                    {pref.info}
                   </div>
                 )}
-                {!pref.title && (
-                  <div className="flex justify-end">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.opposite}</span>
                     <button
                       type="button"
                       onClick={() => setOpenSliderInfo(openSliderInfo === pref.id ? null : pref.id)}
@@ -482,15 +471,6 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                       i
                     </button>
                   </div>
-                )}
-                {openSliderInfo === pref.id && (
-                  <div className="text-xs text-gray-700 dark:text-gray-200 bg-purple-50 dark:bg-gray-700 border border-purple-200 dark:border-gray-600 rounded-lg p-2">
-                    {pref.info}
-                  </div>
-                )}
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.label}</span>
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.opposite}</span>
                 </div>
                 <input
                   type="range"
@@ -500,9 +480,6 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                   onChange={(e) => handlePreferenceChange(pref.id, parseInt(e.target.value))}
                   className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
                 />
-                <div className="text-center text-sm text-gray-700 dark:text-gray-300">
-                  {preferences[pref.id]}%
-                </div>
               </div>
             ))}
           </div>

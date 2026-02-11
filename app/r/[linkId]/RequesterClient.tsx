@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import RadarOverlay from '@/components/RadarOverlay'
 import DeepInsightsSection from '@/components/DeepInsightsSection'
 import type { ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
+import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
 
 interface RequesterClientProps {
   linkId: string
@@ -13,57 +14,10 @@ interface RequesterClientProps {
 
 type FlowState = 'intro' | 'chat' | 'consent-denied' | 'results'
 
-const QUESTIONS = [
-  'Do you consent to a short convo to check alignment?',
-  'What communication style do you prefer?',
-  'Is there anything you do NOT want to discuss?',
-  'What are three values you try to practice in your relationships?',
-  'How do you like to navigate disagreements or misunderstandings?',
-  'What helps you feel erotically connected to someone?',
-  'How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
-]
+const QUESTIONS = [...CANONICAL_DATING_QUESTIONS]
 
-// Quick-reply configurations for structured questions
-const QUICK_REPLY_QUESTIONS: Record<number, QuickReplyOption[]> = {
-  // Q1: Consent (yes/no)
-  0: [
-    { label: 'Yes', value: 'yes', field: 'consent' },
-    { label: 'No', value: 'no', field: 'consent' },
-  ] as QuickReplyOption[],
-  // Q2: Communication style
-  1: [
-    { label: 'Direct', value: 'direct', field: 'communication_style' },
-    { label: 'Playful', value: 'playful', field: 'communication_style' },
-    { label: 'Reflective', value: 'reflective', field: 'communication_style' },
-    { label: 'Short-answer', value: 'short-answer', field: 'communication_style' },
-  ] as QuickReplyOption[],
-  // Q3: Exclusions
-  2: [
-    { label: 'Sex', value: 'sex', field: 'exclusions' },
-    { label: 'Past relationships', value: 'past_relationships', field: 'exclusions' },
-    { label: 'Kink', value: 'kink', field: 'exclusions' },
-    { label: 'No exclusions', value: 'no_exclusions', field: 'exclusions' },
-  ] as QuickReplyOption[],
-  // Q5: Inserted after Q4 (values) - Relationship structure
-  4: [
-    { label: 'Monogamous', value: 'monogamous', field: 'relationship_structure' },
-    { label: 'Open to ENM', value: 'open_to_enm', field: 'relationship_structure' },
-    { label: 'ENM only', value: 'enm_only', field: 'relationship_structure' },
-    { label: 'Unsure', value: 'unsure', field: 'relationship_structure' },
-  ] as QuickReplyOption[],
-  // Q6: Kink openness (before erotic connection question)
-  5: [
-    { label: 'No', value: 'no', field: 'kink_openness' },
-    { label: 'Maybe', value: 'maybe', field: 'kink_openness' },
-    { label: 'Yes', value: 'yes', field: 'kink_openness' },
-  ] as QuickReplyOption[],
-  // Q8: Status orientation (after Q7 - freedom)
-  7: [
-    { label: 'Low', value: 'low', field: 'status_orientation' },
-    { label: 'Medium', value: 'medium', field: 'status_orientation' },
-    { label: 'High', value: 'high', field: 'status_orientation' },
-  ] as QuickReplyOption[],
-}
+// Requester now mirrors canonical 9 free-text questions.
+const QUICK_REPLY_QUESTIONS: Record<number, QuickReplyOption[]> = {}
 
 export default function RequesterClient({ linkId, userId }: RequesterClientProps) {
   const router = useRouter()
@@ -379,151 +333,50 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     setLoading(true)
 
     try {
-      // Get AI commentary for this answer (Q4+ only, Q1-Q3 use quick replies)
-      if (currentQuestionIndex > 2) {
-        try {
-          const commentaryResponse = await fetch('/api/requester/commentary', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              questionIndex: currentQuestionIndex,
-              question: QUESTIONS[currentQuestionIndex],
-              answer: currentMessage,
-              chatHistory: updatedHistory,
-              communicationStyle,
-            }),
-          })
+      let historyWithCommentary = [...updatedHistory]
+      try {
+        const commentaryResponse = await fetch('/api/requester/commentary', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            questionIndex: currentQuestionIndex,
+            question: QUESTIONS[currentQuestionIndex],
+            answer: currentMessage,
+            chatHistory: updatedHistory,
+            communicationStyle,
+          }),
+        })
 
-          if (commentaryResponse.ok) {
-            const { commentary } = await commentaryResponse.json()
-            if (commentary) {
-              setChatHistory(prev => [
-                ...prev,
-                {
-                  role: 'assistant',
-                  content: commentary,
-                  timestamp: new Date(),
-                },
-              ])
-            }
+        if (commentaryResponse.ok) {
+          const { commentary } = await commentaryResponse.json()
+          if (commentary) {
+            historyWithCommentary = [
+              ...historyWithCommentary,
+              {
+                role: 'assistant',
+                content: commentary,
+                timestamp: new Date(),
+              },
+            ]
           }
-        } catch (error) {
-          console.error('Error getting commentary:', error)
-          // Continue even if commentary fails
         }
+      } catch (error) {
+        console.error('Error getting commentary:', error)
       }
 
-      // Handle structured field capture from quick replies or typed text
-      // Check if the last assistant message had quick replies
-      const lastAssistantMessage = chatHistory.filter(m => m.role === 'assistant').pop()
-      if (lastAssistantMessage?.quickReplies) {
-        // Try to match typed text to quick reply options
-        const normalizedMessage = currentMessage.toLowerCase().trim()
-        for (const option of lastAssistantMessage.quickReplies) {
-          if (normalizedMessage === option.value || normalizedMessage === option.label.toLowerCase() || normalizedMessage.includes(option.value)) {
-            setStructuredFields(prev => ({
-              ...prev,
-              [option.field]: option.value,
-            }))
-            break
-          }
-        }
-        
-        // If we just answered a quick-reply question, move to the next regular question
-        const quickReplyField = lastAssistantMessage.quickReplies[0]?.field
-        if (quickReplyField && structuredFields[quickReplyField]) {
-          // We already captured this field via quick reply button, just continue
-        } else if (quickReplyField && !structuredFields[quickReplyField]) {
-          // We're answering it now via text, continue to next question after this
-          const nextRegularIndex = getNextQuestionIndex(currentQuestionIndex)
-          if (nextRegularIndex !== null) {
-            // After capturing quick-reply answer, show next regular question
-            setTimeout(() => {
-              setCurrentQuestionIndex(nextRegularIndex)
-              setChatHistory(prev => [
-                ...prev,
-                {
-                  role: 'assistant',
-                  content: QUESTIONS[nextRegularIndex],
-                  timestamp: new Date(),
-                },
-              ])
-            }, 0)
-          }
-        }
-      }
-
-      // Move to next question or complete
-      const nextIndex = getNextQuestionIndex(currentQuestionIndex)
-      
-      // Check if we need to insert a quick-reply question after the current answer
-      // After Q7 (index 6, just answered) -> status_orientation
-      if (currentQuestionIndex === 6 && !structuredFields.status_orientation) {
-        // Show status_orientation quick reply question
-        const statusQuestion = 'How important is status or success when choosing a partner?'
-        const statusQuickReplies = QUICK_REPLY_QUESTIONS[7] || null
-        setChatHistory(prev => [
-          ...prev,
+      const scriptedNextIndex = currentQuestionIndex + 1
+      if (scriptedNextIndex < QUESTIONS.length) {
+        setCurrentQuestionIndex(scriptedNextIndex)
+        setChatHistory([
+          ...historyWithCommentary,
           {
             role: 'assistant',
-            content: statusQuestion,
+            content: QUESTIONS[scriptedNextIndex],
             timestamp: new Date(),
-            quickReplies: statusQuickReplies || undefined,
           },
         ])
-        // Don't increment question index - wait for status_orientation answer
-        setLoading(false)
-        return
-      }
-      
-      if (nextIndex !== null) {
-        // Check if we're skipping any questions between current and next
-        for (let i = currentQuestionIndex + 1; i < nextIndex; i++) {
-          if (shouldSkipQuestion(i)) {
-            setSkippedQuestions(prev => new Set(prev).add(i))
-          }
-        }
-        
-        // Check if we need to insert a quick-reply question before the next regular question
-        let nextQuestion = QUESTIONS[nextIndex]
-        let quickReplies: QuickReplyOption[] | null = null
-        
-        // Insert structured questions at appropriate points:
-        // After Q4 (index 3, just answered) -> relationship_structure (shown as index 4)
-        if (currentQuestionIndex === 3 && !structuredFields.relationship_structure) {
-          nextQuestion = 'How do you feel about exclusivity in romantic or sexual relationships?'
-          quickReplies = QUICK_REPLY_QUESTIONS[4] || null
-          // Don't increment question index yet - we'll handle this after answer
-        }
-        // Before Q6 (index 5 - erotic) -> kink_openness
-        else if (nextIndex === 5 && !structuredFields.kink_openness) {
-          nextQuestion = 'Are you open to kink/BDSM in your relationships?'
-          quickReplies = QUICK_REPLY_QUESTIONS[5] || null
-          // Show kink question, then after answer show erotic (index 5)
-        }
-        
-        // Only increment index if we're showing a regular question, not a quick-reply question
-        if (!quickReplies) {
-          setCurrentQuestionIndex(nextIndex)
-        }
-        
-        setChatHistory(prev => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: nextQuestion,
-            timestamp: new Date(),
-            quickReplies: quickReplies || undefined,
-          },
-        ])
-        
-        // If we showed a quick-reply question, the next answer will capture it
-        // and then we'll show the next regular question
       } else {
-        // All questions answered (including skipped ones) - generate assessment
-        // Pass skipped questions info and structured fields to the assessment
-        console.log('All questions answered, generating assessment...')
-        await generateAssessment(updatedHistory, skippedQuestions)
+        await generateAssessment(historyWithCommentary, new Set<number>())
       }
     } catch (error) {
       console.error('Error in chat:', error)
@@ -614,7 +467,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
           <h1 className="text-3xl font-bold mb-4 text-purple-600">Save time, test the vibe</h1>
           <p className="text-gray-700 mb-4 text-lg">
-            Just 7 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
+            Just 9 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
           </p>
           <p className="text-sm text-gray-500 mb-6">
             Your responses are analyzed by AI and compared against their profile. No raw data is stored—only compatibility metrics.
