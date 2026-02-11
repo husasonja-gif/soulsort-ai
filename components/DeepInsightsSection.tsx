@@ -34,9 +34,9 @@ function DotBar({
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[4px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 h-[3px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
-            className="absolute top-1/2 -translate-y-1/2 h-[4px] bg-purple-300 dark:bg-purple-500/50 rounded"
+            className="absolute top-1/2 -translate-y-1/2 h-[5px] bg-purple-300 dark:bg-purple-500/50 rounded"
             style={{
               left: `${safeStart}%`,
               width: `${safeEnd - safeStart}%`,

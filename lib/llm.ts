@@ -133,7 +133,8 @@ export async function generateUserRadarProfile(
 
       // Erotic Attunement (Q5/Q9)
       erotic_attunement: 0.5,
-      desire_intensity: eroticPace / 100.0, // linked to erotic pacing
+      // Keep neutral prior: pace is style, not quality.
+      desire_intensity: 0.5,
       fantasy_openness: kink / 100.0,
       attraction_depth_preference: (100 - noveltyDepthPreference) / 100.0,
       desire_regulation: 0.5,
@@ -530,6 +531,15 @@ CHAT QUESTIONS AND ANSWERS:`
     const toPct = (value: number): number => Math.round(clamp01(value) * 100)
 
     // Canonical 6-axis model (exact table mapping)
+    // For style-polarity signals (intensity/novelty), use deviation from personal slider prior
+    // so low/high preference style does not auto-penalize axis quality.
+    const desireIntensityQuality = clamp01(
+      0.5 + (signalScores.desire_intensity - basePriors.desire_intensity)
+    )
+    const noveltyDepthQuality = clamp01(
+      0.5 + (signalScores.novelty_depth_preference - basePriors.novelty_depth_preference)
+    )
+
     const axisScores: SixAxisScores = {
       meaning_values: mean([
         signalScores.self_transcendence,
@@ -546,11 +556,11 @@ CHAT QUESTIONS AND ANSWERS:`
       ]),
       erotic_attunement: mean([
         signalScores.erotic_attunement,
-        signalScores.desire_intensity,
+        desireIntensityQuality,
         signalScores.fantasy_openness,
         signalScores.attraction_depth_preference,
         signalScores.desire_regulation,
-        signalScores.novelty_depth_preference,
+        noveltyDepthQuality,
       ]),
       autonomy_orientation: mean([
         signalScores.freedom_orientation,
