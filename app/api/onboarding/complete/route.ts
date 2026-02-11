@@ -3,6 +3,7 @@ import { generateUserRadarProfile } from '@/lib/llm'
 import { upsertUserRadarProfile, completeOnboarding } from '@/lib/db'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import type { ChatMessage } from '@/lib/types'
+import { DATING_QUESTION_COUNT } from '@/lib/datingQuestions'
 
 export async function POST(request: Request) {
   try {
@@ -27,21 +28,21 @@ export async function POST(request: Request) {
       preferences: preferences || {},
     }
 
-    // Validate chat history has all 4 questions answered
+    // Validate chat history has all required chat questions answered
     const userAnswers = (chatHistory as ChatMessage[]).filter(m => m.role === 'user')
     console.log('User answers count:', userAnswers.length)
-    if (userAnswers.length < 4) {
+    if (userAnswers.length < DATING_QUESTION_COUNT) {
       return NextResponse.json(
-        { error: 'All 4 chat questions must be answered' },
+        { error: `All ${DATING_QUESTION_COUNT} chat questions must be answered` },
         { status: 400 }
       )
     }
 
-    // Check OpenAI API key
-    if (!process.env.OPENAI_API_KEY) {
-      console.error('OpenAI API key not configured')
+    // Check Claude API key
+    if (!process.env.CLAUDE_API_KEY) {
+      console.error('Claude API key not configured')
       return NextResponse.json(
-        { error: 'OpenAI API key not configured' },
+        { error: 'Claude API key not configured' },
         { status: 500 }
       )
     }

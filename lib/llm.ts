@@ -2,6 +2,7 @@
 import { claude, CURRENT_MODEL_VERSION, CURRENT_SCORING_VERSION, CURRENT_SCHEMA_VERSION, convertMessagesToClaude } from './claudeClient'
 import { trackLLMUsage } from './trackLLMUsage'
 import type { ChatMessage, RadarDimensions } from './types'
+import { CANONICAL_DATING_QUESTIONS } from './datingQuestions'
 
 export { CURRENT_MODEL_VERSION, CURRENT_SCORING_VERSION, CURRENT_SCHEMA_VERSION }
 
@@ -115,7 +116,7 @@ export async function generateUserRadarProfile(
       console.log('=== END BASE PRIORS ===')
     }
 
-    const systemPrompt = `You are SoulSort AI. Your job is to infer psychological/behavioral signals from 4 answers and return numeric deltas that adjust the provided BASE PRIORS.
+    const systemPrompt = `You are SoulSort AI. Your job is to infer psychological/behavioral signals from 9 answers and return numeric deltas that adjust the provided BASE PRIORS.
 
 CRITICAL:
 - Return ONLY valid JSON. No prose.
@@ -131,7 +132,7 @@ LANGUAGE:
 
 INPUT:
 A) BASE PRIORS (0.0–1.0 each). Do not recalculate.
-B) Q1–Q4 answers.
+B) Q1–Q9 answers.
 
 SIGNAL RULES (language-agnostic):
 Q1 Values:
@@ -141,21 +142,46 @@ Q1 Values:
 - self_enhancement: ambition/status/competition/intensity focus -> +0.05 to +0.20 only if clearly present
 - stability_orientation: explicit preference for structure/predictability -> +0.05 to +0.20 only if clearly present
 
-Q2 Conflict style (skills):
+Q2 Relationship intent:
+- rooting: intentional commitment, long-horizon building -> +0.05 to +0.20
+- searching: exploratory/open process orientation -> +0.05 to +0.20
+- stability_orientation: preference for clear structure and predictability -> +0.05 to +0.20
+
+Q3 Conflict style (skills):
 - communication_style: clarity, reflective communication, early repair, "I statements", non-hostile, collaborative -> +0.05 to +0.20
 - negotiation_comfort: names needs/limits, pauses, repair, can discuss boundaries -> +0.05 to +0.20
 - non_coerciveness: accountability, listening, non-blaming, de-escalation -> +0.05 to +0.20
 - self_advocacy: speaks up, states needs, self-soothes, takes space -> +0.05 to +0.20
 
-Q3 Erotic connection:
-- erotic_attunement: slow/intentional, attuned, pacing, cues, comfort, trust, "when it feels right" -> +0.05 to +0.20
-- desire_intensity: high drive, fiery, frequent desire, novelty seeking -> +0.05 to +0.20
-Important: erotic_pace is a preference, not "skill". Only adjust erotic_pace if the user explicitly states fast/slow tempo beyond the slider.
+Q4 Regulation under activation:
+- communication_style: regulated response, reflective timing, collaborative repair -> +0.05 to +0.20
+- negotiation_comfort: can pause, re-engage, and discuss needs clearly -> +0.05 to +0.20
+- self_advocacy: can name own state and ask for space/support -> +0.05 to +0.20
 
-Q4 Freedom:
+Q5 Boundaries and consent:
+- consent_awareness: explicit consent mindset and ongoing check-ins -> +0.05 to +0.20
+- negotiation_comfort: comfort discussing limits and changing agreements -> +0.05 to +0.20
+- non_coerciveness: non-pressuring language and respect for "no"/"not now" -> +0.05 to +0.20
+- self_advocacy: confidence stating boundaries and needs -> +0.05 to +0.20
+
+Q6 Pace for intimacy:
+- erotic_pace: explicit preference for slow/medium/fast relational and physical pacing -> +0.05 to +0.20
+- erotic_attunement: attuned pacing with partner cues -> +0.05 to +0.20
+
+Q7 Erotic connection:
+- erotic_attunement: trust, presence, safety, attunement, responsiveness -> +0.05 to +0.20
+- desire_intensity: high drive, novelty-seeking, explicit intensity -> +0.05 to +0.20
+- fantasy_openness: explicit openness to exploration/fantasy/kink -> +0.05 to +0.20
+
+Q8 Autonomy / exclusivity:
 - freedom_orientation: autonomy within relationship, choice, abundance vs desperation, selfhood -> +0.05 to +0.20
 - searching: exploration/choice/agency -> +0.05 to +0.20
 - rooting may also increase if they emphasize building a future together.
+
+Q9 Growth edge:
+- self_transcendence: accountability, reflection, growth orientation -> +0.05 to +0.20
+- communication_style: willingness to learn and repair -> +0.05 to +0.20
+- self_advocacy: asks for support and expresses needs directly -> +0.05 to +0.20
 
 LOW-EVIDENCE BEHAVIOR:
 If any answer is "Not answered" or extremely short, do not give large positive deltas (cap at +0.10 per dimension). Otherwise score normally.
@@ -174,29 +200,24 @@ OUTPUT JSON FORMAT:
 
     // Extract answers using strict state machine
     // Questions with stable markers for reliable extraction
-    const onboardingQuestions = [
-      '[[Q1]] What are three values you try to practice in your relationships?',
-      '[[Q2]] How do you like to navigate disagreements or misunderstandings?',
-      '[[Q3]] What helps you feel erotically connected to someone?',
-      '[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
-    ]
+    const onboardingQuestions = CANONICAL_DATING_QUESTIONS.map(
+      (question, index) => `[[Q${index + 1}]] ${question}`
+    )
 
     const extractedAnswers: string[] = []
     const answerWordCounts: number[] = []
-    const extractionStatus: { q1: string; q2: string; q3: string; q4: string } = {
-      q1: 'missing',
-      q2: 'missing',
-      q3: 'missing',
-      q4: 'missing',
+    const extractionStatus: Record<string, string> = {}
+    for (let i = 0; i < onboardingQuestions.length; i++) {
+      extractionStatus[`q${i + 1}`] = 'missing'
     }
 
-    // Marker-based extraction: scan for [[Q1]], [[Q2]], [[Q3]], [[Q4]] markers
+    // Marker-based extraction: scan for [[Q1]] ... [[Q9]] markers
     for (let i = 0; i < chatHistory.length; i++) {
       const msg = chatHistory[i]
       
       if (msg.role === 'assistant' && msg.content) {
         // Check for markers
-        for (let qIdx = 0; qIdx < 4; qIdx++) {
+        for (let qIdx = 0; qIdx < onboardingQuestions.length; qIdx++) {
           const marker = `[[Q${qIdx + 1}]]`
           if (msg.content.includes(marker)) {
             // Found marker, look for next user message as answer
@@ -214,7 +235,7 @@ OUTPUT JSON FORMAT:
               }
               // If we hit another marker before finding answer, mark as missing
               if (nextMsg.role === 'assistant' && nextMsg.content) {
-                for (let k = 0; k < 4; k++) {
+                for (let k = 0; k < onboardingQuestions.length; k++) {
                   if (nextMsg.content.includes(`[[Q${k + 1}]]`)) {
                     break
                   }
@@ -231,8 +252,8 @@ OUTPUT JSON FORMAT:
       }
     }
 
-    // Ensure we have 4 answers (fill with placeholders if needed)
-    for (let i = 0; i < 4; i++) {
+    // Ensure we have all answers (fill with placeholders if needed)
+    for (let i = 0; i < onboardingQuestions.length; i++) {
       if (!extractedAnswers[i]) {
         extractedAnswers[i] = 'Not answered'
         answerWordCounts[i] = 0
@@ -581,12 +602,9 @@ CHAT QUESTIONS AND ANSWERS:`
             consent_vector,
           },
           extraction_status: extractionStatus,
-          answer_word_counts: {
-            q1: answerWordCounts[0] || 0,
-            q2: answerWordCounts[1] || 0,
-            q3: answerWordCounts[2] || 0,
-            q4: answerWordCounts[3] || 0,
-          },
+          answer_word_counts: Object.fromEntries(
+            onboardingQuestions.map((_, index) => [`q${index + 1}`, answerWordCounts[index] || 0])
+          ),
           low_evidence: isLowEvidence,
         }
         

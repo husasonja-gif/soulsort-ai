@@ -3,70 +3,22 @@ import { claude, CURRENT_MODEL_VERSION, convertMessagesToClaude } from '@/lib/cl
 import { trackLLMUsage } from '@/lib/trackLLMUsage'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import type { ChatMessage } from '@/lib/types'
+import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
 
-// Pre-prompted responses for each question
-const questionCommentaries = [
-  {
-    question: '[[Q1]] What are three values you try to practice in your relationships?',
-    systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
+const questionCommentaries = CANONICAL_DATING_QUESTIONS.map((question, index) => ({
+  question: `[[Q${index + 1}]] ${question}`,
+  systemPrompt: `You're providing brief, casual commentary during a SoulSort onboarding conversation.
 
-The user just answered: "What are three values you try to practice in your relationships?"
+The user just answered: "${question}"
 
-Provide a brief, chill reflection (1 sentence max) that:
-- Acknowledges what they said in a casual, friendly way
-- Sounds like you're texting a friend, not a therapist
-- Avoids therapy-speak or formal language
-- Use natural, conversational language
+Provide one brief, chill reflection (1 sentence max) that:
+- Acknowledges what they shared in natural language
+- Sounds like texting a thoughtful friend, not a therapist
+- Avoids clinical/diagnostic language and avoids over-praise
+- Never asks a follow-up question
 
-Examples of good tone: "Cool, those make sense together" or "Nice, I can see how those connect" or "That tracks"
-Avoid: "I appreciate your insight" or "That demonstrates healthy communication"`,
-  },
-  {
-    question: '[[Q2]] How do you like to navigate disagreements or misunderstandings?',
-    systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
-
-The user just answered: "[[Q2]] How do you like to navigate disagreements or misunderstandings?"
-
-Provide a brief, chill reflection (1 sentence max) that:
-- Acknowledges their approach casually
-- Sounds like you're texting a friend, not a therapist
-- Avoids therapy-speak or formal language
-- Use natural, conversational language
-
-Examples of good tone: "That sounds like a solid approach" or "Makes sense" or "I hear you"
-Avoid: "I appreciate your communication style" or "That demonstrates healthy conflict resolution"`,
-  },
-  {
-    question: '[[Q3]] What helps you feel erotically connected to someone?',
-    systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
-
-The user just answered: "[[Q3]] What helps you feel erotically connected to someone?"
-
-Provide a brief, chill reflection (1 sentence max) that:
-- Acknowledges what they said in a casual, non-judgmental way
-- Sounds like you're texting a friend, not a therapist
-- Avoids therapy-speak or clinical language
-- Is sex-positive and inclusive but casual
-
-Examples of good tone: "Got it" or "That makes sense" or "Cool"
-Avoid: "I appreciate your openness" or "That demonstrates healthy intimacy"`,
-  },
-  {
-    question: '[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
-    systemPrompt: `You're providing brief, casual commentary during a vibe-check conversation.
-
-The user just answered: "[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?"
-
-Provide a brief, chill reflection (1 sentence max) that:
-- Acknowledges their answer casually
-- Sounds like you're texting a friend, not a therapist
-- Avoids therapy-speak or formal language
-- Use natural, conversational language
-
-Examples of good tone: "That tracks" or "Makes sense" or "I hear you"
-Avoid: "I appreciate your self-awareness" or "That demonstrates healthy boundary-setting"`,
-  },
-]
+Examples of tone: "That tracks", "Makes sense", "I hear you", "Got it"`,
+}))
 
 export async function POST(request: Request) {
   try {

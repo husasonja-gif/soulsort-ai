@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { t, getCanonicalText, detectLanguage } from '@/lib/translations'
+import { t, detectLanguage } from '@/lib/translations'
+import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
 import type { ChatMessage } from '@/lib/types'
 
 interface OnboardingClientProps {
@@ -171,12 +172,9 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   }, [])
 
   // Canonical English questions (for LLM - always English)
-  const canonicalQuestions = [
-    '[[Q1]] What are three values you try to practice in your relationships?',
-    '[[Q2]] How do you like to navigate disagreements or misunderstandings?',
-    '[[Q3]] What helps you feel erotically connected to someone?',
-    '[[Q4]] How much do you need and seek freedom in your romantic relationships and what does freedom look like to you?',
-  ]
+  const canonicalQuestions = CANONICAL_DATING_QUESTIONS.map(
+    (question, index) => `[[Q${index + 1}]] ${question}`
+  )
   
   // Translated questions (for UI display)
   const chatQuestions = [
@@ -184,6 +182,11 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
     `[[Q2]] ${t('onboarding.q2', userLang)}`,
     `[[Q3]] ${t('onboarding.q3', userLang)}`,
     `[[Q4]] ${t('onboarding.q4', userLang)}`,
+    `[[Q5]] ${t('onboarding.q5', userLang)}`,
+    `[[Q6]] ${t('onboarding.q6', userLang)}`,
+    `[[Q7]] ${t('onboarding.q7', userLang)}`,
+    `[[Q8]] ${t('onboarding.q8', userLang)}`,
+    `[[Q9]] ${t('onboarding.q9', userLang)}`,
   ]
 
   const handleDealbreakerToggle = (option: string) => {
