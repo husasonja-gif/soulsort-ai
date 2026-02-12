@@ -36,7 +36,7 @@ function DotBar({
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[2px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
             className="absolute top-1/2 -translate-y-1/2 h-[4px] rounded"
             style={{
@@ -80,7 +80,7 @@ function ComparisonBar({
       </div>
       <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[2px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
             className="absolute top-1/2 -translate-y-[calc(50%+3px)] h-[4px] rounded"
             style={{ left: `${yStart}%`, width: `${yEnd - yStart}%`, backgroundColor: YOU_COLOR }}

@@ -114,16 +114,6 @@ export default function LandingPage() {
           Create radar. Share link. Compare alignment.
         </p>
 
-        {/* Core Principles */}
-        <div className="flex flex-wrap gap-4 justify-center mb-8 text-sm text-gray-600 dark:text-gray-400">
-          <span>AI powered</span>
-          <span>•</span>
-          <span>Privacy First</span>
-          <span>•</span>
-          <span>Consent-led</span>
-          <span>•</span>
-          <span>Inclusive</span>
-        </div>
       </section>
 
       {/* Create Your Vibe-Check Section */}
@@ -155,6 +145,17 @@ export default function LandingPage() {
           </div>
         </div>
 
+        {/* Core Principles */}
+        <div className="flex flex-wrap gap-4 justify-center mb-8 text-sm text-gray-600 dark:text-gray-400">
+          <span>AI powered</span>
+          <span>•</span>
+          <span>Privacy First</span>
+          <span>•</span>
+          <span>Consent-led</span>
+          <span>•</span>
+          <span>Inclusive</span>
+        </div>
+
         {/* Flip Cards */}
         <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
           {/* Dating Card */}
@@ -166,7 +167,7 @@ export default function LandingPage() {
               {/* Front */}
               <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
                 <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-3 text-white text-2xl">
-                  ❤️
+                  ♥
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-gray-900">Dating</h3>
                 <p className="text-gray-600 text-sm max-w-xs">
@@ -191,7 +192,7 @@ export default function LandingPage() {
               {/* Front */}
               <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
                 <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-3 text-white text-2xl">
-                  ✨
+                  ✦
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-gray-900">Festivals & Events</h3>
                 <p className="text-gray-600 text-sm max-w-xs">
@@ -216,7 +217,7 @@ export default function LandingPage() {
               {/* Front */}
               <div className="absolute inset-0 backface-hidden bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center shadow-md border border-purple-100">
                 <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center mb-3 text-white text-2xl">
-                  🏡
+                  ⌂
                 </div>
                 <h3 className="text-xl font-bold mb-2 text-gray-900">Shared Spaces</h3>
                 <p className="text-gray-600 text-sm max-w-xs">

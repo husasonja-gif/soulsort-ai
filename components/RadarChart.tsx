@@ -39,18 +39,22 @@ const AXIS_LABEL_LINES: Record<string, string[]> = {
 interface AxisTickProps {
   x?: number
   y?: number
+  cx?: number
+  cy?: number
   textAnchor?: 'start' | 'middle' | 'end' | 'inherit'
   payload?: { value?: string }
   onAxisHover?: (axis: string | null) => void
 }
 
-function AxisTick({ x = 0, y = 0, textAnchor = 'middle', payload, onAxisHover }: AxisTickProps) {
+function AxisTick({ x = 0, y = 0, cx = 0, cy = 0, textAnchor = 'middle', payload, onAxisHover }: AxisTickProps) {
   const key = payload?.value || ''
   const [line1, line2] = AXIS_LABEL_LINES[key] || [key, '']
+  const tx = cx + (x - cx) * 1.2
+  const ty = cy + (y - cy) * 1.2
 
   return (
     <g
-      transform={`translate(${x},${y})`}
+      transform={`translate(${tx},${ty})`}
       className="cursor-help"
       onMouseEnter={() => onAxisHover?.(key)}
       onMouseLeave={() => onAxisHover?.(null)}
@@ -105,18 +109,18 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
         <div className="absolute z-20 left-1/2 -translate-x-1/2 top-2 max-w-xl rounded-2xl px-4 py-3 bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/70 dark:to-purple-800/40 text-gray-800 dark:text-gray-100 shadow-sm">
           <div className="flex items-start gap-2">
             <span className="mt-0.5 w-5 h-5 rounded-full border border-purple-400 text-purple-600 text-xs font-bold flex items-center justify-center bg-white/70 dark:bg-gray-900/40">
-              ?
+              i
             </span>
             <p className="text-sm leading-snug">{AXIS_DESCRIPTIONS[hoveredAxis]}</p>
           </div>
         </div>
       ) : null}
 
-      <ResponsiveContainer width="100%" height={620} className="min-h-[480px] sm:min-h-[620px]">
+      <ResponsiveContainer width="100%" height={700} className="min-h-[560px] sm:min-h-[700px]">
         <RechartsRadarChart
           data={chartData}
-          margin={{ top: 120, bottom: 120, left: 100, right: 100 }}
-          outerRadius="56%"
+          margin={{ top: 150, bottom: 150, left: 130, right: 130 }}
+          outerRadius="66%"
         >
           <PolarGrid gridType="circle" />
           <PolarAngleAxis
