@@ -12,6 +12,7 @@ interface DeepInsightsSectionProps {
   requesterPreferences?: Record<string, number | undefined> | null
   userSignalScores?: Partial<CanonicalSignalScores> | null
   requesterSignalScores?: Partial<CanonicalSignalScores> | null
+  insightOverrides?: Record<string, string> | null
 }
 
 const THEM_COLOR = '#9333ea'
@@ -38,11 +39,11 @@ function DotBar({
         <span className="whitespace-nowrap">{leftLabel}</span>
         <div className="relative flex-1 h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
-            className="absolute top-1/2 -translate-y-1/2 h-[4px] rounded"
+            className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
             style={{
               left: `${safeStart}%`,
               width: `${safeEnd - safeStart}%`,
-              backgroundColor: lineColor,
+              backgroundImage: `linear-gradient(90deg, ${lineColor}, #8b5cf6)`,
             }}
           />
         </div>
@@ -82,12 +83,20 @@ function ComparisonBar({
         <span className="whitespace-nowrap">{leftLabel}</span>
         <div className="relative flex-1 h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
-            className="absolute top-1/2 -translate-y-[calc(50%+3px)] h-[4px] rounded"
-            style={{ left: `${yStart}%`, width: `${yEnd - yStart}%`, backgroundColor: YOU_COLOR }}
+            className="absolute top-1/2 -translate-y-[calc(50%+4px)] h-[6px] rounded"
+            style={{
+              left: `${yStart}%`,
+              width: `${yEnd - yStart}%`,
+              backgroundImage: `linear-gradient(90deg, ${YOU_COLOR}, #f472b6)`,
+            }}
           />
           <span
-            className="absolute top-1/2 -translate-y-[calc(50%-3px)] h-[4px] rounded"
-            style={{ left: `${tStart}%`, width: `${tEnd - tStart}%`, backgroundColor: THEM_COLOR }}
+            className="absolute top-1/2 -translate-y-[calc(50%-4px)] h-[6px] rounded"
+            style={{
+              left: `${tStart}%`,
+              width: `${tEnd - tStart}%`,
+              backgroundImage: `linear-gradient(90deg, ${THEM_COLOR}, #7c3aed)`,
+            }}
           />
         </div>
         <span className="whitespace-nowrap">{rightLabel}</span>
@@ -183,6 +192,7 @@ export default function DeepInsightsSection({
   requesterPreferences,
   userSignalScores,
   requesterSignalScores,
+  insightOverrides,
 }: DeepInsightsSectionProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -239,7 +249,10 @@ export default function DeepInsightsSection({
           {data.areas.map((area) => (
             <InsightCard
               key={area.id}
-              area={area}
+              area={{
+                ...area,
+                insight: insightOverrides?.[area.id] || area.insight,
+              }}
               mode={mode}
               expanded={expandedId === area.id}
               onToggle={() => setExpandedId(expandedId === area.id ? null : area.id)}

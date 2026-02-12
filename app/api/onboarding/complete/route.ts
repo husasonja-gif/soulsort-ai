@@ -4,6 +4,8 @@ import { upsertUserRadarProfile, completeOnboarding } from '@/lib/db'
 import { createSupabaseServerClient } from '@/lib/supabaseServer'
 import type { ChatMessage } from '@/lib/types'
 import { DATING_QUESTION_COUNT } from '@/lib/datingQuestions'
+import { buildUserDeepInsights } from '@/lib/deepInsights'
+import { generateDeepInsightsCopy } from '@/lib/deepInsightsCopy'
 
 export async function POST(request: Request) {
   try {
@@ -95,6 +97,15 @@ export async function POST(request: Request) {
     console.log('Saving to database...')
     // Extract chart values from the profile
     const chart = profile.chart
+    const radar = {
+      self_transcendence: chart.Self_Transcendence,
+      self_enhancement: chart.Self_Enhancement,
+      rooting: chart.Rooting,
+      searching: chart.Searching,
+      relational: chart.Relational,
+      erotic: chart.Erotic,
+      consent: chart.Consent,
+    }
     const v4Axes = profile.axis_scores
       ? {
           meaning_values: Math.round(profile.axis_scores.meaning_values * 100),
@@ -105,21 +116,20 @@ export async function POST(request: Request) {
           conflict_repair: Math.round(profile.axis_scores.conflict_repair * 100),
         }
       : undefined
+    const deepInsightAreas = buildUserDeepInsights(
+      radar,
+      preferences || {},
+      profile.signal_scores
+    )
+    const deepInsightsCopy = await generateDeepInsightsCopy('user', deepInsightAreas)
     // Save to database
     await upsertUserRadarProfile(
       userId,
-      {
-        self_transcendence: chart.Self_Transcendence,
-        self_enhancement: chart.Self_Enhancement,
-        rooting: chart.Rooting,
-        searching: chart.Searching,
-        relational: chart.Relational,
-        erotic: chart.Erotic,
-        consent: chart.Consent,
-      },
+      radar,
       profile.dealbreakers,
       v4Axes,
-      profile.signal_scores
+      profile.signal_scores,
+      deepInsightsCopy
     )
     console.log('Profile saved to database')
 

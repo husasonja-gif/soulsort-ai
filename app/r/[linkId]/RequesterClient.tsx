@@ -72,6 +72,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     summary: string
     userRadar: RadarDimensions
     requesterRadar: RadarDimensions
+    deepInsightsCopy?: Record<string, string>
   } | null>(null)
   
   // Analytics tracking
@@ -740,6 +741,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             mode="requester"
             userRadar={assessment.requesterRadar}
             requesterRadar={assessment.userRadar}
+            insightOverrides={assessment.deepInsightsCopy || null}
           />
 
           {/* Feedback Section */}

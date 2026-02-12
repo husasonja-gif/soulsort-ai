@@ -33,7 +33,8 @@ export async function upsertUserRadarProfile(
     consent_orientation: number
     conflict_repair: number
   },
-  signalScores?: Partial<CanonicalSignalScores>
+  signalScores?: Partial<CanonicalSignalScores>,
+  deepInsightsCopy?: Record<string, string>
 ) {
   const supabase = await createSupabaseServerClient()
   
@@ -60,6 +61,7 @@ export async function upsertUserRadarProfile(
       ...basePayload,
       ...(v4Axes ? { v4_axes: v4Axes } : {}),
       ...(signalScores ? { signal_scores: signalScores } : {}),
+      ...(deepInsightsCopy ? { deep_insights_copy: deepInsightsCopy } : {}),
     }, {
       onConflict: 'user_id',
     })
@@ -72,6 +74,7 @@ export async function upsertUserRadarProfile(
       ...basePayload,
       ...(v4Axes ? { v4_axes: v4Axes } : {}),
       ...(signalScores ? { signal_scores: signalScores } : {}),
+      ...(deepInsightsCopy ? { deep_insights_copy: deepInsightsCopy } : {}),
     } as Record<string, unknown>
 
     const missingColumnMatch = /column\s+"?([a-zA-Z0-9_]+)"?\s+of relation|Could not find the '([^']+)' column/i.exec(
@@ -249,7 +252,8 @@ export async function createRequesterAssessment(
     autonomy_orientation: number
     consent_orientation: number
     conflict_repair: number
-  }
+  },
+  deepInsightsCopy?: Record<string, string>
 ) {
   // Use service role to bypass RLS for requester assessment inserts
   // Requesters are anonymous, so we need service role to insert on their behalf
@@ -327,6 +331,7 @@ export async function createRequesterAssessment(
     model_version: CURRENT_MODEL_VERSION,
     scoring_version: CURRENT_SCORING_VERSION,
     ...(v4Axes ? { v4_axes: v4Axes } : {}),
+    ...(deepInsightsCopy ? { deep_insights_copy: deepInsightsCopy } : {}),
   }
 
   let { data, error } = await supabase
@@ -335,14 +340,22 @@ export async function createRequesterAssessment(
     .select()
     .single()
 
-  // Backward-compatible retry for environments where v4_axes column is not migrated yet.
-  if (error && v4Axes && error.message?.includes('v4_axes')) {
-    const { v4_axes: _omitV4Axes, ...legacyPayload } = assessmentPayload as typeof assessmentPayload & { v4_axes?: unknown }
-    ;({ data, error } = await supabase
-      .from('requester_assessments')
-      .insert(legacyPayload)
-      .select()
-      .single())
+  // Backward-compatible retry for environments where optional columns are not migrated yet.
+  if (error) {
+    const payload = { ...assessmentPayload } as Record<string, unknown>
+    const missingColumnMatch = /column\s+"?([a-zA-Z0-9_]+)"?\s+of relation|Could not find the '([^']+)' column/i.exec(
+      error.message || ''
+    )
+    const missingColumn = missingColumnMatch?.[1] || missingColumnMatch?.[2]
+
+    if (missingColumn && missingColumn in payload) {
+      delete payload[missingColumn]
+      ;({ data, error } = await supabase
+        .from('requester_assessments')
+        .insert(payload)
+        .select()
+        .single())
+    }
   }
 
   if (error) {

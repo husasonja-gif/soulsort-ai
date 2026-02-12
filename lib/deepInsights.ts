@@ -187,7 +187,7 @@ export function buildUserDeepInsights(
   return [
     {
       id: 'pacing-rhythm',
-      title: 'Pacing & Rhythm',
+      title: 'How you pace intimacy',
       icon: '🔥',
       leftLabel: 'Slow burn',
       rightLabel: 'Fast ignition',
@@ -196,11 +196,11 @@ export function buildUserDeepInsights(
       zoneEnd: pacingRhythm.zoneEnd,
       descriptor: axisDescriptor(pacingRhythm.value, 'Slow burn', 'Fast ignition'),
       insight:
-        'Conversation tip: ask, "What pace feels good for you right now?" and agree one next step that feels safe for both.',
+        "You take your time letting trust build-you're not someone who rushes into vulnerability. But once you feel safe, you move toward intimacy with intention. Give yourself permission to honor both sides of this.",
     },
     {
       id: 'voicing-listening',
-      title: 'Voicing & Listening',
+      title: 'How you navigate consent',
       icon: '🗣️',
       leftLabel: 'Subtle cues',
       rightLabel: 'Direct asks',
@@ -209,11 +209,11 @@ export function buildUserDeepInsights(
       zoneEnd: voicingListening.zoneEnd,
       descriptor: axisDescriptor(voicingListening.value, 'Subtle cues', 'Direct asks'),
       insight:
-        'Conversation tip: use one direct ask and one check-back ("Did I hear you right?") in the same conversation.',
+        "You're comfortable naming your boundaries clearly, and you appreciate when others do the same. Ambiguity can feel unsafe to you-you'd rather know where you stand than guess.",
     },
     {
       id: 'conflict-style',
-      title: 'Conflict Style',
+      title: 'How you settle',
       icon: '⚡',
       leftLabel: 'Withdraw',
       rightLabel: 'Pursue',
@@ -222,11 +222,11 @@ export function buildUserDeepInsights(
       zoneEnd: conflictStyle.zoneEnd,
       descriptor: axisDescriptor(conflictStyle.value, 'Withdraw', 'Pursue'),
       insight:
-        'Conversation tip: set a repair rule in advance: pause, cool down, and name a specific time to continue.',
+        "You're skilled at repair and holding boundaries-you don't lose yourself when things get intense. You know how to come back to center.",
     },
     {
       id: 'autonomy-closeness',
-      title: 'Autonomy & Closeness',
+      title: 'How you balance closeness and freedom',
       icon: '🫶',
       leftLabel: 'Need space',
       rightLabel: 'Need closeness',
@@ -235,11 +235,11 @@ export function buildUserDeepInsights(
       zoneEnd: autonomyCloseness.zoneEnd,
       descriptor: axisDescriptor(autonomyCloseness.value, 'Need space', 'Need closeness'),
       insight:
-        'Conversation tip: share your refill pattern (alone time vs together time) before tension starts.',
+        "You value both autonomy and intimacy-you're not someone who merges completely or walls off entirely. You're looking for a partner who can hold both independence and deep connection without making you choose.",
     },
     {
       id: 'erotic-expression',
-      title: 'Erotic Expression',
+      title: 'Your desire landscape',
       icon: '🌙',
       leftLabel: 'Familiar',
       rightLabel: 'Exploratory',
@@ -248,11 +248,11 @@ export function buildUserDeepInsights(
       zoneEnd: eroticExpression.zoneEnd,
       descriptor: axisDescriptor(eroticExpression.value, 'Familiar', 'Exploratory'),
       insight:
-        'Conversation tip: alternate comfort and novelty intentionally, instead of waiting for mismatch to appear.',
+        "You savor the build, but you crave depth and heat. You're demisexual in pacing but highly erotic once connected-a beautiful paradox that might confuse partners who don't understand both sides of you.",
     },
     {
       id: 'emotional-regulation',
-      title: 'Emotional Regulation',
+      title: 'How you find calm',
       icon: '🌊',
       leftLabel: 'Self-soothe',
       rightLabel: 'Co-regulate',
@@ -261,11 +261,11 @@ export function buildUserDeepInsights(
       zoneEnd: emotionalRegulation.zoneEnd,
       descriptor: axisDescriptor(emotionalRegulation.value, 'Self-soothe', 'Co-regulate'),
       insight:
-        'Conversation tip: when activated, state your process clearly: "I need X minutes and I will come back."',
+        "When overwhelmed, you tend to step back and process alone before reconnecting. You don't need someone to fix your feelings-you need space to find your center, then you'll come back ready to engage.",
     },
     {
       id: 'values-alignment',
-      title: 'Values Alignment',
+      title: 'How you find meaning',
       icon: '🧭',
       leftLabel: 'Stability',
       rightLabel: 'Adventure',
@@ -282,7 +282,7 @@ export function buildUserDeepInsights(
         descriptor: axisDescriptor(valuesImpact.value, 'roots', 'impact'),
       },
       insight:
-        'Conversation tip: compare direction, not just chemistry: "What are we building in the next 3-6 months?"',
+        "You're drawn to self-expression and intensity (living fully) more than external service or tradition. You create meaning through being alive, not through conforming.",
     },
   ]
 }
@@ -315,7 +315,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'pacing-rhythm').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'pacing-rhythm').youValue - areaById(tAreas, 'pacing-rhythm').youValue),
       insight:
-        'Try this: agree a pace check-in question you both use when things speed up or stall.',
+        'You and they may move toward intimacy at different speeds, which can feel energizing in one moment and uncertain in another. This area often works best when both pacing styles are recognized as valid rather than treated as a problem to fix.',
     },
     {
       id: 'voicing-listening',
@@ -331,7 +331,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'voicing-listening').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'voicing-listening').youValue - areaById(tAreas, 'voicing-listening').youValue),
       insight:
-        'Try this: one person makes a direct ask, the other mirrors it back in one sentence before responding.',
+        'Your consent communication styles may differ in directness. When one person relies on subtle cues and the other prefers explicit language, misunderstandings can happen even when both people have good intent.',
     },
     {
       id: 'conflict-style',
@@ -347,7 +347,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'conflict-style').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'conflict-style').youValue - areaById(tAreas, 'conflict-style').youValue),
       insight:
-        'Try this: set a same-day repair window after conflict, even if the full topic is handled later.',
+        'You and they may carry tension differently during conflict, with one seeking immediate repair while the other needs distance first. The pattern itself is not the issue; the strain appears when each style is interpreted as rejection.',
     },
     {
       id: 'autonomy-closeness',
@@ -363,7 +363,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'autonomy-closeness').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'autonomy-closeness').youValue - areaById(tAreas, 'autonomy-closeness').youValue),
       insight:
-        'Try this: name one thing that helps each person reconnect after space or overwhelm.',
+        'This area shows how each of you balances independence and closeness. If one person experiences space as safety and the other experiences closeness as safety, the same interaction can feel grounding to one and distant to the other.',
     },
     {
       id: 'erotic-expression',
@@ -379,7 +379,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'erotic-expression').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'erotic-expression').youValue - areaById(tAreas, 'erotic-expression').youValue),
       insight:
-        'Try this: plan one familiar and one exploratory moment so both people feel seen.',
+        'Your desire patterns may overlap in some moments and diverge in others, especially around familiarity versus exploration. Friction here usually reflects different pathways to feeling turned on, not a lack of chemistry.',
     },
     {
       id: 'emotional-regulation',
@@ -395,7 +395,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'emotional-regulation').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'emotional-regulation').youValue - areaById(tAreas, 'emotional-regulation').youValue),
       insight:
-        'Try this: use a return promise ("I will come back at __") whenever either person takes space.',
+        'You and they may regulate emotional intensity through different rhythms of closeness and space. When those rhythms are out of sync, one person can feel pressured while the other feels alone.',
     },
     {
       id: 'values-alignment',
@@ -425,7 +425,7 @@ export function buildComparisonDeepInsights(
         ),
       },
       insight:
-        'Try this: align on one shared priority and one personal priority for the next month.',
+        'This area reflects whether your sense of meaning is built through steadiness, exploration, impact, or some blend of all three. Differences can be complementary, but only when both value systems are seen as equally real.',
     },
   ]
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Radar, RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts'
 import type { RadarDimensions } from '@/lib/types'
 import { toV4RadarAxes } from '@/lib/radarAxes'
@@ -44,13 +44,23 @@ interface AxisTickProps {
   textAnchor?: 'start' | 'middle' | 'end' | 'inherit'
   payload?: { value?: string }
   onAxisHover?: (axis: string | null) => void
+  labelDistanceMultiplier?: number
 }
 
-function AxisTick({ x = 0, y = 0, cx = 0, cy = 0, textAnchor = 'middle', payload, onAxisHover }: AxisTickProps) {
+function AxisTick({
+  x = 0,
+  y = 0,
+  cx = 0,
+  cy = 0,
+  textAnchor = 'middle',
+  payload,
+  onAxisHover,
+  labelDistanceMultiplier = 1.2,
+}: AxisTickProps) {
   const key = payload?.value || ''
   const [line1, line2] = AXIS_LABEL_LINES[key] || [key, '']
-  const tx = cx + (x - cx) * 1.2
-  const ty = cy + (y - cy) * 1.2
+  const tx = cx + (x - cx) * labelDistanceMultiplier
+  const ty = cy + (y - cy) * labelDistanceMultiplier
 
   return (
     <g
@@ -69,6 +79,20 @@ function AxisTick({ x = 0, y = 0, cx = 0, cy = 0, textAnchor = 'middle', payload
 
 export default function RadarChart({ data, label = 'Profile', color = '#9333ea', showLegend = false }: RadarChartProps) {
   const [hoveredAxis, setHoveredAxis] = useState<string | null>(null)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const update = () => {
+      setIsMobile(window.innerWidth < 640)
+      setIsMounted(true)
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   const axes = toV4RadarAxes(data)
   const chartData = [
     {
@@ -103,6 +127,14 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
     },
   ]
 
+  const chartHeight = isMobile ? 520 : 760
+  const chartMinHeight = isMobile ? 460 : 640
+  const margin = isMobile
+    ? { top: 90, bottom: 95, left: 30, right: 30 }
+    : { top: 120, bottom: 125, left: 85, right: 85 }
+  const outerRadius = isMobile ? '76%' : '74%'
+  const labelDistanceMultiplier = isMobile ? 1.12 : 1.28
+
   return (
     <div className="relative">
       {hoveredAxis ? (
@@ -116,31 +148,39 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
         </div>
       ) : null}
 
-      <ResponsiveContainer width="100%" height={700} className="min-h-[560px] sm:min-h-[700px]">
-        <RechartsRadarChart
-          data={chartData}
-          margin={{ top: 150, bottom: 150, left: 130, right: 130 }}
-          outerRadius="66%"
-        >
-          <PolarGrid gridType="circle" />
-          <PolarAngleAxis
-            dataKey="dimension"
-            tick={(props) => <AxisTick {...props} onAxisHover={setHoveredAxis} />}
-            tickLine={false}
-            className="dark:text-gray-300"
-          />
-          <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 10, fill: '#999' }} />
-          <Radar
-            name={label}
-            dataKey="value"
-            stroke={color}
-            fill={color}
-            fillOpacity={0.3}
-            strokeWidth={2}
-          />
-          {showLegend && <Legend />}
-        </RechartsRadarChart>
-      </ResponsiveContainer>
+      <div style={{ minHeight: chartMinHeight }}>
+        <ResponsiveContainer width="100%" height={chartHeight}>
+          <RechartsRadarChart
+            data={chartData}
+            margin={margin}
+            outerRadius={outerRadius}
+          >
+            <PolarGrid gridType="circle" />
+            <PolarAngleAxis
+              dataKey="dimension"
+              tick={(props) => (
+                <AxisTick
+                  {...props}
+                  onAxisHover={setHoveredAxis}
+                  labelDistanceMultiplier={isMounted ? labelDistanceMultiplier : 1.2}
+                />
+              )}
+              tickLine={false}
+              className="dark:text-gray-300"
+            />
+            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: isMobile ? 9 : 10, fill: '#999' }} />
+            <Radar
+              name={label}
+              dataKey="value"
+              stroke={color}
+              fill={color}
+              fillOpacity={0.3}
+              strokeWidth={2}
+            />
+            {showLegend && <Legend />}
+          </RechartsRadarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { Radar, RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts'
 import type { RadarDimensions } from '@/lib/types'
 import { toV4RadarAxes } from '@/lib/radarAxes'
@@ -10,6 +11,16 @@ interface RadarOverlayProps {
 }
 
 export default function RadarOverlay({ userData, requesterData }: RadarOverlayProps) {
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const update = () => setIsMobile(window.innerWidth < 640)
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   const userAxes = toV4RadarAxes(userData)
   const requesterAxes = toV4RadarAxes(requesterData)
   const chartData = [
@@ -52,37 +63,43 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
   ]
 
   return (
-    <ResponsiveContainer width="100%" height={400}>
-      <RechartsRadarChart data={chartData}>
-        <PolarGrid gridType="circle" />
-        <PolarAngleAxis 
-          dataKey="dimension" 
-          tick={{ fontSize: 12, fill: '#666' }}
-        />
-        <PolarRadiusAxis 
-          angle={90} 
-          domain={[0, 100]} 
-          tick={{ fontSize: 10, fill: '#999' }}
-        />
-        <Radar
-          name="Them"
-          dataKey="user"
-          stroke="#9333ea"
-          fill="#9333ea"
-          fillOpacity={0.3}
-          strokeWidth={2}
-        />
-        <Radar
-          name="You"
-          dataKey="requester"
-          stroke="#d946ef"
-          fill="#d946ef"
-          fillOpacity={0.3}
-          strokeWidth={2}
-        />
-        <Legend />
-      </RechartsRadarChart>
-    </ResponsiveContainer>
+    <div style={{ minHeight: isMobile ? 440 : 560 }}>
+      <ResponsiveContainer width="100%" height={isMobile ? 500 : 620}>
+        <RechartsRadarChart
+          data={chartData}
+          margin={isMobile ? { top: 80, bottom: 95, left: 35, right: 35 } : { top: 110, bottom: 120, left: 90, right: 90 }}
+          outerRadius={isMobile ? '72%' : '68%'}
+        >
+          <PolarGrid gridType="circle" />
+          <PolarAngleAxis 
+            dataKey="dimension" 
+            tick={{ fontSize: isMobile ? 11 : 13, fill: '#666' }}
+          />
+          <PolarRadiusAxis 
+            angle={90} 
+            domain={[0, 100]} 
+            tick={{ fontSize: isMobile ? 9 : 10, fill: '#999' }}
+          />
+          <Radar
+            name="Them"
+            dataKey="user"
+            stroke="#9333ea"
+            fill="#9333ea"
+            fillOpacity={0.3}
+            strokeWidth={2}
+          />
+          <Radar
+            name="You"
+            dataKey="requester"
+            stroke="#d946ef"
+            fill="#d946ef"
+            fillOpacity={0.3}
+            strokeWidth={2}
+          />
+          <Legend />
+        </RechartsRadarChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
 

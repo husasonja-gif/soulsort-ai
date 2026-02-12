@@ -6,6 +6,8 @@ import { evaluateDealbreakers, applyDealbreakerCaps, type RequesterStructuredFie
 import type { ChatMessage } from '@/lib/types'
 import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
 import { toV4RadarAxes } from '@/lib/radarAxes'
+import { buildComparisonDeepInsights } from '@/lib/deepInsights'
+import { generateDeepInsightsCopy } from '@/lib/deepInsightsCopy'
 
 /**
  * REQUESTER VECTOR STORAGE AUDIT (Part C):
@@ -298,6 +300,24 @@ export async function POST(request: Request) {
 
     // Save assessment (including dealbreaker hits - private to profile owner)
     const requesterV4Axes = toV4RadarAxes(assessment.radar)
+    const userRadarForComparison = {
+      self_transcendence: userRadarProfile.self_transcendence,
+      self_enhancement: userRadarProfile.self_enhancement,
+      rooting: userRadarProfile.rooting,
+      searching: userRadarProfile.searching,
+      relational: userRadarProfile.relational,
+      erotic: userRadarProfile.erotic,
+      consent: userRadarProfile.consent || (userRadarProfile as any).consent_dim,
+    }
+    const comparisonAreas = buildComparisonDeepInsights(
+      assessment.radar,
+      userRadarForComparison,
+      undefined,
+      undefined,
+      undefined,
+      userRadarProfile.signal_scores
+    ).areas
+    const deepInsightsCopy = await generateDeepInsightsCopy('requester', comparisonAreas)
     const savedAssessment = await createRequesterAssessment(
       linkId,
       userId,
@@ -306,7 +326,8 @@ export async function POST(request: Request) {
       assessment.summary,
       assessment.abuseFlags,
       assessment.dealbreakerHits,
-      requesterV4Axes
+      requesterV4Axes,
+      deepInsightsCopy
     )
 
     // Store requester trace if analytics_opt_in is true (privacy-first)
@@ -393,6 +414,7 @@ export async function POST(request: Request) {
         consent: userRadarProfile.consent || (userRadarProfile as any).consent_dim, // Support both for migration
       },
       requesterRadar: assessment.radar,
+      deepInsightsCopy,
       assessmentId: savedAssessment.id,
     })
   } catch (error) {

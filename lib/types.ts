@@ -66,6 +66,7 @@ export interface UserRadarProfile {
     conflict_repair: number
   } | null
   signal_scores?: Partial<CanonicalSignalScores> | null
+  deep_insights_copy?: Record<string, string> | null
   dealbreakers: string[]
   schema_version: number
   model_version: string
@@ -113,6 +114,7 @@ export interface RequesterAssessment {
     conflict_repair: number
   } | null
   signal_scores?: Partial<CanonicalSignalScores> | null
+  deep_insights_copy?: Record<string, string> | null
   compatibility_score: number
   summary_text?: string
   schema_version: number
