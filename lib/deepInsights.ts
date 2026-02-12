@@ -196,7 +196,7 @@ export function buildUserDeepInsights(
       zoneEnd: pacingRhythm.zoneEnd,
       descriptor: axisDescriptor(pacingRhythm.value, 'Slow burn', 'Fast ignition'),
       insight:
-        "How fast you move from stranger to intimate. Mismatch here can feel like rejection in both directions when one person needs runway and the other feels ready now.",
+        'Conversation tip: ask, "What pace feels good for you right now?" and agree one next step that feels safe for both.',
     },
     {
       id: 'voicing-listening',
@@ -209,7 +209,7 @@ export function buildUserDeepInsights(
       zoneEnd: voicingListening.zoneEnd,
       descriptor: axisDescriptor(voicingListening.value, 'Subtle cues', 'Direct asks'),
       insight:
-        "How you express needs and receive what is unsaid. Clear communication reduces friction, but different signaling styles can still create missed intentions.",
+        'Conversation tip: use one direct ask and one check-back ("Did I hear you right?") in the same conversation.',
     },
     {
       id: 'conflict-style',
@@ -222,7 +222,7 @@ export function buildUserDeepInsights(
       zoneEnd: conflictStyle.zoneEnd,
       descriptor: axisDescriptor(conflictStyle.value, 'Withdraw', 'Pursue'),
       insight:
-        "What happens when you disagree. Relationships usually survive conflict when repair is intentional, paced, and explicitly initiated.",
+        'Conversation tip: set a repair rule in advance: pause, cool down, and name a specific time to continue.',
     },
     {
       id: 'autonomy-closeness',
@@ -235,7 +235,7 @@ export function buildUserDeepInsights(
       zoneEnd: autonomyCloseness.zoneEnd,
       descriptor: axisDescriptor(autonomyCloseness.value, 'Need space', 'Need closeness'),
       insight:
-        "How much space you need versus togetherness. This is often the attachment dance: do you regenerate alone, together, or with deliberate alternation?",
+        'Conversation tip: share your refill pattern (alone time vs together time) before tension starts.',
     },
     {
       id: 'erotic-expression',
@@ -248,7 +248,7 @@ export function buildUserDeepInsights(
       zoneEnd: eroticExpression.zoneEnd,
       descriptor: axisDescriptor(eroticExpression.value, 'Familiar', 'Exploratory'),
       insight:
-        "The kind of desire and intimacy you are drawn to. Differences here are workable when there is explicit negotiation instead of silent assumptions.",
+        'Conversation tip: alternate comfort and novelty intentionally, instead of waiting for mismatch to appear.',
     },
     {
       id: 'emotional-regulation',
@@ -261,7 +261,7 @@ export function buildUserDeepInsights(
       zoneEnd: emotionalRegulation.zoneEnd,
       descriptor: axisDescriptor(emotionalRegulation.value, 'Self-soothe', 'Co-regulate'),
       insight:
-        "How you handle big feelings. Naming your regulation style in real time lowers misread abandonment/smothering loops.",
+        'Conversation tip: when activated, state your process clearly: "I need X minutes and I will come back."',
     },
     {
       id: 'values-alignment',
@@ -282,7 +282,7 @@ export function buildUserDeepInsights(
         descriptor: axisDescriptor(valuesImpact.value, 'roots', 'impact'),
       },
       insight:
-        "What drives you and what you are building toward. Long-term fit improves when shared direction is explicit even if paths differ.",
+        'Conversation tip: compare direction, not just chemistry: "What are we building in the next 3-6 months?"',
     },
   ]
 }
@@ -315,7 +315,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'pacing-rhythm').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'pacing-rhythm').youValue - areaById(tAreas, 'pacing-rhythm').youValue),
       insight:
-        "Pacing mismatch can feel like rejection in both directions. Make timing explicit: who leads tempo, who leads intensity, and when you re-sync.",
+        'Try this: agree a pace check-in question you both use when things speed up or stall.',
     },
     {
       id: 'voicing-listening',
@@ -331,7 +331,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'voicing-listening').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'voicing-listening').youValue - areaById(tAreas, 'voicing-listening').youValue),
       insight:
-        "Different signaling styles are common friction. One direct ask + one reflection per conflict cycle can dramatically improve understanding.",
+        'Try this: one person makes a direct ask, the other mirrors it back in one sentence before responding.',
     },
     {
       id: 'conflict-style',
@@ -347,7 +347,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'conflict-style').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'conflict-style').youValue - areaById(tAreas, 'conflict-style').youValue),
       insight:
-        "Conflict itself is not the threat. Delayed repair and silent assumptions are. Set a check-in time after cooldown.",
+        'Try this: set a same-day repair window after conflict, even if the full topic is handled later.',
     },
     {
       id: 'autonomy-closeness',
@@ -363,7 +363,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'autonomy-closeness').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'autonomy-closeness').youValue - areaById(tAreas, 'autonomy-closeness').youValue),
       insight:
-        "Attachment rhythm is workable when both people know the other's refill pattern and don't moralize it.",
+        'Try this: name one thing that helps each person reconnect after space or overwhelm.',
     },
     {
       id: 'erotic-expression',
@@ -379,7 +379,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'erotic-expression').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'erotic-expression').youValue - areaById(tAreas, 'erotic-expression').youValue),
       insight:
-        "Erotic mismatch is a negotiation problem, not automatically incompatibility. Alternate comfort and novelty intentionally.",
+        'Try this: plan one familiar and one exploratory moment so both people feel seen.',
     },
     {
       id: 'emotional-regulation',
@@ -395,7 +395,7 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'emotional-regulation').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'emotional-regulation').youValue - areaById(tAreas, 'emotional-regulation').youValue),
       insight:
-        "When overwhelmed, name process in the moment: 'I need X minutes and I will return.' This protects both nervous systems.",
+        'Try this: use a return promise ("I will come back at __") whenever either person takes space.',
     },
     {
       id: 'values-alignment',
@@ -425,7 +425,7 @@ export function buildComparisonDeepInsights(
         ),
       },
       insight:
-        "Shared direction matters most long-term. Differences can become strength when translated into a joint roadmap.",
+        'Try this: align on one shared priority and one personal priority for the next month.',
     },
   ]
 
@@ -442,8 +442,8 @@ export function buildComparisonDeepInsights(
   }
 
   const creativeEdges: string[] = [
-    '🎯 Translate one friction area into a simple weekly ritual (timing, repair, or check-in).',
-    '🧩 Keep one aligned area as your anchor when tension rises.',
+    'Translate one friction area into a weekly ritual (timing, repair, or check-in).',
+    'Use one aligned area as your anchor when tension rises.',
   ]
 
   return {

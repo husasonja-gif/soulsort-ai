@@ -75,8 +75,8 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
         <Radar
           name="You"
           dataKey="requester"
-          stroke="#ec4899"
-          fill="#ec4899"
+          stroke="#d946ef"
+          fill="#d946ef"
           fillOpacity={0.3}
           strokeWidth={2}
         />

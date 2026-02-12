@@ -14,45 +14,80 @@ interface DeepInsightsSectionProps {
   requesterSignalScores?: Partial<CanonicalSignalScores> | null
 }
 
+const THEM_COLOR = '#9333ea'
+const YOU_COLOR = '#d946ef'
+
 function DotBar({
-  value,
-  leftLabel,
-  rightLabel,
   zoneStart = 35,
   zoneEnd = 65,
+  lineColor = '#c4b5fd',
+  leftLabel,
+  rightLabel,
 }: {
-  value: number
+  lineColor?: string
   leftLabel: string
   rightLabel: string
   zoneStart?: number
   zoneEnd?: number
 }) {
-  const clamped = Math.max(0, Math.min(100, value))
   const safeStart = Math.max(0, Math.min(100, zoneStart))
   const safeEnd = Math.max(safeStart, Math.min(100, zoneEnd))
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[3px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 h-[2px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
-            className="absolute top-1/2 -translate-y-1/2 h-[5px] bg-purple-300 dark:bg-purple-500/50 rounded"
+            className="absolute top-1/2 -translate-y-1/2 h-[4px] rounded"
             style={{
               left: `${safeStart}%`,
               width: `${safeEnd - safeStart}%`,
+              backgroundColor: lineColor,
             }}
           />
+        </div>
+        <span className="whitespace-nowrap">{rightLabel}</span>
+      </div>
+    </div>
+  )
+}
+
+function ComparisonBar({
+  leftLabel,
+  rightLabel,
+  youZoneStart,
+  youZoneEnd,
+  themZoneStart,
+  themZoneEnd,
+}: {
+  leftLabel: string
+  rightLabel: string
+  youZoneStart?: number
+  youZoneEnd?: number
+  themZoneStart?: number
+  themZoneEnd?: number
+}) {
+  const yStart = Math.max(0, Math.min(100, youZoneStart ?? 35))
+  const yEnd = Math.max(yStart, Math.min(100, youZoneEnd ?? 65))
+  const tStart = Math.max(0, Math.min(100, themZoneStart ?? 35))
+  const tEnd = Math.max(tStart, Math.min(100, themZoneEnd ?? 65))
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3 text-xs font-semibold">
+        <span style={{ color: YOU_COLOR }}>You</span>
+        <span style={{ color: THEM_COLOR }}>Them</span>
+      </div>
+      <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+        <span className="whitespace-nowrap">{leftLabel}</span>
+        <div className="relative flex-1 h-[2px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
-            className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400"
-            style={{ left: `calc(${safeStart}% - 4px)` }}
+            className="absolute top-1/2 -translate-y-[calc(50%+3px)] h-[4px] rounded"
+            style={{ left: `${yStart}%`, width: `${yEnd - yStart}%`, backgroundColor: YOU_COLOR }}
           />
           <span
-            className="absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-purple-400"
-            style={{ left: `calc(${safeEnd}% - 4px)` }}
-          />
-          <span
-            className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-900 dark:bg-white border-2 border-white dark:border-gray-900"
-            style={{ left: `calc(${clamped}% - 6px)` }}
+            className="absolute top-1/2 -translate-y-[calc(50%-3px)] h-[4px] rounded"
+            style={{ left: `${tStart}%`, width: `${tEnd - tStart}%`, backgroundColor: THEM_COLOR }}
           />
         </div>
         <span className="whitespace-nowrap">{rightLabel}</span>
@@ -79,42 +114,29 @@ function InsightCard({
         onClick={onToggle}
         className="w-full text-left flex items-center justify-between gap-3"
       >
-        <div className="font-semibold text-gray-900 dark:text-gray-100">
-          {area.title}
-        </div>
+        <div className="font-semibold text-gray-900 dark:text-gray-100">{area.title}</div>
+        <div className="text-xs text-gray-500 dark:text-gray-400">{expanded ? 'Hide practical tip' : 'Show practical tip'}</div>
       </button>
 
       <div className="mt-3 space-y-3">
         {mode === 'requester' ? (
           <>
-            <div>
-              <div className="text-xs text-gray-500 mb-1">You</div>
-              <DotBar
-                value={area.youValue}
-                leftLabel={area.leftLabel}
-                rightLabel={area.rightLabel}
-                zoneStart={area.zoneStart}
-                zoneEnd={area.zoneEnd}
-              />
-            </div>
-            <div>
-              <div className="text-xs text-gray-500 mb-1">Them</div>
-              <DotBar
-                value={area.themValue ?? area.youValue}
-                leftLabel={area.leftLabel}
-                rightLabel={area.rightLabel}
-                zoneStart={area.themZoneStart ?? area.zoneStart}
-                zoneEnd={area.themZoneEnd ?? area.zoneEnd}
-              />
-            </div>
+            <ComparisonBar
+              leftLabel={area.leftLabel}
+              rightLabel={area.rightLabel}
+              youZoneStart={area.zoneStart}
+              youZoneEnd={area.zoneEnd}
+              themZoneStart={area.themZoneStart ?? area.zoneStart}
+              themZoneEnd={area.themZoneEnd ?? area.zoneEnd}
+            />
           </>
         ) : (
           <DotBar
-            value={area.youValue}
             leftLabel={area.leftLabel}
             rightLabel={area.rightLabel}
             zoneStart={area.zoneStart}
             zoneEnd={area.zoneEnd}
+            lineColor="#c4b5fd"
           />
         )}
 
@@ -122,30 +144,22 @@ function InsightCard({
           <div className="pt-1">
             {mode === 'requester' ? (
               <>
-                <div className="text-xs text-gray-500 mb-1">You</div>
-                <DotBar
-                  value={area.secondary.youValue}
+                <ComparisonBar
                   leftLabel={area.secondary.leftLabel}
                   rightLabel={area.secondary.rightLabel}
-                  zoneStart={area.secondary.zoneStart}
-                  zoneEnd={area.secondary.zoneEnd}
-                />
-                <div className="text-xs text-gray-500 mt-2 mb-1">Them</div>
-                <DotBar
-                  value={area.secondary.themValue ?? area.secondary.youValue}
-                  leftLabel={area.secondary.leftLabel}
-                  rightLabel={area.secondary.rightLabel}
-                  zoneStart={area.secondary.themZoneStart ?? area.secondary.zoneStart}
-                  zoneEnd={area.secondary.themZoneEnd ?? area.secondary.zoneEnd}
+                  youZoneStart={area.secondary.zoneStart}
+                  youZoneEnd={area.secondary.zoneEnd}
+                  themZoneStart={area.secondary.themZoneStart ?? area.secondary.zoneStart}
+                  themZoneEnd={area.secondary.themZoneEnd ?? area.secondary.zoneEnd}
                 />
               </>
             ) : (
               <DotBar
-                value={area.secondary.youValue}
                 leftLabel={area.secondary.leftLabel}
                 rightLabel={area.secondary.rightLabel}
                 zoneStart={area.secondary.zoneStart}
                 zoneEnd={area.secondary.zoneEnd}
+                lineColor="#c4b5fd"
               />
             )}
           </div>
@@ -170,7 +184,6 @@ export default function DeepInsightsSection({
   userSignalScores,
   requesterSignalScores,
 }: DeepInsightsSectionProps) {
-  const [enabled, setEnabled] = useState(false)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const data = useMemo(() => {
@@ -191,27 +204,9 @@ export default function DeepInsightsSection({
     <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
       <div className="flex items-center justify-between gap-4 mb-4">
         <h2 className="text-xl font-semibold text-purple-600 dark:text-purple-400">Deep Insights</h2>
-        <button
-          type="button"
-          onClick={() => {
-            setEnabled(!enabled)
-            if (enabled) setExpandedId(null)
-          }}
-          className="px-3 py-2 text-sm rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors"
-        >
-          {enabled ? 'Hide insights' : 'Reveal insights'}
-        </button>
       </div>
 
-      {!enabled ? (
-        <p className="text-sm text-gray-600 dark:text-gray-300">
-          Reveal to explore tension and flow patterns across pacing, repair, desire, and values.
-        </p>
-      ) : (
-        <div className="space-y-4">
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            Purple band = tension spread from your underlying signals (wider means more variance). Black dot = your blended score.
-          </div>
+      <div className="space-y-4">
           {mode === 'requester' && data.summary && (
             <div className="rounded-xl border border-purple-100 dark:border-purple-900 bg-purple-50/60 dark:bg-purple-950/30 p-4 space-y-3">
               <div>
@@ -250,8 +245,7 @@ export default function DeepInsightsSection({
               onToggle={() => setExpandedId(expandedId === area.id ? null : area.id)}
             />
           ))}
-        </div>
-      )}
+      </div>
     </section>
   )
 }

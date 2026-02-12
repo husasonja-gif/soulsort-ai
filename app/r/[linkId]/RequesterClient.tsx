@@ -7,6 +7,39 @@ import DeepInsightsSection from '@/components/DeepInsightsSection'
 import type { ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
 import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
 
+interface SpeechRecognition extends EventTarget {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  onstart: (() => void) | null
+  onend: (() => void) | null
+  onerror: ((event: Event) => void) | null
+  onresult: ((event: SpeechRecognitionEvent) => void) | null
+  start: () => void
+  stop: () => void
+}
+
+interface SpeechRecognitionEvent extends Event {
+  resultIndex: number
+  results: SpeechRecognitionResultList
+}
+
+interface SpeechRecognitionResultList {
+  length: number
+  item(index: number): SpeechRecognitionResult
+  [index: number]: SpeechRecognitionResult
+}
+
+interface SpeechRecognitionResult {
+  length: number
+  item(index: number): SpeechRecognitionAlternative
+  [index: number]: SpeechRecognitionAlternative
+}
+
+interface SpeechRecognitionAlternative {
+  transcript: string
+}
+
 interface RequesterClientProps {
   linkId: string
   userId: string
@@ -44,6 +77,43 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   // Analytics tracking
   const [sessionToken, setSessionToken] = useState<string | null>(null)
   const [startTime, setStartTime] = useState<number | null>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+
+  useEffect(() => {
+    const AnyWindow = window as Window & {
+      webkitSpeechRecognition?: new () => SpeechRecognition
+      SpeechRecognition?: new () => SpeechRecognition
+    }
+    const SR = AnyWindow.webkitSpeechRecognition || AnyWindow.SpeechRecognition
+    if (!SR) return
+
+    const recognitionInstance: SpeechRecognition = new SR()
+    recognitionInstance.lang = 'en-US'
+    recognitionInstance.continuous = true
+    recognitionInstance.interimResults = true
+    recognitionInstance.onstart = () => setIsRecording(true)
+    recognitionInstance.onend = () => setIsRecording(false)
+    recognitionInstance.onerror = () => setIsRecording(false)
+    recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+      let transcript = ''
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript
+      }
+      setCurrentMessage(transcript.trim())
+    }
+
+    setRecognition(recognitionInstance)
+    return () => {
+      recognitionInstance.stop()
+    }
+  }, [])
+
+  const toggleRecording = () => {
+    if (!recognition) return
+    if (isRecording) recognition.stop()
+    else recognition.start()
+  }
 
   // Generate session token for anonymous tracking
   const generateSessionToken = () => {
@@ -560,6 +630,9 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
             You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.
           </p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4 text-xs">
+            You can answer in any language.
+          </p>
 
           <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             {chatHistory.map((msg, idx) => (
@@ -604,20 +677,35 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               ))}
             </div>
           )}
-          <form onSubmit={handleChatSubmit} className="flex gap-2 pb-safe">
-            <input
-              type="text"
-              value={currentMessage}
-              onChange={(e) => setCurrentMessage(e.target.value)}
-              placeholder={currentQuickReplies ? "Or type your response..." : "Type your response..."}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400"
-              disabled={loading}
-              autoComplete="off"
-            />
+          <form onSubmit={handleChatSubmit} className="flex gap-2 items-end pb-safe">
+            <div className="flex-1 flex items-end border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700">
+              <textarea
+                value={currentMessage}
+                onChange={(e) => setCurrentMessage(e.target.value)}
+                placeholder={currentQuickReplies ? 'Or type your response...' : 'Type your response...'}
+                className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
+                disabled={loading}
+                autoComplete="off"
+                rows={1}
+                wrap="soft"
+              />
+              <button
+                type="button"
+                onClick={toggleRecording}
+                disabled={loading || !recognition}
+                className={`ml-2 w-9 h-9 rounded-full flex items-center justify-center text-white text-lg ${
+                  isRecording ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-purple-600 hover:bg-purple-700'
+                } disabled:bg-gray-400`}
+                aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+                title={recognition ? 'Voice input' : 'Voice input unavailable on this browser'}
+              >
+                {isRecording ? '■' : '🎤'}
+              </button>
+            </div>
             <button
               type="submit"
               disabled={loading || !currentMessage.trim() || currentQuickReplies !== null}
-              className="px-6 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+              className="px-5 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
             >
               Send
             </button>
@@ -632,14 +720,6 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold mb-2 text-center text-purple-600">Compatibility Results</h1>
-          
-          {/* Score */}
-          <div className="text-center mb-8">
-            <div className="text-6xl font-bold text-purple-600 mb-2">
-              {assessment.score}%
-            </div>
-            <p className="text-gray-600">Compatibility Score</p>
-          </div>
 
           {/* Summary */}
           <div className="bg-purple-50 rounded-lg p-6 mb-8">
