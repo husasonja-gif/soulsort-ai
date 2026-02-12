@@ -83,19 +83,19 @@ function ComparisonBar({
         <span className="whitespace-nowrap">{leftLabel}</span>
         <div className="relative flex-1 h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
-            className="absolute top-1/2 -translate-y-[calc(50%+4px)] h-[6px] rounded"
+            className="absolute top-1/2 -translate-y-[calc(50%+4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(236,72,153,0.15)]"
             style={{
               left: `${yStart}%`,
               width: `${yEnd - yStart}%`,
-              backgroundImage: `linear-gradient(90deg, ${YOU_COLOR}, #f472b6)`,
+              backgroundImage: 'linear-gradient(90deg, #f5d0fe, #d946ef)',
             }}
           />
           <span
-            className="absolute top-1/2 -translate-y-[calc(50%-4px)] h-[6px] rounded"
+            className="absolute top-1/2 -translate-y-[calc(50%-4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(124,58,237,0.15)]"
             style={{
               left: `${tStart}%`,
               width: `${tEnd - tStart}%`,
-              backgroundImage: `linear-gradient(90deg, ${THEM_COLOR}, #7c3aed)`,
+              backgroundImage: 'linear-gradient(90deg, #ddd6fe, #7c3aed)',
             }}
           />
         </div>

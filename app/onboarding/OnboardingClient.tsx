@@ -550,14 +550,24 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                   type="button"
                   onClick={toggleRecording}
                   disabled={loading}
-                  className={`ml-2 w-9 h-9 rounded-full flex items-center justify-center text-white text-lg ${
+                  className={`ml-2 w-9 h-9 rounded-full flex items-center justify-center text-white ${
                     isRecording
                       ? 'bg-red-600 hover:bg-red-700 animate-pulse'
                       : 'bg-purple-600 hover:bg-purple-700'
                   } disabled:bg-gray-400`}
                   aria-label={isRecording ? 'Stop recording' : 'Start recording'}
                 >
-                  {isRecording ? '■' : '🎤'}
+                  {isRecording ? (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <rect x="6" y="6" width="12" height="12" rx="2" />
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="9" y="2" width="6" height="12" rx="3" />
+                      <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
+                      <path d="M12 19v3" />
+                    </svg>
+                  )}
                 </button>
               </div>
               <button
