@@ -382,8 +382,13 @@ export async function POST(request: Request) {
           })
         
         if (traceError) {
+          const isMissingOptionalTable =
+            traceError.message?.includes('does not exist') ||
+            traceError.message?.includes('Could not find the table') ||
+            traceError.code === '42P01' ||
+            traceError.code === 'PGRST205'
           // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
-          if (traceError.message?.includes('does not exist') || traceError.code === '42P01') {
+          if (isMissingOptionalTable) {
             console.warn('requester_assessment_traces table does not exist yet (migration not run). Skipping trace storage.')
           } else {
             console.error('Error storing requester assessment trace:', traceError)
@@ -392,7 +397,14 @@ export async function POST(request: Request) {
         }
       } catch (error) {
         // Table might not exist yet - that's OK
-        if (error instanceof Error && (error.message.includes('does not exist') || error.message.includes('relation'))) {
+        if (
+          error instanceof Error &&
+          (
+            error.message.includes('does not exist') ||
+            error.message.includes('relation') ||
+            error.message.includes('Could not find the table')
+          )
+        ) {
           console.warn('requester_assessment_traces table does not exist yet (migration not run). Skipping trace storage.')
         } else {
           console.error('Error in requester trace storage:', error)
@@ -400,6 +412,13 @@ export async function POST(request: Request) {
         // Don't fail the request if trace storage fails
       }
     }
+
+    console.log('Requester assessment summary:', {
+      score: assessment.compatibilityScore,
+      abuseFlags: assessment.abuseFlags,
+      dealbreakerHits: assessment.dealbreakerHits.length,
+      requesterRadar: assessment.radar,
+    })
 
     return NextResponse.json({
       score: assessment.compatibilityScore,

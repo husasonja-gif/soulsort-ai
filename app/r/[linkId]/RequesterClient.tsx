@@ -483,7 +483,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
       if (response.ok) {
         const data = await response.json()
-        console.log('Assessment received:', { score: data.compatibilityScore, hasRadar: !!data.radar })
+        console.log('Assessment received:', { score: data.score, hasRadar: !!data.requesterRadar })
         setAssessment(data)
         setFlowState('results')
         

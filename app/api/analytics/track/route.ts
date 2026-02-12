@@ -7,6 +7,15 @@ export async function POST(request: Request) {
     const { data: { user } } = await supabase.auth.getUser()
     
     const body = await request.json()
+    const isMissingOptionalTableError = (err: { code?: string; message?: string } | null | undefined): boolean => {
+      if (!err) return false
+      return (
+        err.code === '42P01' ||
+        err.code === 'PGRST205' ||
+        err.message?.includes('does not exist') === true ||
+        err.message?.includes('Could not find the table') === true
+      )
+    }
     
     // Validate event type
     const validEventTypes = [
@@ -105,7 +114,7 @@ export async function POST(request: Request) {
             })
           if (eventError) {
             // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
-            if (eventError.message?.includes('does not exist') || eventError.code === '42P01') {
+            if (isMissingOptionalTableError(eventError)) {
               console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
             } else {
               console.error('Error storing requester assessment event:', eventError)
@@ -217,7 +226,7 @@ export async function POST(request: Request) {
             
             if (insertError) {
               // Check if it's a "table doesn't exist" error - that's OK, migration not run yet
-              if (insertError.message?.includes('does not exist') || insertError.code === '42P01') {
+              if (isMissingOptionalTableError(insertError)) {
                 console.warn('requester_assessment_events table does not exist yet (migration not run). Using requester_sessions only.')
               } else {
                 console.error('Error inserting requester assessment completion event:', insertError)
@@ -251,14 +260,19 @@ export async function POST(request: Request) {
           .single()
         
         if (userLink) {
-          const { error: shareError } = await supabase.from('share_actions').insert({
+          // Use service-role backed client when available to avoid RLS failures in analytics logging.
+          const { error: shareError } = await analyticsClient.from('share_actions').insert({
             user_id: user.id,
             link_id: userLink.link_id,
             share_method: body.event_data.share_method,
           })
           
           if (shareError) {
-            console.error('Error tracking share action:', shareError)
+            if (shareError.code === '42501') {
+              console.warn('Share action tracking blocked by RLS (non-critical).')
+            } else {
+              console.error('Error tracking share action:', shareError)
+            }
           }
         }
       }
