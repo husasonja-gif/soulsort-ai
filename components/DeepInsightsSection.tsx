@@ -109,22 +109,22 @@ function InsightCard({
   area,
   mode,
   expanded,
-  onToggle,
+  onReveal,
 }: {
   area: DeepInsightArea
   mode: 'user' | 'requester'
   expanded: boolean
-  onToggle: () => void
+  onReveal: () => void
 }) {
   return (
     <div className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white/60 dark:bg-gray-800/60 p-4">
       <button
         type="button"
-        onClick={onToggle}
+        onClick={onReveal}
         className="w-full text-left flex items-center justify-between gap-3"
       >
         <div className="font-semibold text-gray-900 dark:text-gray-100">{area.title}</div>
-        <div className="text-xs text-gray-500 dark:text-gray-400">{expanded ? 'Hide practical tip' : 'Show practical tip'}</div>
+        {!expanded && <div className="text-xs text-gray-500 dark:text-gray-400">In words</div>}
       </button>
 
       <div className="mt-3 space-y-3">
@@ -194,7 +194,7 @@ export default function DeepInsightsSection({
   requesterSignalScores,
   insightOverrides,
 }: DeepInsightsSectionProps) {
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [revealedIds, setRevealedIds] = useState<Record<string, boolean>>({})
 
   const data = useMemo(() => {
     if (mode === 'requester' && requesterRadar) {
@@ -217,35 +217,6 @@ export default function DeepInsightsSection({
       </div>
 
       <div className="space-y-4">
-          {mode === 'requester' && data.summary && (
-            <div className="rounded-xl border border-purple-100 dark:border-purple-900 bg-purple-50/60 dark:bg-purple-950/30 p-4 space-y-3">
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Where You Flow</h3>
-                <ul className="text-sm text-gray-700 dark:text-gray-300 list-disc pl-5 mt-1">
-                  {(data.summary.flow.length ? data.summary.flow : ['✨ Build on your strongest overlap and keep naming what works.']).map((item, idx) => (
-                      <li key={`flow-${idx}`}>{item.replace(/^[^\w]+/, '')}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Where You&apos;ll Feel Friction</h3>
-                <ul className="text-sm text-gray-700 dark:text-gray-300 list-disc pl-5 mt-1">
-                  {(data.summary.friction.length ? data.summary.friction : ['⚡ Low visible friction right now; revisit after real-life stress or conflict.']).map((item, idx) => (
-                      <li key={`friction-${idx}`}>{item.replace(/^[^\w]+/, '')}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Creative Edges</h3>
-                <ul className="text-sm text-gray-700 dark:text-gray-300 list-disc pl-5 mt-1">
-                  {data.summary.creativeEdges.map((item, idx) => (
-                    <li key={`edge-${idx}`}>{item.replace(/^[^\w]+/, '')}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )}
-
           {data.areas.map((area) => (
             <InsightCard
               key={area.id}
@@ -254,8 +225,10 @@ export default function DeepInsightsSection({
                 insight: insightOverrides?.[area.id] || area.insight,
               }}
               mode={mode}
-              expanded={expandedId === area.id}
-              onToggle={() => setExpandedId(expandedId === area.id ? null : area.id)}
+              expanded={!!revealedIds[area.id]}
+              onReveal={() => {
+                setRevealedIds((prev) => (prev[area.id] ? prev : { ...prev, [area.id]: true }))
+              }}
             />
           ))}
       </div>

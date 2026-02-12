@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     // Use service role key to bypass RLS for profile lookup
     const { data: userProfile, error: profileError } = await linkSupabase
       .from('user_profiles')
-      .select('id, onboarding_completed')
+      .select('id, onboarding_completed, preferences')
       .eq('id', userId)
       .maybeSingle()
     
@@ -313,7 +313,7 @@ export async function POST(request: Request) {
       assessment.radar,
       userRadarForComparison,
       undefined,
-      undefined,
+      (userProfile as { preferences?: Record<string, number | undefined> | null })?.preferences ?? undefined,
       undefined,
       userRadarProfile.signal_scores
     ).areas
@@ -433,6 +433,8 @@ export async function POST(request: Request) {
         consent: userRadarProfile.consent || (userRadarProfile as any).consent_dim, // Support both for migration
       },
       requesterRadar: assessment.radar,
+      userPreferences: (userProfile as { preferences?: Record<string, number | undefined> | null })?.preferences ?? null,
+      userSignalScores: userRadarProfile.signal_scores ?? null,
       deepInsightsCopy,
       assessmentId: savedAssessment.id,
     })

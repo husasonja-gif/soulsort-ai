@@ -45,6 +45,7 @@ interface AxisTickProps {
   payload?: { value?: string }
   onAxisHover?: (axis: string | null) => void
   labelDistanceMultiplier?: number
+  isMobile?: boolean
 }
 
 function AxisTick({
@@ -56,6 +57,7 @@ function AxisTick({
   payload,
   onAxisHover,
   labelDistanceMultiplier = 1.2,
+  isMobile = false,
 }: AxisTickProps) {
   const key = payload?.value || ''
   const [line1, line2] = AXIS_LABEL_LINES[key] || [key, '']
@@ -70,8 +72,8 @@ function AxisTick({
       onMouseLeave={() => onAxisHover?.(null)}
     >
       <text textAnchor={textAnchor} fill="#4b5563" className="dark:fill-gray-300 font-medium">
-        <tspan x={0} dy={0} fontSize={13}>{line1}</tspan>
-        {line2 ? <tspan x={0} dy={15} fontSize={13}>{line2}</tspan> : null}
+        <tspan x={0} dy={0} fontSize={isMobile ? 11 : 13}>{line1}</tspan>
+        {line2 ? <tspan x={0} dy={isMobile ? 13 : 15} fontSize={isMobile ? 11 : 13}>{line2}</tspan> : null}
       </text>
     </g>
   )
@@ -127,23 +129,29 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
     },
   ]
 
-  const chartHeight = isMobile ? 520 : 760
-  const chartMinHeight = isMobile ? 460 : 640
+  const chartHeight = isMobile ? 500 : 760
+  const chartMinHeight = isMobile ? 470 : 640
   const margin = isMobile
-    ? { top: 90, bottom: 95, left: 30, right: 30 }
+    ? { top: 96, bottom: 100, left: 56, right: 56 }
     : { top: 120, bottom: 125, left: 85, right: 85 }
-  const outerRadius = isMobile ? '76%' : '74%'
-  const labelDistanceMultiplier = isMobile ? 1.12 : 1.28
+  const outerRadius = isMobile ? '63%' : '74%'
+  const labelDistanceMultiplier = isMobile ? 1.03 : 1.28
 
   return (
     <div className="relative">
       {hoveredAxis ? (
-        <div className="absolute z-20 left-1/2 -translate-x-1/2 top-2 max-w-xl rounded-2xl px-4 py-3 bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/70 dark:to-purple-800/40 text-gray-800 dark:text-gray-100 shadow-sm">
+        <div
+          className={
+            isMobile
+              ? 'mb-3 w-full rounded-2xl px-3 py-2 bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/70 dark:to-purple-800/40 text-gray-800 dark:text-gray-100 shadow-sm'
+              : 'absolute z-20 left-1/2 -translate-x-1/2 top-2 max-w-xl rounded-2xl px-4 py-3 bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/70 dark:to-purple-800/40 text-gray-800 dark:text-gray-100 shadow-sm'
+          }
+        >
           <div className="flex items-start gap-2">
             <span className="mt-0.5 w-5 h-5 rounded-full border border-purple-400 text-purple-600 text-xs font-bold flex items-center justify-center bg-white/70 dark:bg-gray-900/40">
               i
             </span>
-            <p className="text-sm leading-snug">{AXIS_DESCRIPTIONS[hoveredAxis]}</p>
+            <p className="text-xs sm:text-sm leading-snug">{AXIS_DESCRIPTIONS[hoveredAxis]}</p>
           </div>
         </div>
       ) : null}
@@ -163,6 +171,7 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
                   {...props}
                   onAxisHover={setHoveredAxis}
                   labelDistanceMultiplier={isMounted ? labelDistanceMultiplier : 1.2}
+                  isMobile={isMobile}
                 />
               )}
               tickLine={false}

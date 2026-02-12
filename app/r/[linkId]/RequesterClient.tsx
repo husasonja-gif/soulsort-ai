@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import RadarOverlay from '@/components/RadarOverlay'
 import DeepInsightsSection from '@/components/DeepInsightsSection'
-import type { ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
+import type { CanonicalSignalScores, ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
 import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
 
 interface SpeechRecognition extends EventTarget {
@@ -72,6 +72,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     summary: string
     userRadar: RadarDimensions
     requesterRadar: RadarDimensions
+    userPreferences?: Record<string, number | undefined> | null
+    userSignalScores?: Partial<CanonicalSignalScores> | null
     deepInsightsCopy?: Record<string, string>
   } | null>(null)
   
@@ -741,6 +743,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             mode="requester"
             userRadar={assessment.requesterRadar}
             requesterRadar={assessment.userRadar}
+            requesterPreferences={assessment.userPreferences || null}
+            requesterSignalScores={assessment.userSignalScores || null}
             insightOverrides={assessment.deepInsightsCopy || null}
           />
 

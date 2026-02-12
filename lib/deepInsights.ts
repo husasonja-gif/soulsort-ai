@@ -254,12 +254,12 @@ export function buildUserDeepInsights(
       id: 'emotional-regulation',
       title: 'How you find calm',
       icon: '🌊',
-      leftLabel: 'Self-soothe',
+      leftLabel: 'Withdraw',
       rightLabel: 'Co-regulate',
       youValue: emotionalRegulation.value,
       zoneStart: emotionalRegulation.zoneStart,
       zoneEnd: emotionalRegulation.zoneEnd,
-      descriptor: axisDescriptor(emotionalRegulation.value, 'Self-soothe', 'Co-regulate'),
+      descriptor: axisDescriptor(emotionalRegulation.value, 'Withdraw', 'Co-regulate'),
       insight:
         "When overwhelmed, you tend to step back and process alone before reconnecting. You don't need someone to fix your feelings-you need space to find your center, then you'll come back ready to engage.",
     },
@@ -303,10 +303,10 @@ export function buildComparisonDeepInsights(
   const areas: DeepInsightArea[] = [
     {
       id: 'pacing-rhythm',
-      title: 'How You Both Desire',
+      title: 'How you pace intimacy',
       icon: '🔥',
-      leftLabel: 'Slow pace',
-      rightLabel: 'High intensity',
+      leftLabel: 'Slow burn',
+      rightLabel: 'Fast ignition',
       youValue: areaById(yAreas, 'pacing-rhythm').youValue,
       themValue: areaById(tAreas, 'pacing-rhythm').youValue,
       zoneStart: areaById(yAreas, 'pacing-rhythm').zoneStart,
@@ -319,7 +319,7 @@ export function buildComparisonDeepInsights(
     },
     {
       id: 'voicing-listening',
-      title: 'Voicing & Listening',
+      title: 'How you navigate consent',
       icon: '🗣️',
       leftLabel: 'Subtle cues',
       rightLabel: 'Direct asks',
@@ -335,7 +335,7 @@ export function buildComparisonDeepInsights(
     },
     {
       id: 'conflict-style',
-      title: 'Conflict Style',
+      title: 'How you settle',
       icon: '⚡',
       leftLabel: 'Withdraw',
       rightLabel: 'Pursue',
@@ -351,7 +351,7 @@ export function buildComparisonDeepInsights(
     },
     {
       id: 'autonomy-closeness',
-      title: 'Autonomy & Closeness',
+      title: 'How you balance closeness and freedom',
       icon: '🫶',
       leftLabel: 'Need space',
       rightLabel: 'Need closeness',
@@ -367,7 +367,7 @@ export function buildComparisonDeepInsights(
     },
     {
       id: 'erotic-expression',
-      title: 'Erotic Expression',
+      title: 'Your desire landscape',
       icon: '🌙',
       leftLabel: 'Familiar',
       rightLabel: 'Exploratory',
@@ -383,9 +383,9 @@ export function buildComparisonDeepInsights(
     },
     {
       id: 'emotional-regulation',
-      title: 'Emotional Regulation',
+      title: 'How you find calm',
       icon: '🌊',
-      leftLabel: 'Self-soothe',
+      leftLabel: 'Withdraw',
       rightLabel: 'Co-regulate',
       youValue: areaById(yAreas, 'emotional-regulation').youValue,
       themValue: areaById(tAreas, 'emotional-regulation').youValue,
@@ -399,7 +399,7 @@ export function buildComparisonDeepInsights(
     },
     {
       id: 'values-alignment',
-      title: 'Values Alignment',
+      title: 'How you find meaning',
       icon: '🧭',
       leftLabel: 'Stability',
       rightLabel: 'Adventure',
