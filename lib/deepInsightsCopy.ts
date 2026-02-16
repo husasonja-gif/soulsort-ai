@@ -11,6 +11,25 @@ function sanitizeText(text: string): string {
   return text.replace(/\s+/g, ' ').trim().slice(0, 420)
 }
 
+function parseClaudeJson(content: string): { insights?: Record<string, unknown> } {
+  const trimmed = content.trim()
+  const withoutFences = trimmed
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim()
+
+  try {
+    return JSON.parse(withoutFences)
+  } catch {
+    const start = withoutFences.indexOf('{')
+    const end = withoutFences.lastIndexOf('}')
+    if (start >= 0 && end > start) {
+      return JSON.parse(withoutFences.slice(start, end + 1))
+    }
+    throw new Error('No valid JSON object found in Deep Insights copy response')
+  }
+}
+
 export async function generateDeepInsightsCopy(
   mode: 'user' | 'requester',
   areas: DeepInsightArea[]
@@ -81,7 +100,7 @@ Generate one body copy string per area id.`
 
     let parsed: { insights?: Record<string, unknown> } = {}
     try {
-      parsed = JSON.parse(content)
+      parsed = parseClaudeJson(content)
     } catch {
       return fallback
     }

@@ -11,6 +11,26 @@ const DELTA_MAX_ABS = 0.2
 const LOW_EVIDENCE_WORD_THRESHOLD = 8
 const GAMING_FORCED_VECTOR_VALUE = 0.15
 
+function parseClaudeJson(content: string): any {
+  const trimmed = content.trim()
+  const withoutFences = trimmed
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/\s*```$/i, '')
+    .trim()
+
+  try {
+    return JSON.parse(withoutFences)
+  } catch {
+    const start = withoutFences.indexOf('{')
+    const end = withoutFences.lastIndexOf('}')
+    if (start >= 0 && end > start) {
+      const candidate = withoutFences.slice(start, end + 1)
+      return JSON.parse(candidate)
+    }
+    throw new Error('No valid JSON object found in Claude response')
+  }
+}
+
 function detectGamingIntent(text: string): boolean {
   const strongPatterns = [
     /\bsystem\s+prompt\b/i,
@@ -417,7 +437,7 @@ CHAT QUESTIONS AND ANSWERS:`
     console.log('Parsing JSON response...')
     let result: UserProfileOutput
     try {
-      result = JSON.parse(content)
+      result = parseClaudeJson(content)
       console.log('Parsed result:', result)
     } catch (parseError) {
       console.error('JSON parse error:', parseError)
@@ -995,7 +1015,7 @@ Assess compatibility based on these responses.`
     }
     let result: any
     try {
-      result = JSON.parse(content)
+      result = parseClaudeJson(content)
     } catch (parseError) {
       console.error('JSON parse error:', parseError)
       if (logRaw) {

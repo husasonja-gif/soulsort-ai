@@ -57,7 +57,7 @@ const BMNL_QUESTIONS_CANONICAL = [
 ]
 
 // Helper to get translated questions
-function getBMNLQuestions(lang: 'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt'): string[] {
+function getBMNLQuestions(lang: 'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt' | 'fi'): string[] {
   return [
     t('bmnl.q1', lang),
     t('bmnl.q2', lang),
@@ -77,7 +77,7 @@ function BMNLAssessmentPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
-  const [userLang, setUserLang] = useState<'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt'>('en')
+  const [userLang, setUserLang] = useState<'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt' | 'fi'>('en')
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])

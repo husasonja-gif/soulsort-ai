@@ -1,14 +1,14 @@
 // i18n translations for SoulSort V4
 // Safe translation layer: UI copy can be translated, but canonical questions stay in English for LLMs
 
-export type LanguageCode = 'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt'
+export type LanguageCode = 'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt' | 'fi'
 
 export interface Translations {
   [key: string]: string | Translations
 }
 
 // Translation maps keyed by screenId/questionId and language code
-const translations: Record<string, Record<LanguageCode, string>> = {
+const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
   // Onboarding Chat Questions (Dating Flow)
   'onboarding.q1': {
     en: 'What kind of behaviour drains you fastest, even if the other person means well?',
@@ -258,6 +258,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     es: 'Puedes responder en cualquier idioma.',
     it: 'Puoi rispondere in qualsiasi lingua.',
     pt: 'Você pode responder em qualquer idioma.',
+    fi: 'Voit vastata milla tahansa kielella.',
   },
   'ui.requester.chat.placeholder': {
     en: 'Answer in any language...',
@@ -267,6 +268,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     es: 'Responde en cualquier idioma...',
     it: 'Rispondi in qualsiasi lingua...',
     pt: 'Responda em qualquer idioma...',
+    fi: 'Vastaa milla tahansa kielella...',
   },
   'ui.requester.chat.placeholderWithQuickReplies': {
     en: 'Or answer in any language...',
@@ -276,6 +278,7 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     es: 'O responde en cualquier idioma...',
     it: 'Oppure rispondi in qualsiasi lingua...',
     pt: 'Ou responda em qualquer idioma...',
+    fi: 'Tai vastaa milla tahansa kielella...',
   },
   
   // UI Copy - Dashboard
@@ -310,8 +313,12 @@ export function detectLanguage(): LanguageCode {
   const langCode = browserLang.split('-')[0].toLowerCase() as LanguageCode
   
   // Check if we support this language
-  const supportedLanguages: LanguageCode[] = ['en', 'nl', 'de', 'fr', 'es', 'it', 'pt']
-  return supportedLanguages.includes(langCode) ? langCode : 'en'
+  const supportedLanguages: LanguageCode[] = ['en', 'nl', 'de', 'fr', 'es', 'it', 'pt', 'fi']
+  if (supportedLanguages.includes(langCode)) return langCode
+  const fallbackFromList = (navigator.languages || [])
+    .map((lang) => lang.split('-')[0].toLowerCase() as LanguageCode)
+    .find((lang) => supportedLanguages.includes(lang))
+  return fallbackFromList || 'en'
 }
 
 /**

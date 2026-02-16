@@ -154,39 +154,56 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   }
 
   const ui = {
-    introTitle: userLang === 'it' ? 'Risparmia tempo, testa la vibe' : 'Save time, test the vibe',
+    introTitle:
+      userLang === 'it'
+        ? 'Risparmia tempo, testa la vibe'
+        : userLang === 'fi'
+          ? 'Saasta aikaa, testaa vibe'
+          : 'Save time, test the vibe',
     introBody:
       userLang === 'it'
         ? 'Solo 9 domande. Capisci subito se vale il tuo tempo. Tieni i risultati per te e li condividi solo se vuoi.'
+        : userLang === 'fi'
+          ? 'Vain 9 kysymysta. Saat nopeasti selkeyden, onko tama aikasi arvoista. Tulokset pysyvat sinulla, ellet halua jakaa.'
         : 'Just 9 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.',
     introSub:
       userLang === 'it'
         ? 'Le tue risposte vengono analizzate dall\'AI e confrontate con il loro profilo. Non salviamo risposte raw, solo metriche di compatibilita.'
+        : userLang === 'fi'
+          ? 'Vastauksesi analysoidaan tekoalylla ja verrataan toisen profiiliin. Raakavastauksia ei tallenneta, vain yhteensopivuusmittarit.'
         : 'Your responses are analyzed by AI and compared against their profile. No raw data is stored-only compatibility metrics.',
     consentOptIn:
       userLang === 'it'
         ? 'Acconsento all\'uso di analytics anonimi per migliorare SoulSort (nessuna risposta raw salvata).'
+        : userLang === 'fi'
+          ? 'Annan suostumuksen anonyymiin analytiikkaan SoulSortin parantamiseksi (raakavastauksia ei tallenneta).'
         : 'I consent to anonymized analytics being used to improve SoulSort (no raw answers stored).',
     consentOptional:
       userLang === 'it'
         ? 'Opzionale. Puoi comunque completare il vibe check senza questo.'
+        : userLang === 'fi'
+          ? 'Valinnainen. Voit silti suorittaa vibe checkin ilman tata.'
         : 'Optional. You can still complete the vibe check without this.',
-    startButton: userLang === 'it' ? 'Inizia vibe check' : 'Start vibe check',
+    startButton: userLang === 'it' ? 'Inizia vibe check' : userLang === 'fi' ? 'Aloita vibe check' : 'Start vibe check',
     chatTitle: userLang === 'it' ? 'Vibe-check' : 'Vibe-check',
     chatIntro:
       userLang === 'it'
         ? 'Otterrai risultati migliori rispondendo con onesta e in modo riflessivo su cio che senti vero in questo momento.'
+        : userLang === 'fi'
+          ? 'Saat parhaat tulokset vastaamalla rehellisesti ja pohtivasti siita, milta sinusta tuntuu juuri nyt.'
         : "You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.",
-    thinking: userLang === 'it' ? 'Sto pensando...' : 'Thinking...',
-    send: userLang === 'it' ? 'Invia' : 'Send',
-    resultsTitle: userLang === 'it' ? 'Risultati di compatibilita' : 'Compatibility Results',
-    summaryTitle: userLang === 'it' ? 'Sintesi' : 'Summary',
-    radarTitle: userLang === 'it' ? 'Confronto Radar' : 'Radar Comparison',
+    thinking: userLang === 'it' ? 'Sto pensando...' : userLang === 'fi' ? 'Ajattelen...' : 'Thinking...',
+    send: userLang === 'it' ? 'Invia' : userLang === 'fi' ? 'Laheta' : 'Send',
+    resultsTitle: userLang === 'it' ? 'Risultati di compatibilita' : userLang === 'fi' ? 'Yhteensopivuuden tulokset' : 'Compatibility Results',
+    summaryTitle: userLang === 'it' ? 'Sintesi' : userLang === 'fi' ? 'Yhteenveto' : 'Summary',
+    radarTitle: userLang === 'it' ? 'Confronto Radar' : userLang === 'fi' ? 'Radar-vertailu' : 'Radar Comparison',
     ctaBody:
       userLang === 'it'
         ? 'Vuoi creare il tuo link vibe-check e vedere come gli altri matchano con te?'
+        : userLang === 'fi'
+          ? 'Haluatko luoda oman vibe-check-linkin ja nahda miten muut matchaavat kanssasi?'
         : 'Want to create your own vibe-check link and see how others match with you?',
-    ctaButton: userLang === 'it' ? 'Crea il tuo profilo' : 'Create Your Profile',
+    ctaButton: userLang === 'it' ? 'Crea il tuo profilo' : userLang === 'fi' ? 'Luo oma profiili' : 'Create Your Profile',
   }
 
   // Generate session token for anonymous tracking

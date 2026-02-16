@@ -189,7 +189,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   ]
 
   // Get user's language preference
-  const [userLang, setUserLang] = useState<'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt'>('en')
+  const [userLang, setUserLang] = useState<'en' | 'nl' | 'de' | 'fr' | 'es' | 'it' | 'pt' | 'fi'>('en')
   
   useEffect(() => {
     if (typeof window !== 'undefined') {

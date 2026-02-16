@@ -31,23 +31,43 @@ function DotBar({
   zoneStart?: number
   zoneEnd?: number
 }) {
+  const FIXED_SEGMENT_WIDTH = 20
   const safeStart = Math.max(0, Math.min(100, zoneStart))
   const safeEnd = Math.max(safeStart, Math.min(100, zoneEnd))
+  const midpoint = (safeStart + safeEnd) / 2
+  const fixedLeft = Math.max(0, Math.min(100 - FIXED_SEGMENT_WIDTH, midpoint - FIXED_SEGMENT_WIDTH / 2))
+  const fixedRight = fixedLeft + FIXED_SEGMENT_WIDTH
   return (
     <div className="space-y-1">
-      <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+      <div className="hidden sm:flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 min-w-[110px] h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
             className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
             style={{
-              left: `${safeStart}%`,
-              width: `${safeEnd - safeStart}%`,
+              left: `${fixedLeft}%`,
+              width: `${fixedRight - fixedLeft}%`,
               backgroundImage: `linear-gradient(90deg, ${lineColor}, #8b5cf6)`,
             }}
           />
         </div>
         <span className="whitespace-nowrap">{rightLabel}</span>
+      </div>
+      <div className="sm:hidden space-y-1">
+        <div className="relative h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
+          <span
+            className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
+            style={{
+              left: `${fixedLeft}%`,
+              width: `${fixedRight - fixedLeft}%`,
+              backgroundImage: `linear-gradient(90deg, ${lineColor}, #8b5cf6)`,
+            }}
+          />
+        </div>
+        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-800 dark:text-gray-200">
+          <span className="leading-tight">{leftLabel}</span>
+          <span className="text-right leading-tight">{rightLabel}</span>
+        </div>
       </div>
     </div>
   )
