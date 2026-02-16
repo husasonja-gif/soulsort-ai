@@ -129,13 +129,13 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
     },
   ]
 
-  const chartHeight = isMobile ? 500 : 760
-  const chartMinHeight = isMobile ? 470 : 640
+  const chartHeight = isMobile ? 560 : 760
+  const chartMinHeight = isMobile ? 520 : 640
   const margin = isMobile
-    ? { top: 96, bottom: 100, left: 56, right: 56 }
+    ? { top: 78, bottom: 130, left: 24, right: 24 }
     : { top: 120, bottom: 125, left: 85, right: 85 }
-  const outerRadius = isMobile ? '63%' : '74%'
-  const labelDistanceMultiplier = isMobile ? 1.03 : 1.28
+  const outerRadius = isMobile ? '77%' : '74%'
+  const labelDistanceMultiplier = isMobile ? 1.18 : 1.28
 
   return (
     <div className="relative">
@@ -177,7 +177,7 @@ export default function RadarChart({ data, label = 'Profile', color = '#9333ea',
               tickLine={false}
               className="dark:text-gray-300"
             />
-            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: isMobile ? 9 : 10, fill: '#999' }} />
+            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: isMobile ? 10 : 10, fill: '#999' }} />
             <Radar
               name={label}
               dataKey="value"

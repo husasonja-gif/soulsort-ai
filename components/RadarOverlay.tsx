@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Radar, RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend } from 'recharts'
+import { Radar, RadarChart as RechartsRadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts'
 import type { RadarDimensions } from '@/lib/types'
 import { toV4RadarAxes } from '@/lib/radarAxes'
 
@@ -137,7 +137,7 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
   const labelDistanceMultiplier = isMobile ? 1.03 : 1.28
 
   return (
-    <div className="relative" style={{ minHeight: isMobile ? 440 : 560 }}>
+    <div className="relative" style={{ minHeight: isMobile ? 500 : 560 }}>
       {hoveredAxis ? (
         <div
           className={
@@ -158,8 +158,8 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
       <ResponsiveContainer width="100%" height={isMobile ? 500 : 620}>
         <RechartsRadarChart
           data={chartData}
-          margin={isMobile ? { top: 96, bottom: 100, left: 56, right: 56 } : { top: 110, bottom: 120, left: 90, right: 90 }}
-          outerRadius={isMobile ? '63%' : '68%'}
+          margin={isMobile ? { top: 78, bottom: 130, left: 24, right: 24 } : { top: 110, bottom: 120, left: 90, right: 90 }}
+          outerRadius={isMobile ? '75%' : '68%'}
         >
           <PolarGrid gridType="circle" />
           <PolarAngleAxis
@@ -196,9 +196,18 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
             fillOpacity={0.3}
             strokeWidth={2}
           />
-          <Legend />
         </RechartsRadarChart>
       </ResponsiveContainer>
+      <div className="mt-2 flex items-center justify-center gap-6 text-sm font-medium">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: '#9333ea' }} />
+          <span className="text-gray-700 dark:text-gray-200">Them</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: '#d946ef' }} />
+          <span className="text-gray-700 dark:text-gray-200">You</span>
+        </div>
+      </div>
     </div>
   )
 }

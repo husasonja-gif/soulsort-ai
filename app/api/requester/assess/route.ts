@@ -166,64 +166,29 @@ export async function POST(request: Request) {
     // Canonical 9-question flow: no exclusions/skip logic.
     const skippedSet = new Set<number>()
 
-    // Pair questions with answers from chat history
-    // Note: AI commentary may appear between questions and answers
-    // For Q1-Q3, use structuredFields if available (from quick replies)
+    // Pair canonical questions with user answers by sequence, independent of UI language.
+    // This avoids brittle assistant-text matching and supports translated question rendering.
     const chatPairs: Array<{ question: string; answer: string; index: number; skipped?: boolean }> = []
-    let questionIndex = 0
-    
-    for (let i = 0; i < chatHistory.length && questionIndex < QUESTIONS.length; i++) {
-      const msg = chatHistory[i]
-      if (msg.role === 'assistant') {
-        // Check if this assistant message is one of our questions
-        const matchingQuestion = QUESTIONS[questionIndex]
-        // Check if message contains the question (allowing for partial matches)
-        const questionStart = matchingQuestion.substring(0, 30)
-        
-        // Skip question if it was marked as skipped
-        if (skippedSet.has(questionIndex)) {
-          chatPairs.push({
-            question: matchingQuestion,
-            answer: '[SKIPPED - Topic excluded]',
-            index: questionIndex,
-            skipped: true,
-          })
-          questionIndex++
-          continue
-        }
-        
-        if (msg.content.includes(questionStart) || msg.content === matchingQuestion) {
-          // Look for the corresponding user answer (skip any commentary in between)
-          for (let j = i + 1; j < chatHistory.length; j++) {
-            const nextMsg = chatHistory[j]
-            if (nextMsg.role === 'user') {
-              chatPairs.push({
-                question: matchingQuestion,
-                answer: nextMsg.content,
-                index: questionIndex,
-              })
-              questionIndex++
-              break // Found the answer, move to next question
-            }
-            // If we hit another assistant question before finding an answer, something's wrong
-            if (nextMsg.role === 'assistant' && questionIndex + 1 < QUESTIONS.length) {
-              const nextQuestion = QUESTIONS[questionIndex + 1]
-              // Check if next question is skipped
-              if (skippedSet.has(questionIndex + 1)) {
-                // Missing answer for current question, but next is skipped
-                console.warn(`Missing answer for question ${questionIndex + 1}, but next is skipped`)
-                questionIndex++
-                break
-              }
-              if (nextMsg.content.includes(nextQuestion.substring(0, 30))) {
-                // Missing answer for current question, skip it
-                console.warn(`Missing answer for question ${questionIndex + 1}`)
-                questionIndex++
-                break
-              }
-            }
-          }
-        }
+    const userMessages = chatHistory
+      .filter((msg: ChatMessage) => msg.role === 'user')
+      .map((msg: ChatMessage) => msg.content)
+    for (let questionIndex = 0; questionIndex < QUESTIONS.length; questionIndex++) {
+      if (skippedSet.has(questionIndex)) {
+        chatPairs.push({
+          question: QUESTIONS[questionIndex],
+          answer: '[SKIPPED - Topic excluded]',
+          index: questionIndex,
+          skipped: true,
+        })
+        continue
+      }
+      const answer = userMessages[questionIndex]
+      if (typeof answer === 'string' && answer.trim().length > 0) {
+        chatPairs.push({
+          question: QUESTIONS[questionIndex],
+          answer: answer.trim(),
+          index: questionIndex,
+        })
       }
     }
 
@@ -271,9 +236,8 @@ export async function POST(request: Request) {
 
     // Assess requester (includes dealbreaker evaluation)
     console.log('Calling assessRequester...')
-    let assessment
-    try {
-      assessment = await assessRequester(
+    const runAssessRequester = async () =>
+      assessRequester(
         requesterResponses,
         {
           self_transcendence: userRadarProfile.self_transcendence,
@@ -290,12 +254,22 @@ export async function POST(request: Request) {
         linkId,
         requesterSessionId
       )
+
+    let assessment
+    try {
+      assessment = await runAssessRequester()
       console.log('Assessment completed successfully')
     } catch (assessError) {
-      console.error('Error in assessRequester:', assessError)
-      console.error('Error stack:', assessError instanceof Error ? assessError.stack : 'No stack')
-      console.error('Error message:', assessError instanceof Error ? assessError.message : String(assessError))
-      throw assessError // Re-throw to be caught by outer try-catch
+      console.error('Error in assessRequester (attempt 1):', assessError)
+      try {
+        assessment = await runAssessRequester()
+        console.log('Assessment completed successfully on retry')
+      } catch (retryError) {
+        console.error('Error in assessRequester (attempt 2):', retryError)
+        console.error('Error stack:', retryError instanceof Error ? retryError.stack : 'No stack')
+        console.error('Error message:', retryError instanceof Error ? retryError.message : String(retryError))
+        throw retryError
+      }
     }
 
     // Save assessment (including dealbreaker hits - private to profile owner)

@@ -248,6 +248,35 @@ const translations: Record<string, Record<LanguageCode, string>> = {
     it: 'Puoi rispondere in qualsiasi lingua. Digita o tocca il microfono per dettare.',
     pt: 'Você pode responder em qualquer idioma. Digite ou toque no microfone para ditar.',
   },
+
+  // UI Copy - Requester Flow
+  'ui.requester.chat.languageHint': {
+    en: 'You can answer in any language.',
+    nl: 'Je kunt in elke taal antwoorden.',
+    de: 'Du kannst in jeder Sprache antworten.',
+    fr: 'Vous pouvez répondre dans n\'importe quelle langue.',
+    es: 'Puedes responder en cualquier idioma.',
+    it: 'Puoi rispondere in qualsiasi lingua.',
+    pt: 'Você pode responder em qualquer idioma.',
+  },
+  'ui.requester.chat.placeholder': {
+    en: 'Answer in any language...',
+    nl: 'Beantwoord in elke taal...',
+    de: 'Antworte in jeder Sprache...',
+    fr: 'Répondez dans n\'importe quelle langue...',
+    es: 'Responde en cualquier idioma...',
+    it: 'Rispondi in qualsiasi lingua...',
+    pt: 'Responda em qualquer idioma...',
+  },
+  'ui.requester.chat.placeholderWithQuickReplies': {
+    en: 'Or answer in any language...',
+    nl: 'Of antwoord in elke taal...',
+    de: 'Oder antworte in jeder Sprache...',
+    fr: 'Ou répondez dans n\'importe quelle langue...',
+    es: 'O responde en cualquier idioma...',
+    it: 'Oppure rispondi in qualsiasi lingua...',
+    pt: 'Ou responda em qualquer idioma...',
+  },
   
   // UI Copy - Dashboard
   'ui.dashboard.title': {

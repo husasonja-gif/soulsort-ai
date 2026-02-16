@@ -6,6 +6,7 @@ import RadarOverlay from '@/components/RadarOverlay'
 import DeepInsightsSection from '@/components/DeepInsightsSection'
 import type { CanonicalSignalScores, ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
 import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
+import { detectLanguage, t, type LanguageCode } from '@/lib/translations'
 
 interface SpeechRecognition extends EventTarget {
   continuous: boolean
@@ -46,6 +47,17 @@ interface RequesterClientProps {
 }
 
 type FlowState = 'intro' | 'chat' | 'consent-denied' | 'results'
+type VoiceLangOption =
+  | 'auto'
+  | 'en-US'
+  | 'sv-SE'
+  | 'it-IT'
+  | 'de-DE'
+  | 'fr-FR'
+  | 'es-ES'
+  | 'pt-PT'
+  | 'nl-NL'
+  | 'fi-FI'
 
 const QUESTIONS = [...CANONICAL_DATING_QUESTIONS]
 
@@ -54,6 +66,7 @@ const QUICK_REPLY_QUESTIONS: Record<number, QuickReplyOption[]> = {}
 
 export default function RequesterClient({ linkId, userId }: RequesterClientProps) {
   const router = useRouter()
+  const [userLang, setUserLang] = useState<LanguageCode>('en')
   const [flowState, setFlowState] = useState<FlowState>('intro')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [currentMessage, setCurrentMessage] = useState('')
@@ -82,6 +95,24 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   const [startTime, setStartTime] = useState<number | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+  const [voiceLang, setVoiceLang] = useState<VoiceLangOption>('auto')
+
+  const resolveVoiceRecognitionLang = (selected: VoiceLangOption): string => {
+    if (selected !== 'auto') return selected
+    if (typeof window === 'undefined') return 'en-US'
+    const primary = navigator.language || 'en-US'
+    const languageList = navigator.languages || []
+    // On some Nordic devices, Swedish may be spoken despite Finnish locale.
+    if (primary.toLowerCase().startsWith('fi')) {
+      const swedishFromPrefs = languageList.find((lang) => lang.toLowerCase().startsWith('sv'))
+      return swedishFromPrefs || 'sv-SE'
+    }
+    return primary
+  }
+
+  useEffect(() => {
+    setUserLang(detectLanguage())
+  }, [])
 
   useEffect(() => {
     const AnyWindow = window as Window & {
@@ -92,7 +123,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     if (!SR) return
 
     const recognitionInstance: SpeechRecognition = new SR()
-    recognitionInstance.lang = 'en-US'
+    recognitionInstance.lang = resolveVoiceRecognitionLang(voiceLang)
     recognitionInstance.continuous = true
     recognitionInstance.interimResults = true
     recognitionInstance.onstart = () => setIsRecording(true)
@@ -110,12 +141,52 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     return () => {
       recognitionInstance.stop()
     }
-  }, [])
+  }, [userLang, voiceLang])
 
   const toggleRecording = () => {
     if (!recognition) return
     if (isRecording) recognition.stop()
     else recognition.start()
+  }
+
+  const getLocalizedQuestion = (index: number): string => {
+    return t(`onboarding.q${index + 1}`, userLang)
+  }
+
+  const ui = {
+    introTitle: userLang === 'it' ? 'Risparmia tempo, testa la vibe' : 'Save time, test the vibe',
+    introBody:
+      userLang === 'it'
+        ? 'Solo 9 domande. Capisci subito se vale il tuo tempo. Tieni i risultati per te e li condividi solo se vuoi.'
+        : 'Just 9 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.',
+    introSub:
+      userLang === 'it'
+        ? 'Le tue risposte vengono analizzate dall\'AI e confrontate con il loro profilo. Non salviamo risposte raw, solo metriche di compatibilita.'
+        : 'Your responses are analyzed by AI and compared against their profile. No raw data is stored-only compatibility metrics.',
+    consentOptIn:
+      userLang === 'it'
+        ? 'Acconsento all\'uso di analytics anonimi per migliorare SoulSort (nessuna risposta raw salvata).'
+        : 'I consent to anonymized analytics being used to improve SoulSort (no raw answers stored).',
+    consentOptional:
+      userLang === 'it'
+        ? 'Opzionale. Puoi comunque completare il vibe check senza questo.'
+        : 'Optional. You can still complete the vibe check without this.',
+    startButton: userLang === 'it' ? 'Inizia vibe check' : 'Start vibe check',
+    chatTitle: userLang === 'it' ? 'Vibe-check' : 'Vibe-check',
+    chatIntro:
+      userLang === 'it'
+        ? 'Otterrai risultati migliori rispondendo con onesta e in modo riflessivo su cio che senti vero in questo momento.'
+        : "You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.",
+    thinking: userLang === 'it' ? 'Sto pensando...' : 'Thinking...',
+    send: userLang === 'it' ? 'Invia' : 'Send',
+    resultsTitle: userLang === 'it' ? 'Risultati di compatibilita' : 'Compatibility Results',
+    summaryTitle: userLang === 'it' ? 'Sintesi' : 'Summary',
+    radarTitle: userLang === 'it' ? 'Confronto Radar' : 'Radar Comparison',
+    ctaBody:
+      userLang === 'it'
+        ? 'Vuoi creare il tuo link vibe-check e vedere come gli altri matchano con te?'
+        : 'Want to create your own vibe-check link and see how others match with you?',
+    ctaButton: userLang === 'it' ? 'Crea il tuo profilo' : 'Create Your Profile',
   }
 
   // Generate session token for anonymous tracking
@@ -124,6 +195,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   }
 
   const handleStart = () => {
+    const lang = detectLanguage()
+    setUserLang(lang)
     // Track requester start
     const token = generateSessionToken()
     setSessionToken(token)
@@ -146,7 +219,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     setFlowState('chat')
     setFlowState('chat')
     setCurrentQuestionIndex(0)
-    const firstQuestion = QUESTIONS[0]
+    const firstQuestion = t('onboarding.q1', lang)
     const firstQuickReplies = QUICK_REPLY_QUESTIONS[0]
     setChatHistory([
       {
@@ -238,7 +311,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       if (option.field === 'relationship_structure') {
         // After relationship_structure, show disagreements question (index 4)
         const nextIndex = 4
-        const nextQuestion = QUESTIONS[nextIndex]
+        const nextQuestion = getLocalizedQuestion(nextIndex)
         setChatHistory(prev => [
           ...prev,
           userMessage,
@@ -257,7 +330,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       if (option.field === 'kink_openness') {
         // After kink_openness, show erotic question (index 5)
         const nextIndex = 5
-        const nextQuestion = QUESTIONS[nextIndex]
+        const nextQuestion = getLocalizedQuestion(nextIndex)
         setChatHistory(prev => [
           ...prev,
           userMessage,
@@ -290,7 +363,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       // Move to next question
       const nextIndex = questionIndex + 1
       if (nextIndex < QUESTIONS.length) {
-        const nextQuestion = QUESTIONS[nextIndex]
+        const nextQuestion = getLocalizedQuestion(nextIndex)
         const nextQuickReplies = QUICK_REPLY_QUESTIONS[nextIndex]
         
         // Update chat history and question index - use functional updates to avoid stale state
@@ -444,7 +517,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           ...historyWithCommentary,
           {
             role: 'assistant',
-            content: QUESTIONS[scriptedNextIndex],
+            content: getLocalizedQuestion(scriptedNextIndex),
             timestamp: new Date(),
           },
         ])
@@ -522,8 +595,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
         console.error('Assessment error data:', errorData)
         const errorMsg = errorData.error || errorData.details || `HTTP ${response.status}: ${response.statusText}`
         alert(`Failed to generate assessment: ${errorMsg}`)
-        // Don't reset loading state on error - keep user on chat screen so they can see the error
-        // setLoading(false) - commented out so user can see what happened
+        setLoading(false)
       }
     } catch (error) {
       console.error('Error generating assessment:', error)
@@ -538,12 +610,12 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
-          <h1 className="text-3xl font-bold mb-4 text-purple-600">Save time, test the vibe</h1>
+          <h1 className="text-3xl font-bold mb-4 text-purple-600">{ui.introTitle}</h1>
           <p className="text-gray-700 mb-4 text-lg">
-            Just 9 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
+            {ui.introBody}
           </p>
           <p className="text-sm text-gray-500 mb-6">
-            Your responses are analyzed by AI and compared against their profile. No raw data is stored—only compatibility metrics.
+            {ui.introSub}
           </p>
           
           {/* Analytics consent toggle - privacy-first, default OFF */}
@@ -556,11 +628,11 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
                 className="mt-1 w-4 h-4 text-purple-600 rounded"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
-                I consent to anonymized analytics being used to improve SoulSort (no raw answers stored).
+                {ui.consentOptIn}
               </span>
             </label>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-7">
-              Optional. You can still complete the vibe check without this.
+              {ui.consentOptional}
             </p>
           </div>
           
@@ -568,7 +640,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             onClick={handleStart}
             className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
           >
-            Start vibe check
+            {ui.startButton}
           </button>
         </div>
       </div>
@@ -629,13 +701,32 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 pb-24 sm:pb-12">
         <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col" style={{ minHeight: 'calc(100vh - 6rem)', maxHeight: 'calc(100vh - 6rem)' }}>
-          <h1 className="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">Vibe-check</h1>
+          <h1 className="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">{ui.chatTitle}</h1>
           <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-            You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.
+            {ui.chatIntro}
           </p>
           <p className="text-gray-500 dark:text-gray-400 mb-4 text-xs">
-            You can answer in any language.
+            {t('ui.requester.chat.languageHint', userLang)}
           </p>
+          <div className="mb-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+            <span>Voice language</span>
+            <select
+              value={voiceLang}
+              onChange={(e) => setVoiceLang(e.target.value as VoiceLangOption)}
+              className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+            >
+              <option value="auto">Auto (browser)</option>
+              <option value="sv-SE">Svenska</option>
+              <option value="en-US">English</option>
+              <option value="it-IT">Italiano</option>
+              <option value="de-DE">Deutsch</option>
+              <option value="fr-FR">Francais</option>
+              <option value="es-ES">Espanol</option>
+              <option value="pt-PT">Portugues</option>
+              <option value="nl-NL">Nederlands</option>
+              <option value="fi-FI">Suomi</option>
+            </select>
+          </div>
 
           <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             {chatHistory.map((msg, idx) => (
@@ -659,7 +750,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 p-3 rounded-lg">
-                  <span className="animate-pulse dark:text-gray-100">Thinking...</span>
+                  <span className="animate-pulse dark:text-gray-100">{ui.thinking}</span>
                 </div>
               </div>
             )}
@@ -685,7 +776,11 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               <textarea
                 value={currentMessage}
                 onChange={(e) => setCurrentMessage(e.target.value)}
-                placeholder={currentQuickReplies ? 'Or answer in any language...' : 'Answer in any language...'}
+                placeholder={
+                  currentQuickReplies
+                    ? t('ui.requester.chat.placeholderWithQuickReplies', userLang)
+                    : t('ui.requester.chat.placeholder', userLang)
+                }
                 className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
                 disabled={loading}
                 autoComplete="off"
@@ -720,7 +815,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               disabled={loading || !currentMessage.trim() || currentQuickReplies !== null}
               className="px-5 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
             >
-              Send
+              {ui.send}
             </button>
           </form>
         </div>
@@ -732,17 +827,17 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2 text-center text-purple-600">Compatibility Results</h1>
+          <h1 className="text-3xl font-bold mb-2 text-center text-purple-600">{ui.resultsTitle}</h1>
 
           {/* Summary */}
           <div className="bg-purple-50 rounded-lg p-6 mb-8">
-            <h2 className="font-semibold text-lg mb-3 text-purple-600">Summary</h2>
+            <h2 className="font-semibold text-lg mb-3 text-purple-600">{ui.summaryTitle}</h2>
             <p className="text-gray-700">{assessment.summary}</p>
           </div>
 
           {/* Radar Overlay */}
           <div className="mb-8">
-            <h2 className="font-semibold text-lg mb-4 text-center text-purple-600">Radar Comparison</h2>
+            <h2 className="font-semibold text-lg mb-4 text-center text-purple-600">{ui.radarTitle}</h2>
             <RadarOverlay
               userData={assessment.userRadar}
               requesterData={assessment.requesterRadar}
@@ -764,13 +859,13 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           {/* CTA to create account */}
           <div className="text-center mt-8 pt-8 border-t border-gray-200">
             <p className="text-gray-700 mb-4">
-              Want to create your own vibe-check link and see how others match with you?
+              {ui.ctaBody}
             </p>
             <a
               href="/login"
               className="inline-block px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
             >
-              Create Your Profile
+              {ui.ctaButton}
             </a>
           </div>
         </div>

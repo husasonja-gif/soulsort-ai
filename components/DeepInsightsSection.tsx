@@ -68,10 +68,22 @@ function ComparisonBar({
   themZoneStart?: number
   themZoneEnd?: number
 }) {
-  const yStart = Math.max(0, Math.min(100, youZoneStart ?? 35))
-  const yEnd = Math.max(yStart, Math.min(100, youZoneEnd ?? 65))
-  const tStart = Math.max(0, Math.min(100, themZoneStart ?? 35))
-  const tEnd = Math.max(tStart, Math.min(100, themZoneEnd ?? 65))
+  const FIXED_SEGMENT_WIDTH = 20
+  const clampRange = (start: number, end: number): { start: number; end: number } => {
+    const midpoint = (start + end) / 2
+    const left = Math.max(0, Math.min(100 - FIXED_SEGMENT_WIDTH, midpoint - FIXED_SEGMENT_WIDTH / 2))
+    return {
+      start: left,
+      end: left + FIXED_SEGMENT_WIDTH,
+    }
+  }
+
+  const yRawStart = Math.max(0, Math.min(100, youZoneStart ?? 35))
+  const yRawEnd = Math.max(yRawStart, Math.min(100, youZoneEnd ?? 65))
+  const tRawStart = Math.max(0, Math.min(100, themZoneStart ?? 35))
+  const tRawEnd = Math.max(tRawStart, Math.min(100, themZoneEnd ?? 65))
+  const yRange = clampRange(yRawStart, yRawEnd)
+  const tRange = clampRange(tRawStart, tRawEnd)
 
   return (
     <div className="space-y-2">
@@ -85,16 +97,16 @@ function ComparisonBar({
           <span
             className="absolute top-1/2 -translate-y-[calc(50%+4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(236,72,153,0.15)]"
             style={{
-              left: `${yStart}%`,
-              width: `${yEnd - yStart}%`,
+              left: `${yRange.start}%`,
+              width: `${yRange.end - yRange.start}%`,
               backgroundImage: 'linear-gradient(90deg, #f5d0fe, #d946ef)',
             }}
           />
           <span
             className="absolute top-1/2 -translate-y-[calc(50%-4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(124,58,237,0.15)]"
             style={{
-              left: `${tStart}%`,
-              width: `${tEnd - tStart}%`,
+              left: `${tRange.start}%`,
+              width: `${tRange.end - tRange.start}%`,
               backgroundImage: 'linear-gradient(90deg, #ddd6fe, #7c3aed)',
             }}
           />
@@ -176,7 +188,7 @@ function InsightCard({
       </div>
 
       {expanded && (
-        <div className="mt-3 text-sm text-gray-700 dark:text-gray-300 leading-relaxed border-t border-gray-100 dark:border-gray-700 pt-3">
+        <div className="mt-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed border-t border-gray-100 dark:border-gray-700 pt-4">
           {area.insight}
         </div>
       )}

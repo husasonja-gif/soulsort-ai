@@ -274,8 +274,8 @@ export function buildUserDeepInsights(
       zoneEnd: valuesAdventure.zoneEnd,
       descriptor: axisDescriptor(valuesAdventure.value, 'Stability', 'Adventure'),
       secondary: {
-        leftLabel: 'Meaning through roots',
-        rightLabel: 'Meaning through impact',
+        leftLabel: 'Self-enhancement',
+        rightLabel: 'Self-transcendence',
         youValue: valuesImpact.value,
         zoneStart: valuesImpact.zoneStart,
         zoneEnd: valuesImpact.zoneEnd,
@@ -411,8 +411,8 @@ export function buildComparisonDeepInsights(
       themZoneEnd: areaById(tAreas, 'values-alignment').zoneEnd,
       descriptor: descriptorFromDelta(areaById(yAreas, 'values-alignment').youValue - areaById(tAreas, 'values-alignment').youValue),
       secondary: {
-        leftLabel: 'Meaning through roots',
-        rightLabel: 'Meaning through impact',
+        leftLabel: 'Self-enhancement',
+        rightLabel: 'Self-transcendence',
         youValue: areaById(yAreas, 'values-alignment').secondary?.youValue || areaById(yAreas, 'values-alignment').youValue,
         themValue: areaById(tAreas, 'values-alignment').secondary?.youValue || areaById(tAreas, 'values-alignment').youValue,
         zoneStart: areaById(yAreas, 'values-alignment').secondary?.zoneStart,
