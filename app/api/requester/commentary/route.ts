@@ -67,7 +67,11 @@ When answers show concerning patterns (controlling, dismissive, etc.):
 
 If no reflection is needed: Say nothing.
 
-Communication style: ${toneInstruction}`
+Communication style: ${toneInstruction}
+
+Language rule:
+- Understand any input language.
+- Reply in concise English.`
 
     const userPrompt = `Question: ${question}
 

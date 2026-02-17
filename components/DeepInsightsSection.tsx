@@ -111,9 +111,8 @@ function ComparisonBar({
         <span style={{ color: YOU_COLOR }}>You</span>
         <span style={{ color: THEM_COLOR }}>Them</span>
       </div>
-      <div className="flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
-        <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
+      <div className="space-y-1">
+        <div className="relative h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
           <span
             className="absolute top-1/2 -translate-y-[calc(50%+4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(236,72,153,0.15)]"
             style={{
@@ -131,7 +130,10 @@ function ComparisonBar({
             }}
           />
         </div>
-        <span className="whitespace-nowrap">{rightLabel}</span>
+        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-800 dark:text-gray-200">
+          <span className="leading-tight">{leftLabel}</span>
+          <span className="text-right leading-tight">{rightLabel}</span>
+        </div>
       </div>
     </div>
   )

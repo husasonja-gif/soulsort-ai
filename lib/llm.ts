@@ -843,7 +843,8 @@ export async function assessRequester(
   structuredFields?: Record<string, any>,
   userId?: string | null,
   linkId?: string | null,
-  requesterSessionId?: string | null
+  requesterSessionId?: string | null,
+  preferredLanguage: string = 'en'
 ): Promise<{
   radar: RadarDimensions
   compatibilityScore: number
@@ -880,6 +881,7 @@ CRITICAL LANGUAGE RULES (for summary only):
 - The summary will be shown to the requester (the person who took the assessment)
 - Always refer to the requester as "you" or "your"
 - Always refer to the user (the person whose link they used) as "they", "them", or "their"
+- Write the summary in this language code whenever possible: ${preferredLanguage}
 - NEVER mention dealbreakers explicitly - this reduces psychological safety
 - NEVER use profiling language like "stubborn", "rigid", "controlling", etc.
 - Use descriptive, neutral language that describes patterns and differences without judgment

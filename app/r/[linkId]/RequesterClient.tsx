@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import RadarOverlay from '@/components/RadarOverlay'
 import DeepInsightsSection from '@/components/DeepInsightsSection'
 import type { CanonicalSignalScores, ChatMessage, RadarDimensions, QuickReplyOption } from '@/lib/types'
 import { CANONICAL_DATING_QUESTIONS } from '@/lib/datingQuestions'
-import { detectLanguage, t, type LanguageCode } from '@/lib/translations'
 
 interface SpeechRecognition extends EventTarget {
   continuous: boolean
@@ -51,6 +50,9 @@ type VoiceLangOption =
   | 'auto'
   | 'en-US'
   | 'sv-SE'
+  | 'ar-SA'
+  | 'zh-CN'
+  | 'hi-IN'
   | 'it-IT'
   | 'de-DE'
   | 'fr-FR'
@@ -66,7 +68,6 @@ const QUICK_REPLY_QUESTIONS: Record<number, QuickReplyOption[]> = {}
 
 export default function RequesterClient({ linkId, userId }: RequesterClientProps) {
   const router = useRouter()
-  const [userLang, setUserLang] = useState<LanguageCode>('en')
   const [flowState, setFlowState] = useState<FlowState>('intro')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
   const [currentMessage, setCurrentMessage] = useState('')
@@ -85,6 +86,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     summary: string
     userRadar: RadarDimensions
     requesterRadar: RadarDimensions
+    showDeepInsights?: boolean
+    abuseFlags?: string[]
     userPreferences?: Record<string, number | undefined> | null
     userSignalScores?: Partial<CanonicalSignalScores> | null
     deepInsightsCopy?: Record<string, string>
@@ -96,6 +99,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
   const [voiceLang, setVoiceLang] = useState<VoiceLangOption>('auto')
+  const chatEndRef = useRef<HTMLDivElement | null>(null)
 
   const resolveVoiceRecognitionLang = (selected: VoiceLangOption): string => {
     if (selected !== 'auto') return selected
@@ -109,10 +113,6 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     }
     return primary
   }
-
-  useEffect(() => {
-    setUserLang(detectLanguage())
-  }, [])
 
   useEffect(() => {
     const AnyWindow = window as Window & {
@@ -141,69 +141,18 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     return () => {
       recognitionInstance.stop()
     }
-  }, [userLang, voiceLang])
+  }, [voiceLang])
+
+  useEffect(() => {
+    if (chatEndRef.current) {
+      chatEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    }
+  }, [chatHistory, loading, currentQuestionIndex])
 
   const toggleRecording = () => {
     if (!recognition) return
     if (isRecording) recognition.stop()
     else recognition.start()
-  }
-
-  const getLocalizedQuestion = (index: number): string => {
-    return t(`onboarding.q${index + 1}`, userLang)
-  }
-
-  const ui = {
-    introTitle:
-      userLang === 'it'
-        ? 'Risparmia tempo, testa la vibe'
-        : userLang === 'fi'
-          ? 'Saasta aikaa, testaa vibe'
-          : 'Save time, test the vibe',
-    introBody:
-      userLang === 'it'
-        ? 'Solo 9 domande. Capisci subito se vale il tuo tempo. Tieni i risultati per te e li condividi solo se vuoi.'
-        : userLang === 'fi'
-          ? 'Vain 9 kysymysta. Saat nopeasti selkeyden, onko tama aikasi arvoista. Tulokset pysyvat sinulla, ellet halua jakaa.'
-        : 'Just 9 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.',
-    introSub:
-      userLang === 'it'
-        ? 'Le tue risposte vengono analizzate dall\'AI e confrontate con il loro profilo. Non salviamo risposte raw, solo metriche di compatibilita.'
-        : userLang === 'fi'
-          ? 'Vastauksesi analysoidaan tekoalylla ja verrataan toisen profiiliin. Raakavastauksia ei tallenneta, vain yhteensopivuusmittarit.'
-        : 'Your responses are analyzed by AI and compared against their profile. No raw data is stored-only compatibility metrics.',
-    consentOptIn:
-      userLang === 'it'
-        ? 'Acconsento all\'uso di analytics anonimi per migliorare SoulSort (nessuna risposta raw salvata).'
-        : userLang === 'fi'
-          ? 'Annan suostumuksen anonyymiin analytiikkaan SoulSortin parantamiseksi (raakavastauksia ei tallenneta).'
-        : 'I consent to anonymized analytics being used to improve SoulSort (no raw answers stored).',
-    consentOptional:
-      userLang === 'it'
-        ? 'Opzionale. Puoi comunque completare il vibe check senza questo.'
-        : userLang === 'fi'
-          ? 'Valinnainen. Voit silti suorittaa vibe checkin ilman tata.'
-        : 'Optional. You can still complete the vibe check without this.',
-    startButton: userLang === 'it' ? 'Inizia vibe check' : userLang === 'fi' ? 'Aloita vibe check' : 'Start vibe check',
-    chatTitle: userLang === 'it' ? 'Vibe-check' : 'Vibe-check',
-    chatIntro:
-      userLang === 'it'
-        ? 'Otterrai risultati migliori rispondendo con onesta e in modo riflessivo su cio che senti vero in questo momento.'
-        : userLang === 'fi'
-          ? 'Saat parhaat tulokset vastaamalla rehellisesti ja pohtivasti siita, milta sinusta tuntuu juuri nyt.'
-        : "You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.",
-    thinking: userLang === 'it' ? 'Sto pensando...' : userLang === 'fi' ? 'Ajattelen...' : 'Thinking...',
-    send: userLang === 'it' ? 'Invia' : userLang === 'fi' ? 'Laheta' : 'Send',
-    resultsTitle: userLang === 'it' ? 'Risultati di compatibilita' : userLang === 'fi' ? 'Yhteensopivuuden tulokset' : 'Compatibility Results',
-    summaryTitle: userLang === 'it' ? 'Sintesi' : userLang === 'fi' ? 'Yhteenveto' : 'Summary',
-    radarTitle: userLang === 'it' ? 'Confronto Radar' : userLang === 'fi' ? 'Radar-vertailu' : 'Radar Comparison',
-    ctaBody:
-      userLang === 'it'
-        ? 'Vuoi creare il tuo link vibe-check e vedere come gli altri matchano con te?'
-        : userLang === 'fi'
-          ? 'Haluatko luoda oman vibe-check-linkin ja nahda miten muut matchaavat kanssasi?'
-        : 'Want to create your own vibe-check link and see how others match with you?',
-    ctaButton: userLang === 'it' ? 'Crea il tuo profilo' : userLang === 'fi' ? 'Luo oma profiili' : 'Create Your Profile',
   }
 
   // Generate session token for anonymous tracking
@@ -212,8 +161,6 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   }
 
   const handleStart = () => {
-    const lang = detectLanguage()
-    setUserLang(lang)
     // Track requester start
     const token = generateSessionToken()
     setSessionToken(token)
@@ -234,9 +181,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     }).catch(err => console.error('Analytics tracking error:', err))
     
     setFlowState('chat')
-    setFlowState('chat')
     setCurrentQuestionIndex(0)
-    const firstQuestion = t('onboarding.q1', lang)
+    const firstQuestion = QUESTIONS[0]
     const firstQuickReplies = QUICK_REPLY_QUESTIONS[0]
     setChatHistory([
       {
@@ -328,7 +274,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       if (option.field === 'relationship_structure') {
         // After relationship_structure, show disagreements question (index 4)
         const nextIndex = 4
-        const nextQuestion = getLocalizedQuestion(nextIndex)
+        const nextQuestion = QUESTIONS[nextIndex]
         setChatHistory(prev => [
           ...prev,
           userMessage,
@@ -347,7 +293,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       if (option.field === 'kink_openness') {
         // After kink_openness, show erotic question (index 5)
         const nextIndex = 5
-        const nextQuestion = getLocalizedQuestion(nextIndex)
+        const nextQuestion = QUESTIONS[nextIndex]
         setChatHistory(prev => [
           ...prev,
           userMessage,
@@ -380,7 +326,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
       // Move to next question
       const nextIndex = questionIndex + 1
       if (nextIndex < QUESTIONS.length) {
-        const nextQuestion = getLocalizedQuestion(nextIndex)
+        const nextQuestion = QUESTIONS[nextIndex]
         const nextQuickReplies = QUICK_REPLY_QUESTIONS[nextIndex]
         
         // Update chat history and question index - use functional updates to avoid stale state
@@ -534,7 +480,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           ...historyWithCommentary,
           {
             role: 'assistant',
-            content: getLocalizedQuestion(scriptedNextIndex),
+            content: QUESTIONS[scriptedNextIndex],
             timestamp: new Date(),
           },
         ])
@@ -570,6 +516,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           structuredFields: structuredFields, // Include structured fields
           session_token: sessionToken, // Include session token for tracking
           analytics_opt_in: analyticsOptIn, // Requester consent for analytics
+          user_lang: 'en',
         }),
       })
 
@@ -627,12 +574,12 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
-          <h1 className="text-3xl font-bold mb-4 text-purple-600">{ui.introTitle}</h1>
+          <h1 className="text-3xl font-bold mb-4 text-purple-600">Save time, test the vibe</h1>
           <p className="text-gray-700 mb-4 text-lg">
-            {ui.introBody}
+            Just 9 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
           </p>
           <p className="text-sm text-gray-500 mb-6">
-            {ui.introSub}
+            Your responses are analyzed by AI and compared against their profile. No raw data is stored-only compatibility metrics.
           </p>
           
           {/* Analytics consent toggle - privacy-first, default OFF */}
@@ -645,11 +592,11 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
                 className="mt-1 w-4 h-4 text-purple-600 rounded"
               />
               <span className="text-sm text-gray-700 dark:text-gray-300">
-                {ui.consentOptIn}
+                I consent to anonymized analytics being used to improve SoulSort (no raw answers stored).
               </span>
             </label>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-7">
-              {ui.consentOptional}
+              Optional. You can still complete the vibe check without this.
             </p>
           </div>
           
@@ -657,7 +604,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             onClick={handleStart}
             className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
           >
-            {ui.startButton}
+            Start vibe check
           </button>
         </div>
       </div>
@@ -717,13 +664,13 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     
     return (
       <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 pb-24 sm:pb-12">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col" style={{ minHeight: 'calc(100vh - 6rem)', maxHeight: 'calc(100vh - 6rem)' }}>
-          <h1 className="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">{ui.chatTitle}</h1>
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col" style={{ minHeight: 'calc(100dvh - 5rem)', maxHeight: 'calc(100dvh - 5rem)' }}>
+          <h1 className="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">Vibe-check</h1>
           <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
-            {ui.chatIntro}
+            You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.
           </p>
           <p className="text-gray-500 dark:text-gray-400 mb-4 text-xs">
-            {t('ui.requester.chat.languageHint', userLang)}
+            You can answer in any language.
           </p>
           <div className="mb-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
             <span>Voice language</span>
@@ -734,6 +681,9 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             >
               <option value="auto">Auto (browser)</option>
               <option value="sv-SE">Svenska</option>
+              <option value="ar-SA">Arabic</option>
+              <option value="zh-CN">Chinese</option>
+              <option value="hi-IN">Hindi</option>
               <option value="en-US">English</option>
               <option value="it-IT">Italiano</option>
               <option value="de-DE">Deutsch</option>
@@ -767,10 +717,11 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 p-3 rounded-lg">
-                  <span className="animate-pulse dark:text-gray-100">{ui.thinking}</span>
+                  <span className="animate-pulse dark:text-gray-100">Thinking...</span>
                 </div>
               </div>
             )}
+            <div ref={chatEndRef} />
           </div>
 
           {/* Show quick replies if current question has them and field not captured */}
@@ -795,8 +746,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
                 onChange={(e) => setCurrentMessage(e.target.value)}
                 placeholder={
                   currentQuickReplies
-                    ? t('ui.requester.chat.placeholderWithQuickReplies', userLang)
-                    : t('ui.requester.chat.placeholder', userLang)
+                    ? 'Or answer in any language...'
+                    : 'Answer in any language...'
                 }
                 className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
                 disabled={loading}
@@ -832,7 +783,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               disabled={loading || !currentMessage.trim() || currentQuickReplies !== null}
               className="px-5 py-2 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
             >
-              {ui.send}
+              Send
             </button>
           </form>
         </div>
@@ -842,33 +793,35 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
   if (flowState === 'results' && assessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2 text-center text-purple-600">{ui.resultsTitle}</h1>
+      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
+        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
+          <h1 className="text-3xl font-bold mb-2 text-center text-purple-600">Compatibility Results</h1>
 
           {/* Summary */}
-          <div className="bg-purple-50 rounded-lg p-6 mb-8">
-            <h2 className="font-semibold text-lg mb-3 text-purple-600">{ui.summaryTitle}</h2>
-            <p className="text-gray-700">{assessment.summary}</p>
+          <div className="bg-purple-50 dark:bg-purple-950/30 rounded-lg p-6 mb-8">
+            <h2 className="font-semibold text-lg mb-3 text-purple-600">Summary</h2>
+            <p className="text-gray-700 dark:text-gray-200">{assessment.summary}</p>
           </div>
 
           {/* Radar Overlay */}
           <div className="mb-8">
-            <h2 className="font-semibold text-lg mb-4 text-center text-purple-600">{ui.radarTitle}</h2>
+            <h2 className="font-semibold text-lg mb-4 text-center text-purple-600">Radar Comparison</h2>
             <RadarOverlay
               userData={assessment.userRadar}
               requesterData={assessment.requesterRadar}
             />
           </div>
 
-          <DeepInsightsSection
-            mode="requester"
-            userRadar={assessment.requesterRadar}
-            requesterRadar={assessment.userRadar}
-            requesterPreferences={assessment.userPreferences || null}
-            requesterSignalScores={assessment.userSignalScores || null}
-            insightOverrides={assessment.deepInsightsCopy || null}
-          />
+          {assessment.showDeepInsights !== false && (
+            <DeepInsightsSection
+              mode="requester"
+              userRadar={assessment.requesterRadar}
+              requesterRadar={assessment.userRadar}
+              requesterPreferences={assessment.userPreferences || null}
+              requesterSignalScores={assessment.userSignalScores || null}
+              insightOverrides={assessment.deepInsightsCopy || null}
+            />
+          )}
 
           {/* Feedback Section */}
           <FeedbackSection linkId={linkId} />
@@ -876,13 +829,13 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           {/* CTA to create account */}
           <div className="text-center mt-8 pt-8 border-t border-gray-200">
             <p className="text-gray-700 mb-4">
-              {ui.ctaBody}
+              Want to create your own vibe-check link and see how others match with you?
             </p>
             <a
               href="/login"
               className="inline-block px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
             >
-              {ui.ctaButton}
+              Create Your Profile
             </a>
           </div>
         </div>

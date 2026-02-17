@@ -19,18 +19,15 @@ interface DashboardClientProps {
 export default function DashboardClient({ radarProfile, consents, shareLink, userPreferences = null }: DashboardClientProps) {
   const router = useRouter()
 
-  const publicRadarConsent = consents.find(c => c.consent_type === 'public_radar' && c.granted && !c.revoked_at)
   const analyticsConsent = consents.find(c => c.consent_type === 'analytics' && c.granted && !c.revoked_at)
 
-  const [publicRadar, setPublicRadar] = useState(!!publicRadarConsent)
   const [analyticsOptIn, setAnalyticsOptIn] = useState(!!analyticsConsent)
   const [updating, setUpdating] = useState(false)
   const [showShareCard, setShowShareCard] = useState(false)
 
   useEffect(() => {
-    setPublicRadar(!!publicRadarConsent)
     setAnalyticsOptIn(!!analyticsConsent)
-  }, [publicRadarConsent, analyticsConsent])
+  }, [analyticsConsent])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -38,7 +35,7 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
     router.push('/login')
   }
 
-  const handleConsentChange = async (type: 'public_radar' | 'analytics', granted: boolean) => {
+  const handleConsentChange = async (type: 'analytics', granted: boolean) => {
     setUpdating(true)
     try {
       const response = await fetch('/api/consent', {
@@ -48,11 +45,7 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
       })
 
       if (response.ok) {
-        if (type === 'public_radar') {
-          setPublicRadar(granted)
-        } else {
-          setAnalyticsOptIn(granted)
-        }
+        setAnalyticsOptIn(granted)
         router.refresh()
       }
     } catch (error) {
@@ -163,23 +156,6 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
         <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Sharing & Consent</h2>
 
         <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="public-radar-checkbox"
-              checked={publicRadar}
-              onChange={(e) => handleConsentChange('public_radar', e.target.checked)}
-              disabled={updating}
-              className="mt-1 w-5 h-5 text-purple-600 rounded accent-purple-600 cursor-pointer flex-shrink-0"
-            />
-            <label htmlFor="public-radar-checkbox" className="flex-1 cursor-pointer">
-              <span className="font-medium dark:text-gray-100">My radar can be viewed publicly</span>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                Allow others to see your radar profile when they use your link (without your identity).
-              </p>
-            </label>
-          </div>
-
           <div className="flex items-start gap-3">
             <input
               type="checkbox"

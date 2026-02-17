@@ -60,7 +60,8 @@ function AxisTick({
   const key = payload?.value || ''
   const [line1, line2] = AXIS_LABEL_LINES[key] || [key, '']
   const tx = cx + (x - cx) * labelDistanceMultiplier
-  const ty = cy + (y - cy) * labelDistanceMultiplier
+  const verticalNudge = key === 'Meaning & Values' ? (isMobile ? -10 : -4) : 0
+  const ty = cy + (y - cy) * labelDistanceMultiplier + verticalNudge
 
   return (
     <g
@@ -134,7 +135,7 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
     },
   ]
 
-  const labelDistanceMultiplier = isMobile ? 1.03 : 1.28
+  const labelDistanceMultiplier = isMobile ? 1.08 : 1.28
 
   return (
     <div className="relative" style={{ minHeight: isMobile ? 500 : 560 }}>

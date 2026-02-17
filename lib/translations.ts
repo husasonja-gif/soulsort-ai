@@ -18,6 +18,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Cuáles son tres valores que intentas practicar en tus relaciones?',
     it: 'Quali sono tre valori che cerchi di praticare nelle tue relazioni?',
     pt: 'Quais são três valores que você tenta praticar em seus relacionamentos?',
+    fi: 'Millainen kaytos kuluttaa sinua nopeimmin, vaikka toinen tarkoittaisi hyvaa?',
   },
   'onboarding.q2': {
     en: 'After your last breakup, what\'s one thing you do differently now, even in early dating?',
@@ -27,6 +28,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Cómo te gusta manejar los desacuerdos o malentendidos?',
     it: 'Come ti piace gestire i disaccordi o i malintesi?',
     pt: 'Como você gosta de lidar com desentendimentos ou mal-entendidos?',
+    fi: 'Mita teet eri tavalla viimeisimmän eron jalkeen, myos deittailun alkuvaiheessa?',
   },
   'onboarding.q3': {
     en: 'If you realize you\'ve hurt someone you care about, what\'s your first move?',
@@ -36,6 +38,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Qué te ayuda a sentirte eróticamente conectado con alguien?',
     it: 'Cosa ti aiuta a sentirti eroticamente connesso con qualcuno?',
     pt: 'O que te ajuda a se sentir eroticamente conectado com alguém?',
+    fi: 'Jos huomaat satuttaneesi valittamaasi ihmista, mika on ensimmainen liikkeesi?',
   },
   'onboarding.q4': {
     en: 'What is something a partner can do to make you feel safe when you\'re tense or overwhelmed?',
@@ -45,6 +48,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Cuánta libertad necesitas y buscas en tus relaciones románticas y cómo se ve la libertad para ti?',
     it: 'Quanta libertà hai bisogno e cerchi nelle tue relazioni romantiche e come appare la libertà per te?',
     pt: 'Quanta liberdade você precisa e busca em seus relacionamentos românticos e como a liberdade parece para você?',
+    fi: 'Mika kumppanin teko auttaa sinua tuntemaan olosi turvalliseksi, kun olet jannittynyt tai ylikuormittunut?',
   },
   'onboarding.q5': {
     en: 'What helps you feel erotically connected, and what tends to shut that down?',
@@ -54,6 +58,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Cómo comunicas tus límites, el consentimiento y los cambios en tus necesidades con el tiempo?',
     it: 'Come comunichi i confini, il consenso e i bisogni che cambiano nel tempo?',
     pt: 'Como você comunica limites, consentimento e necessidades que mudam ao longo do tempo?',
+    fi: 'Mika auttaa sinua tuntemaan eroottista yhteytta, ja mika taas katkaisee sen?',
   },
   'onboarding.q6': {
     en: 'In relationships, where do you need autonomy, and where do you actually like closeness?',
@@ -63,6 +68,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Qué ritmo te parece adecuado para construir intimidad emocional y física?',
     it: 'Quale ritmo ti sembra giusto per costruire intimità emotiva e fisica?',
     pt: 'Que ritmo parece certo para construir intimidade emocional e física?',
+    fi: 'Missa suhteessa tarvitset autonomiaa ja missa taas oikeasti pidat laheisyydesta?',
   },
   'onboarding.q7': {
     en: 'How do you respond when you learn you crossed someone\'s boundary (even unintentionally)?',
@@ -72,6 +78,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Qué te ayuda a sentirte eróticamente conectado y qué tiende a bloquear eso?',
     it: 'Cosa ti aiuta a sentirti eroticamente connesso e cosa tende invece a bloccarlo?',
     pt: 'O que ajuda você a se sentir eroticamente conectado e o que tende a bloquear isso?',
+    fi: 'Miten reagoit, kun huomaat ylittaneesi toisen rajan (myos tahattomasti)?',
   },
   'onboarding.q8': {
     en: 'What do you think most people misunderstand about you?',
@@ -81,6 +88,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿Cómo te relacionas con la autonomía, la libertad y la exclusividad en pareja?',
     it: 'Come ti rapporti ad autonomia, libertà ed esclusività nella coppia?',
     pt: 'Como você se relaciona com autonomia, liberdade e exclusividade na parceria?',
+    fi: 'Mita luulet ihmisten useimmiten ymmartavan sinusta vaarin?',
   },
   'onboarding.q9': {
     en: 'When attraction starts to fade or plateau, what do you usually do?',
@@ -90,6 +98,7 @@ const translations: Record<string, Partial<Record<LanguageCode, string>>> = {
     es: '¿En qué estás creciendo actualmente en tus relaciones y qué apoyo te ayuda más?',
     it: 'In quale area stai crescendo nelle relazioni in questo momento e quale supporto ti aiuta di più?',
     pt: 'Em que área você está crescendo nos relacionamentos agora e qual apoio mais ajuda você?',
+    fi: 'Kun vetovoima alkaa hiipua tai tasaantua, mita teet tavallisesti?',
   },
   
   // BMNL Questions (all 11)

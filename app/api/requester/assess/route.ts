@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     } else {
       console.log('Request body received:', { linkId: body.linkId, userId: body.userId, chatHistoryLength: body.chatHistory?.length, hasStructuredFields: !!body.structuredFields })
     }
-    const { linkId, userId, chatHistory, skippedQuestions = [], structuredFields = {}, session_token, analytics_opt_in = false } = body
+    const { linkId, userId, chatHistory, skippedQuestions = [], structuredFields = {}, session_token, analytics_opt_in = false, user_lang = 'en' } = body
 
     if (!linkId || !userId) {
       return NextResponse.json(
@@ -252,7 +252,8 @@ export async function POST(request: Request) {
         structuredFieldsFormatted,
         null, // userId (requester is anonymous)
         linkId,
-        requesterSessionId
+        requesterSessionId,
+        typeof user_lang === 'string' ? user_lang : 'en'
       )
 
     let assessment
@@ -291,7 +292,12 @@ export async function POST(request: Request) {
       undefined,
       userRadarProfile.signal_scores
     ).areas
-    const deepInsightsCopy = await generateDeepInsightsCopy('requester', comparisonAreas)
+    const showDeepInsights =
+      !assessment.abuseFlags.includes('gaming_detected') &&
+      !assessment.abuseFlags.includes('low_engagement')
+    const deepInsightsCopy = showDeepInsights
+      ? await generateDeepInsightsCopy('requester', comparisonAreas)
+      : undefined
     const savedAssessment = await createRequesterAssessment(
       linkId,
       userId,
@@ -407,6 +413,8 @@ export async function POST(request: Request) {
         consent: userRadarProfile.consent || (userRadarProfile as any).consent_dim, // Support both for migration
       },
       requesterRadar: assessment.radar,
+      abuseFlags: assessment.abuseFlags,
+      showDeepInsights,
       userPreferences: (userProfile as { preferences?: Record<string, number | undefined> | null })?.preferences ?? null,
       userSignalScores: userRadarProfile.signal_scores ?? null,
       deepInsightsCopy,

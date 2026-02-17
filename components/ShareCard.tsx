@@ -162,17 +162,20 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
           <p className="text-gray-600 dark:text-gray-300 text-sm" style={{ color: '#4b5563' }}>Curious how we align?</p>
         </div>
 
-        <div className="flex flex-col md:flex-row items-center justify-center gap-6 mb-6">
-          <div className="w-72 h-72 flex-shrink-0 flex items-center justify-center">
+        <div className="flex items-center justify-center mb-6">
+          <div className="relative w-72 h-72 flex-shrink-0 flex items-center justify-center">
             <RadarChartNoLabels data={radarData} label="Profile" />
-          </div>
-          <div className="flex-shrink-0 flex items-center justify-center p-3 bg-white dark:bg-gray-900 rounded-lg" style={{ backgroundColor: '#ffffff' }}>
-            <QRCodeSVG
-              value={shareLink}
-              size={140}
-              level="M"
-              includeMargin={true}
-            />
+            <div
+              className="absolute bottom-3 right-3 p-1.5 rounded-md shadow-md border border-gray-200"
+              style={{ backgroundColor: '#ffffff' }}
+            >
+              <QRCodeSVG
+                value={shareLink}
+                size={86}
+                level="H"
+                includeMargin={true}
+              />
+            </div>
           </div>
         </div>
 
