@@ -26,12 +26,12 @@ const AXIS_DESCRIPTIONS: Record<string, string> = {
 }
 
 const AXIS_LABEL_LINES: Record<string, string[]> = {
-  'Meaning & Values': ['Meaning', '& Values'],
-  'Regulation & Nervous System': ['Regulation &', 'Nervous System'],
-  'Erotic Attunement': ['Erotic', 'Attunement'],
-  'Autonomy Orientation': ['Autonomy', 'Orientation'],
-  'Consent Orientation': ['Consent', 'Orientation'],
-  'Conflict & Repair': ['Conflict &', 'Repair'],
+  'Meaning & Values': ['Meaning'],
+  'Regulation & Nervous System': ['Calm'],
+  'Erotic Attunement': ['Desire'],
+  'Autonomy Orientation': ['Autonomy'],
+  'Consent Orientation': ['Consent'],
+  'Conflict & Repair': ['Repair'],
 }
 
 interface AxisTickProps {

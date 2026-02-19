@@ -18,6 +18,21 @@ interface DeepInsightsSectionProps {
 const THEM_COLOR = '#9333ea'
 const YOU_COLOR = '#d946ef'
 
+function projectRangeWithNuance(start: number, end: number): { start: number; end: number } {
+  const safeStart = Math.max(0, Math.min(100, start))
+  const safeEnd = Math.max(safeStart, Math.min(100, end))
+  const midpoint = (safeStart + safeEnd) / 2
+  const rawWidth = Math.max(0, safeEnd - safeStart)
+  const MIN_SEGMENT_WIDTH = 10
+  const MAX_SEGMENT_WIDTH = 34
+  const normalizedWidth =
+    MIN_SEGMENT_WIDTH +
+    (Math.min(40, rawWidth) / 40) * (MAX_SEGMENT_WIDTH - MIN_SEGMENT_WIDTH)
+  const half = normalizedWidth / 2
+  const left = Math.max(0, Math.min(100 - normalizedWidth, midpoint - half))
+  return { start: left, end: left + normalizedWidth }
+}
+
 function DotBar({
   zoneStart = 35,
   zoneEnd = 65,
@@ -31,12 +46,7 @@ function DotBar({
   zoneStart?: number
   zoneEnd?: number
 }) {
-  const FIXED_SEGMENT_WIDTH = 20
-  const safeStart = Math.max(0, Math.min(100, zoneStart))
-  const safeEnd = Math.max(safeStart, Math.min(100, zoneEnd))
-  const midpoint = (safeStart + safeEnd) / 2
-  const fixedLeft = Math.max(0, Math.min(100 - FIXED_SEGMENT_WIDTH, midpoint - FIXED_SEGMENT_WIDTH / 2))
-  const fixedRight = fixedLeft + FIXED_SEGMENT_WIDTH
+  const range = projectRangeWithNuance(zoneStart, zoneEnd)
   return (
     <div className="space-y-1">
       <div className="hidden sm:flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
@@ -45,8 +55,8 @@ function DotBar({
           <span
             className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
             style={{
-              left: `${fixedLeft}%`,
-              width: `${fixedRight - fixedLeft}%`,
+              left: `${range.start}%`,
+              width: `${range.end - range.start}%`,
               backgroundImage: `linear-gradient(90deg, ${lineColor}, #8b5cf6)`,
             }}
           />
@@ -58,8 +68,8 @@ function DotBar({
           <span
             className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
             style={{
-              left: `${fixedLeft}%`,
-              width: `${fixedRight - fixedLeft}%`,
+              left: `${range.start}%`,
+              width: `${range.end - range.start}%`,
               backgroundImage: `linear-gradient(90deg, ${lineColor}, #8b5cf6)`,
             }}
           />
@@ -88,22 +98,12 @@ function ComparisonBar({
   themZoneStart?: number
   themZoneEnd?: number
 }) {
-  const FIXED_SEGMENT_WIDTH = 20
-  const clampRange = (start: number, end: number): { start: number; end: number } => {
-    const midpoint = (start + end) / 2
-    const left = Math.max(0, Math.min(100 - FIXED_SEGMENT_WIDTH, midpoint - FIXED_SEGMENT_WIDTH / 2))
-    return {
-      start: left,
-      end: left + FIXED_SEGMENT_WIDTH,
-    }
-  }
-
   const yRawStart = Math.max(0, Math.min(100, youZoneStart ?? 35))
   const yRawEnd = Math.max(yRawStart, Math.min(100, youZoneEnd ?? 65))
   const tRawStart = Math.max(0, Math.min(100, themZoneStart ?? 35))
   const tRawEnd = Math.max(tRawStart, Math.min(100, themZoneEnd ?? 65))
-  const yRange = clampRange(yRawStart, yRawEnd)
-  const tRange = clampRange(tRawStart, tRawEnd)
+  const yRange = projectRangeWithNuance(yRawStart, yRawEnd)
+  const tRange = projectRangeWithNuance(tRawStart, tRawEnd)
 
   return (
     <div className="space-y-2">
