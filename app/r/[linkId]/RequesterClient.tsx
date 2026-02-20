@@ -67,6 +67,7 @@ const QUESTIONS = [...CANONICAL_DATING_QUESTIONS]
 const QUICK_REPLY_QUESTIONS: Record<number, QuickReplyOption[]> = {}
 
 export default function RequesterClient({ linkId, userId }: RequesterClientProps) {
+  const requesterDraftKey = `soulsort:requester-draft:${linkId}:${userId}`
   const router = useRouter()
   const [flowState, setFlowState] = useState<FlowState>('intro')
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([])
@@ -99,8 +100,10 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
   const [voiceLang, setVoiceLang] = useState<VoiceLangOption>('auto')
+  const [speechSupported, setSpeechSupported] = useState(false)
   const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
+  const [draftHydrated, setDraftHydrated] = useState(false)
 
   const resolveVoiceRecognitionLang = (selected: VoiceLangOption): string => {
     if (selected !== 'auto') return selected
@@ -116,12 +119,87 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   }
 
   useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(requesterDraftKey)
+      if (!raw) {
+        setDraftHydrated(true)
+        return
+      }
+      const parsed = JSON.parse(raw) as {
+        flowState?: FlowState
+        chatHistory?: Array<{ role: 'user' | 'assistant'; content: string; timestamp?: string; quickReplies?: QuickReplyOption[] }>
+        currentQuestionIndex?: number
+        currentMessage?: string
+        structuredFields?: Record<string, string>
+        analyticsOptIn?: boolean
+        sessionToken?: string | null
+        startTime?: number | null
+      }
+      if (parsed.flowState) setFlowState(parsed.flowState)
+      if (typeof parsed.currentQuestionIndex === 'number') setCurrentQuestionIndex(parsed.currentQuestionIndex)
+      if (typeof parsed.currentMessage === 'string') setCurrentMessage(parsed.currentMessage)
+      if (parsed.structuredFields) setStructuredFields(parsed.structuredFields)
+      if (typeof parsed.analyticsOptIn === 'boolean') setAnalyticsOptIn(parsed.analyticsOptIn)
+      if (parsed.sessionToken !== undefined) setSessionToken(parsed.sessionToken)
+      if (parsed.startTime !== undefined) setStartTime(parsed.startTime)
+      if (Array.isArray(parsed.chatHistory)) {
+        setChatHistory(
+          parsed.chatHistory.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+            quickReplies: msg.quickReplies,
+          }))
+        )
+      }
+    } catch (error) {
+      console.error('Failed to restore requester draft:', error)
+    } finally {
+      setDraftHydrated(true)
+    }
+  }, [requesterDraftKey])
+
+  useEffect(() => {
+    if (!draftHydrated) return
+    try {
+      const payload = {
+        flowState,
+        chatHistory,
+        currentQuestionIndex,
+        currentMessage,
+        structuredFields,
+        analyticsOptIn,
+        sessionToken,
+        startTime,
+      }
+      sessionStorage.setItem(requesterDraftKey, JSON.stringify(payload))
+    } catch (error) {
+      console.error('Failed to persist requester draft:', error)
+    }
+  }, [
+    requesterDraftKey,
+    draftHydrated,
+    flowState,
+    chatHistory,
+    currentQuestionIndex,
+    currentMessage,
+    structuredFields,
+    analyticsOptIn,
+    sessionToken,
+    startTime,
+  ])
+
+  useEffect(() => {
     const AnyWindow = window as Window & {
       webkitSpeechRecognition?: new () => SpeechRecognition
       SpeechRecognition?: new () => SpeechRecognition
     }
     const SR = AnyWindow.webkitSpeechRecognition || AnyWindow.SpeechRecognition
-    if (!SR) return
+    if (!SR) {
+      setSpeechSupported(false)
+      return
+    }
+    setSpeechSupported(true)
 
     const recognitionInstance: SpeechRecognition = new SR()
     recognitionInstance.lang = resolveVoiceRecognitionLang(voiceLang)
@@ -170,7 +248,10 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   }, [chatHistory, loading, currentQuestionIndex, currentMessage])
 
   const toggleRecording = () => {
-    if (!recognition) return
+    if (!recognition || !speechSupported) {
+      alert('Voice input is not supported in this browser. Please type your answer.')
+      return
+    }
     if (isRecording) recognition.stop()
     else recognition.start()
   }
@@ -545,6 +626,9 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
         console.log('Assessment received:', { score: data.score, hasRadar: !!data.requesterRadar })
         setAssessment(data)
         setFlowState('results')
+        try {
+          sessionStorage.removeItem(requesterDraftKey)
+        } catch {}
         
         // Track completion with assessment ID
         if (sessionToken && startTime) {
@@ -778,12 +862,12 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
               <button
                 type="button"
                 onClick={toggleRecording}
-                disabled={loading || !recognition}
+                disabled={loading}
                 className={`ml-2 w-9 h-9 rounded-full flex items-center justify-center text-white ${
                   isRecording ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-purple-600 hover:bg-purple-700'
                 } disabled:bg-gray-400`}
                 aria-label={isRecording ? 'Stop recording' : 'Start recording'}
-                title={recognition ? 'Voice input' : 'Voice input unavailable on this browser'}
+                title={speechSupported ? 'Voice input' : 'Voice input unavailable on this browser'}
               >
                 {isRecording ? (
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

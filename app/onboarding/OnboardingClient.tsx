@@ -50,6 +50,7 @@ interface SpeechRecognitionAlternative {
 type SurveySection = 'dealbreakers' | 'preferences' | 'chat' | 'complete'
 
 export default function OnboardingClient({ userId, skipChat = false }: OnboardingClientProps) {
+  const onboardingDraftKey = `soulsort:onboarding-draft:${userId}`
   const router = useRouter()
   const [section, setSection] = useState<SurveySection>('dealbreakers')
   const [dealbreakers, setDealbreakers] = useState<string[]>([])
@@ -66,16 +67,101 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
   const [loading, setLoading] = useState(false)
   const [chatComplete, setChatComplete] = useState(false)
   const [openSliderInfo, setOpenSliderInfo] = useState<string | null>(null)
+  const chatContainerRef = useRef<HTMLDivElement | null>(null)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+  const [draftHydrated, setDraftHydrated] = useState(false)
 
   // Always keep the latest messages in view (especially important on mobile)
   useEffect(() => {
-    if (chatEndRef.current) {
-      chatEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' })
+    const scrollToBottom = (smooth = true) => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+          behavior: smooth ? 'smooth' : 'auto',
+        })
+      } else if (chatEndRef.current) {
+        chatEndRef.current.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto', block: 'end' })
+      }
+    }
+    const timer = window.setTimeout(() => scrollToBottom(true), 30)
+    const viewport = window.visualViewport
+    const onViewportChange = () => scrollToBottom(false)
+    viewport?.addEventListener('resize', onViewportChange)
+    viewport?.addEventListener('scroll', onViewportChange)
+    return () => {
+      window.clearTimeout(timer)
+      viewport?.removeEventListener('resize', onViewportChange)
+      viewport?.removeEventListener('scroll', onViewportChange)
     }
   }, [chatHistory, loading])
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem(onboardingDraftKey)
+      if (!raw) {
+        setDraftHydrated(true)
+        return
+      }
+      const parsed = JSON.parse(raw) as {
+        section?: SurveySection
+        dealbreakers?: string[]
+        preferences?: Record<string, number>
+        chatHistory?: Array<{ role: 'user' | 'assistant'; content: string; timestamp?: string }>
+        currentQuestion?: number
+        currentMessage?: string
+        chatComplete?: boolean
+      }
+      if (parsed.section) setSection(parsed.section)
+      if (Array.isArray(parsed.dealbreakers)) setDealbreakers(parsed.dealbreakers)
+      if (parsed.preferences) setPreferences(parsed.preferences)
+      if (typeof parsed.currentQuestion === 'number') setCurrentQuestion(parsed.currentQuestion)
+      if (typeof parsed.currentMessage === 'string') setCurrentMessage(parsed.currentMessage)
+      if (typeof parsed.chatComplete === 'boolean') setChatComplete(parsed.chatComplete)
+      if (Array.isArray(parsed.chatHistory)) {
+        setChatHistory(
+          parsed.chatHistory.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+          }))
+        )
+      }
+    } catch (error) {
+      console.error('Failed to restore onboarding draft:', error)
+    } finally {
+      setDraftHydrated(true)
+    }
+  }, [onboardingDraftKey])
+
+  useEffect(() => {
+    if (!draftHydrated) return
+    try {
+      const payload = {
+        section,
+        dealbreakers,
+        preferences,
+        chatHistory,
+        currentQuestion,
+        currentMessage,
+        chatComplete,
+      }
+      sessionStorage.setItem(onboardingDraftKey, JSON.stringify(payload))
+    } catch (error) {
+      console.error('Failed to persist onboarding draft:', error)
+    }
+  }, [
+    onboardingDraftKey,
+    draftHydrated,
+    section,
+    dealbreakers,
+    preferences,
+    chatHistory,
+    currentQuestion,
+    currentMessage,
+    chatComplete,
+  ])
 
   // Initialise speech recognition for audio answering (where supported)
   useEffect(() => {
@@ -384,6 +470,9 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
       const data = await response.json()
       
       if (data.success) {
+        try {
+          sessionStorage.removeItem(onboardingDraftKey)
+        } catch {}
         router.push('/dashboard')
         router.refresh()
       } else {
@@ -497,14 +586,14 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'chat') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4 pb-24 sm:pb-12">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-8 flex flex-col" style={{ minHeight: 'calc(100vh - 6rem)', maxHeight: 'calc(100vh - 6rem)' }}>
+      <div className="h-[100dvh] bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-2 sm:px-4 sm:py-8">
+        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-none sm:rounded-lg shadow-lg p-3 sm:p-8 flex flex-col h-[100dvh] sm:h-[calc(100dvh-4rem)]">
           <h1 className="text-2xl font-bold mb-4 dark:text-white">Let's Chat</h1>
           <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
             {t('ui.onboarding.chat.intro', userLang, { count: chatQuestions.length })}
           </p>
 
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto overscroll-contain space-y-4 mb-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
             {chatHistory.map((msg, idx) => (
               <div
                 key={idx}
@@ -534,7 +623,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
           </div>
 
           {!chatComplete ? (
-            <form onSubmit={handleChatSubmit} className="flex gap-2 items-end pb-safe">
+            <form onSubmit={handleChatSubmit} className="mt-auto flex gap-2 items-end pb-[calc(env(safe-area-inset-bottom)+0.25rem)]">
               <div className="flex-1 flex items-end border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700">
                 <textarea
                   value={currentMessage}
