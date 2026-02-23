@@ -75,7 +75,7 @@ function PrimaryBlogPostContent() {
   return (
     <div className="space-y-8 text-gray-700 dark:text-gray-300 leading-relaxed">
       <section>
-        <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Most people hate AI dating apps - Here&apos;s why</h2>
+        <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Most People Hate AI Dating Apps - Here&apos;s Why</h2>
         <p>
           Men describe the experience as exhausting and demoralizing. No matter which premiums they buy, they often
           remain invisible: ignored, unseen, ghosted. Women, queers, and sex-positive profiles face the opposite: too
@@ -85,7 +85,7 @@ function PrimaryBlogPostContent() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">The AI Takeover: What&apos;s changing</h2>
+        <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">The AI Takeover: What&apos;s Changing</h2>
         <p>
           Since around 2023, dating platforms have been increasingly betting on AI. That shift hasn&apos;t come without
           friction. Bumble, for example, faced a privacy complaint over failing to properly ask for consent in relation
@@ -144,7 +144,7 @@ function PrimaryBlogPostContent() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Is another AI tool really the solution?</h2>
+        <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Is Another AI Tool Really the Solution?</h2>
         <p>The honest answer is: I don&apos;t know.</p>
         <p>
           What I do know is where my own values lie. I am building a product that tries to cater to the pain-points
@@ -153,9 +153,6 @@ function PrimaryBlogPostContent() {
         </p>
         <p>Because being real and vulnerable are the things that ultimately build trust.</p>
         <p>And trust is what enhances vibes and that real relational presence.</p>
-        <p className="font-semibold text-gray-900 dark:text-gray-100">
-          Ready to date with your values first? Try SoulSort&apos;s compatibility tool - no games, just real connection.
-        </p>
         <p>Lots of love,</p>
         <p>Sonja</p>
       </section>

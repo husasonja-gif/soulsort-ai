@@ -113,6 +113,14 @@ export default function LandingPage() {
         <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
           Create radar. Share link. Compare alignment.
         </p>
+        <div className="mb-8">
+          <Link
+            href="/blog"
+            className="inline-flex items-center rounded-full bg-white/70 px-4 py-2 text-sm font-semibold text-purple-700 shadow-sm transition-colors hover:bg-white dark:bg-gray-800/70 dark:text-purple-300 dark:hover:bg-gray-800"
+          >
+            Read the SoulSort Blog →
+          </Link>
+        </div>
 
       </section>
 
