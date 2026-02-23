@@ -1,31 +1,16 @@
-'use client'
-
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import ThemeToggle from '@/components/ThemeToggle'
+import { blogPosts } from '@/lib/blogPosts'
 
-interface BlogPost {
-  id: string
-  title: string
-  excerpt: string
-  date: string
-  author: string
-  category: string
-  readTime: string
-}
-
-// Blog posts - you can add more here or fetch from a CMS/database
-const blogPosts: BlogPost[] = [
-  {
-    id: '1',
-    title: 'Welcome to SoulSort AI',
-    excerpt: 'Discover how we\'re building a vibe-check engine that helps people find authentic connections while respecting privacy and consent.',
-    date: '2025-01-18',
-    author: 'SoulSort Team',
-    category: 'Product',
-    readTime: '3 min read',
+export const metadata: Metadata = {
+  title: 'SoulSort Blog | AI Dating Apps, Consent, and Connection',
+  description:
+    'Analysis and stories on AI dating apps, dating app fatigue, AI catfishing, consent in AI dating, and values-based alternatives.',
+  alternates: {
+    canonical: 'https://soulsortai.com/blog',
   },
-  // Add more posts here as needed
-]
+}
 
 export default function BlogPage() {
   return (
