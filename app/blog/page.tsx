@@ -14,20 +14,23 @@ export const metadata: Metadata = {
 
 export default function BlogPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 via-white to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_10%_10%,#f5d0fe_0%,#f3e8ff_28%,#ffffff_58%)] dark:bg-[radial-gradient(circle_at_20%_15%,#581c87_0%,#1f2937_42%,#111827_70%)]">
+      <div className="pointer-events-none absolute -top-24 -left-12 h-72 w-72 rounded-full bg-pink-300/30 blur-3xl dark:bg-fuchsia-500/20" />
+      <div className="pointer-events-none absolute top-24 -right-14 h-72 w-72 rounded-full bg-violet-300/30 blur-3xl dark:bg-purple-500/20" />
+
       <div className="absolute top-4 right-4 z-10">
         <ThemeToggle />
       </div>
 
-      <div className="container mx-auto px-4 py-12 sm:py-16 max-w-4xl">
+      <div className="container relative z-10 mx-auto max-w-4xl px-4 py-12 sm:py-16">
         {/* Header */}
         <div className="text-center mb-12">
           <Link href="/" className="inline-block mb-4">
-            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-violet-600 via-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
               SoulSort AI
             </h1>
           </Link>
-          <p className="text-xl text-gray-600 dark:text-gray-300 mt-2">
+          <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mt-2">
             Stories about connection, culture, and building better spaces
           </p>
         </div>
@@ -38,11 +41,11 @@ export default function BlogPage() {
             <Link
               key={post.id}
               href={`/blog/${post.id}`}
-              className="block bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 dark:border-gray-700 overflow-hidden group"
+              className="block overflow-hidden rounded-2xl border border-white/60 bg-white/70 backdrop-blur-xl shadow-[0_8px_30px_rgba(168,85,247,0.12)] transition-all hover:-translate-y-0.5 hover:shadow-[0_16px_45px_rgba(168,85,247,0.18)] dark:border-purple-300/15 dark:bg-gray-900/65 dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)] group"
             >
               <div className="p-6 sm:p-8">
                 <div className="flex items-center gap-3 mb-3 text-sm text-gray-500 dark:text-gray-400">
-                  <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">
+                  <span className="rounded-full bg-gradient-to-r from-fuchsia-500/20 to-violet-500/20 px-3 py-1 text-xs font-semibold text-fuchsia-700 dark:text-fuchsia-300">
                     {post.category}
                   </span>
                   <span>{post.date}</span>
@@ -52,7 +55,7 @@ export default function BlogPage() {
                 <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-gray-900 dark:text-gray-100 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                   {post.title}
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                <p className="mb-4 text-gray-700 dark:text-gray-300">
                   {post.excerpt}
                 </p>
                 <div className="flex items-center justify-between">
@@ -81,7 +84,7 @@ export default function BlogPage() {
         <div className="mt-12 text-center">
           <Link
             href="/"
-            className="text-purple-600 dark:text-purple-400 hover:underline"
+            className="inline-flex items-center rounded-full bg-white/70 px-4 py-2 text-purple-700 transition-colors hover:bg-white dark:bg-gray-900/60 dark:text-purple-300 dark:hover:bg-gray-900/90"
           >
             ← Back to Homepage
           </Link>
