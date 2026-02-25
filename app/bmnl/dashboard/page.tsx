@@ -123,18 +123,18 @@ function BMNLParticipantDashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
           <div className="flex justify-between items-center mb-4">
             <div className="flex-1"></div>
             <div className="flex-1 text-center">
-              <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-900 dark:text-gray-900">
+              <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-white">
                 Your Cultural Onboarding Results
               </h1>
-              <p className="text-lg text-gray-600 dark:text-gray-600">
-                Where the Sheep Sleep - Burning Man Netherlands
+              <p className="text-lg text-purple-100">
+                SoulSort Events Demo
               </p>
             </div>
             <div className="flex-1 flex justify-end">
@@ -149,7 +149,7 @@ function BMNLParticipantDashboardContent() {
                     router.push('/bmnl')
                   }
                 }}
-                className="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 whitespace-nowrap"
+                className="px-4 py-2 text-sm border border-purple-300/30 rounded-xl bg-white/10 hover:bg-white/20 text-purple-100 whitespace-nowrap"
               >
                 Sign Out
               </button>
@@ -159,8 +159,8 @@ function BMNLParticipantDashboardContent() {
 
         {/* Radar Visualization */}
         {radar && (
-          <div className="bg-white dark:bg-white rounded-lg p-6 sm:p-8 mb-6 sm:mb-8 border border-gray-200">
-            <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-900 dark:text-gray-900">
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-6 text-white">
               Your Radar Profile
             </h2>
             
@@ -175,52 +175,52 @@ function BMNLParticipantDashboardContent() {
 
         {/* Summary Section */}
         {radar && (
-          <div className="bg-white dark:bg-white rounded-lg p-6 sm:p-8 mb-6 sm:mb-8 border border-gray-200">
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-purple-600 dark:text-purple-600">
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-purple-200">
               Summary
             </h2>
             {summaryLoading ? (
-              <div className="flex items-center gap-2 text-gray-600">
+              <div className="flex items-center gap-2 text-purple-100">
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600"></div>
                 <span>Generating summary...</span>
               </div>
             ) : summary ? (
-              <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap mb-8">
+              <div className="prose prose-sm prose-invert max-w-none text-purple-50 whitespace-pre-wrap mb-8">
                 {summary}
               </div>
             ) : (
-              <p className="text-gray-600 mb-8">Summary will appear here once generated.</p>
+              <p className="text-purple-100/80 mb-8">Summary will appear here once generated.</p>
             )}
             
             {/* Axis Descriptions */}
-            <div className="mt-8 pt-8 border-t border-gray-200">
-              <h3 className="text-lg font-semibold mb-6 text-purple-600 dark:text-purple-600">
+            <div className="mt-8 pt-8 border-t border-purple-300/20">
+              <h3 className="text-lg font-semibold mb-6 text-purple-200">
                 About Your Dimensions
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                  <h4 className="font-semibold text-purple-600 mb-2">Participation</h4>
-                  <p className="text-sm text-gray-600">Contribution mindset, willingness to engage, show up, and co-create</p>
+                <div className="bg-white/10 rounded-2xl p-4 border border-purple-300/20">
+                  <h4 className="font-semibold text-purple-200 mb-2">Participation</h4>
+                  <p className="text-sm text-purple-50/90">Contribution mindset, willingness to engage, show up, and co-create</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                  <h4 className="font-semibold text-purple-600 mb-2">Consent Literacy</h4>
-                  <p className="text-sm text-gray-600">Navigating boundaries, ambiguity, and power with care and awareness</p>
+                <div className="bg-white/10 rounded-2xl p-4 border border-purple-300/20">
+                  <h4 className="font-semibold text-purple-200 mb-2">Consent Literacy</h4>
+                  <p className="text-sm text-purple-50/90">Navigating boundaries, ambiguity, and power with care and awareness</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                  <h4 className="font-semibold text-purple-600 mb-2">Communal Responsibility</h4>
-                  <p className="text-sm text-gray-600">Accountability, civic maturity, and shared ownership of the space</p>
+                <div className="bg-white/10 rounded-2xl p-4 border border-purple-300/20">
+                  <h4 className="font-semibold text-purple-200 mb-2">Communal Responsibility</h4>
+                  <p className="text-sm text-purple-50/90">Accountability, civic maturity, and shared ownership of the space</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                  <h4 className="font-semibold text-purple-600 mb-2">Inclusion Awareness</h4>
-                  <p className="text-sm text-gray-600">Impact awareness, difference navigation, harm response</p>
+                <div className="bg-white/10 rounded-2xl p-4 border border-purple-300/20">
+                  <h4 className="font-semibold text-purple-200 mb-2">Inclusion Awareness</h4>
+                  <p className="text-sm text-purple-50/90">Impact awareness, difference navigation, harm response</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                  <h4 className="font-semibold text-purple-600 mb-2">Self-Regulation</h4>
-                  <p className="text-sm text-gray-600">Nervous system resilience, self-reliance under strain</p>
+                <div className="bg-white/10 rounded-2xl p-4 border border-purple-300/20">
+                  <h4 className="font-semibold text-purple-200 mb-2">Self-Regulation</h4>
+                  <p className="text-sm text-purple-50/90">Nervous system resilience, self-reliance under strain</p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
-                  <h4 className="font-semibold text-purple-600 mb-2">Openness to Learning</h4>
-                  <p className="text-sm text-gray-600">Curiosity, humility, repair capacity, growth orientation</p>
+                <div className="bg-white/10 rounded-2xl p-4 border border-purple-300/20">
+                  <h4 className="font-semibold text-purple-200 mb-2">Openness to Learning</h4>
+                  <p className="text-sm text-purple-50/90">Curiosity, humility, repair capacity, growth orientation</p>
                 </div>
               </div>
             </div>
@@ -229,23 +229,23 @@ function BMNLParticipantDashboardContent() {
 
         {/* Answers Section */}
         {answers.length > 0 && (
-          <div className="bg-white dark:bg-white rounded-lg p-6 sm:p-8 mb-6 sm:mb-8 border border-gray-200">
-            <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-900 dark:text-gray-900">
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-6 text-white">
               Your Answers
             </h2>
             <div className="space-y-6">
               {answers.map((answer) => (
-                <div key={answer.question_number} className="border-b border-gray-200 pb-6 last:border-b-0 last:pb-0">
+                <div key={answer.question_number} className="border-b border-purple-300/20 pb-6 last:border-b-0 last:pb-0">
                   <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-purple-100/70">
                       Question {answer.question_number}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-purple-100/70">
                       {new Date(answer.answered_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="font-medium text-gray-900 mb-2">{answer.question_text}</p>
-                  <p className="text-gray-700 whitespace-pre-wrap">{answer.raw_answer}</p>
+                  <p className="font-medium text-white mb-2">{answer.question_text}</p>
+                  <p className="text-purple-50/90 whitespace-pre-wrap">{answer.raw_answer}</p>
                 </div>
               ))}
             </div>
@@ -253,9 +253,9 @@ function BMNLParticipantDashboardContent() {
         )}
 
         {/* GDPR Actions */}
-        <div className="bg-white dark:bg-white rounded-lg p-6 sm:p-8 mb-6 sm:mb-8 border border-gray-200">
-          <h2 className="text-xl font-bold mb-4 text-gray-900">Your Rights</h2>
-          <div className="space-y-4 text-sm text-gray-700">
+        <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 sm:p-8 mb-6 sm:mb-8">
+          <h2 className="text-xl font-bold mb-4 text-white">Your Rights</h2>
+          <div className="space-y-4 text-sm text-purple-50/90">
             <p>You can request:</p>
             <ul className="list-disc list-inside space-y-2 ml-4">
               <li>A human explanation of your results</li>
@@ -265,7 +265,7 @@ function BMNLParticipantDashboardContent() {
             <div className="flex flex-col sm:flex-row gap-3 mt-4">
               <button
                 onClick={() => alert('Contact organizers at [email] to request explanation')}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+                className="px-4 py-2 border border-purple-300/30 rounded-xl bg-white/10 hover:bg-white/20 text-purple-100"
               >
                 Request Explanation
               </button>
@@ -285,7 +285,7 @@ function BMNLParticipantDashboardContent() {
                       .catch(() => alert('Failed to delete data. Please try again.'))
                   }
                 }}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-semibold"
               >
                 Delete All My Data
               </button>
@@ -298,12 +298,12 @@ function BMNLParticipantDashboardContent() {
                       const url = URL.createObjectURL(blob)
                       const a = document.createElement('a')
                       a.href = url
-                      a.download = `bmnl-data-${Date.now()}.json`
+                      a.download = `soulsort-events-demo-data-${Date.now()}.json`
                       a.click()
                     })
                     .catch(() => alert('Failed to export data'))
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700"
+                className="px-4 py-2 border border-purple-300/30 rounded-xl bg-white/10 hover:bg-white/20 text-purple-100"
               >
                 Export My Data
               </button>
@@ -312,10 +312,10 @@ function BMNLParticipantDashboardContent() {
         </div>
 
         {/* Footer */}
-        <footer className="text-center text-sm text-gray-600 dark:text-gray-600">
+        <footer className="text-center text-sm text-purple-100/80">
           <p>
             Powered by{' '}
-            <Link href="https://soulsortai.com" className="text-purple-600 dark:text-purple-600 hover:underline">
+            <Link href="https://soulsortai.com" className="text-purple-300 hover:underline">
               SoulSort
             </Link>
           </p>

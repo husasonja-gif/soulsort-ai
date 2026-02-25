@@ -44,15 +44,15 @@ interface SpeechRecognitionAlternative {
 // Canonical English questions (for LLM - always English)
 const BMNL_QUESTIONS_CANONICAL = [
   'Why do you want to join this event, and what do you understand about what it is?',
-  'Which Burning Man principle feels easiest for you to live by — and which one feels most challenging?',
-  'Have you attended Burning Man–inspired events before? If so, which ones?',
-  'Burning Man environments can be intense. How do you respond when you\'re tired, overstimulated, or out of your comfort zone in a group?',
+  'Which event principle feels easiest for you to live by — and which one feels most challenging?',
+  'Have you attended consent-forward or community-led events before? If so, which ones?',
+  'These environments can be intense. How do you respond when you\'re tired, overstimulated, or out of your comfort zone in a group?',
   'Not all boundaries are explicit here. How do you act when you\'re unsure what\'s welcome or appropriate?',
   'If someone gently challenges your behavior during the event, how do you respond?',
   'How do you respond when you learn something you did affected someone negatively (even unintentionally)?',
   'How do you feel about there being expectations or standards of behaviour?',
   'Will you commit to one or two volunteer shifts during the event?',
-  'What would you like to gift to the burn (time, skills, care, creativity)?',
+  'What would you like to gift to this event community (time, skills, care, creativity)?',
   'What do you hope others will bring or offer — to you or to the community?',
 ]
 
@@ -86,6 +86,7 @@ function BMNLAssessmentPageContent() {
   const [participantId, setParticipantId] = useState<string | null>(null)
   const [isRecording, setIsRecording] = useState(false)
   const [recognition, setRecognition] = useState<SpeechRecognition | null>(null)
+  const [speechSupported, setSpeechSupported] = useState(false)
   const [gamingCount, setGamingCount] = useState(0)
   const [phobicCount, setPhobicCount] = useState(0)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
@@ -144,11 +145,13 @@ function BMNLAssessmentPageContent() {
 
   // Initialize speech recognition
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+    if (typeof window !== 'undefined') {
+      const AnyWindow = window as any
+      const SpeechRecognition = AnyWindow.webkitSpeechRecognition || AnyWindow.SpeechRecognition
       if (SpeechRecognition) {
+        setSpeechSupported(true)
         const recognitionInstance = new SpeechRecognition()
-        recognitionInstance.continuous = true
+        recognitionInstance.continuous = false
         recognitionInstance.interimResults = true
         recognitionInstance.lang = navigator.language || 'en-US'
 
@@ -172,7 +175,7 @@ function BMNLAssessmentPageContent() {
             }
           }
 
-          setCurrentAnswer(sessionFinalTranscript + interimTranscript)
+          setCurrentAnswer((sessionFinalTranscript + interimTranscript).trimStart())
         }
 
         recognitionInstance.onerror = (event: any) => {
@@ -189,13 +192,15 @@ function BMNLAssessmentPageContent() {
         }
 
         setRecognition(recognitionInstance)
+      } else {
+        setSpeechSupported(false)
       }
     }
   }, [])
 
   const toggleRecording = () => {
     if (!recognition) {
-      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.')
+      alert('Voice input is not supported in this browser. Please type your answer.')
       return
     }
 
@@ -488,30 +493,36 @@ function BMNLAssessmentPageContent() {
 
   if (!participantId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading assessment...</p>
-          <p className="text-sm text-gray-500 mt-2">If this takes too long, please go back and try again.</p>
+          <p className="text-purple-100">Loading assessment...</p>
+          <p className="text-sm text-purple-100/70 mt-2">If this takes too long, please go back and try again.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
       <div className="container mx-auto px-4 py-6 sm:py-8 max-w-3xl">
-        <div className="bg-white dark:bg-white rounded-lg p-4 sm:p-6 mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-gray-900 dark:text-gray-900">
-            Cultural Onboarding
+        <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold mb-2 text-white">
+            SoulSort Events Demo
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-600">
+          <p className="text-sm text-purple-100/90 mb-3">
             Question {currentQuestionIndex + 1} of {BMNL_QUESTIONS.length}
           </p>
+          <div className="h-2 w-full rounded-full bg-white/15 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-violet-500 transition-all duration-300"
+              style={{ width: `${((currentQuestionIndex + 1) / BMNL_QUESTIONS.length) * 100}%` }}
+            />
+          </div>
         </div>
 
         {/* Chat History */}
-        <div className="bg-white dark:bg-white rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 min-h-[300px] sm:min-h-[400px] max-h-[500px] sm:max-h-[600px] overflow-y-auto">
+        <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4 sm:p-6 mb-4 sm:mb-6 min-h-[300px] sm:min-h-[400px] max-h-[500px] sm:max-h-[600px] overflow-y-auto">
           <div className="space-y-4">
             {chatHistory.map((message, idx) => (
               <div
@@ -522,7 +533,7 @@ function BMNLAssessmentPageContent() {
                   className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-3 sm:p-4 ${
                     message.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-100 text-gray-900 dark:text-gray-900'
+                      : 'bg-white/20 text-white'
                   }`}
                 >
                   <p className="whitespace-pre-wrap text-sm sm:text-base">{message.content}</p>
@@ -531,8 +542,8 @@ function BMNLAssessmentPageContent() {
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-gray-100 dark:bg-gray-100 rounded-lg p-4">
-                  <div className="animate-pulse text-gray-600">Processing...</div>
+                <div className="bg-white/20 rounded-lg p-4">
+                  <div className="animate-pulse text-purple-100">Processing...</div>
                 </div>
               </div>
             )}
@@ -541,8 +552,8 @@ function BMNLAssessmentPageContent() {
         </div>
 
         {/* Input Form */}
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-white rounded-lg p-4 sm:p-6">
-          <div className="mb-2 text-xs text-gray-500">
+        <form onSubmit={handleSubmit} className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4 sm:p-6">
+          <div className="mb-2 text-xs text-purple-100/80">
             {t('ui.onboarding.chat.audio.hint', userLang)}
           </div>
           <div className="flex items-end gap-2 mb-4">
@@ -550,7 +561,7 @@ function BMNLAssessmentPageContent() {
               value={currentAnswer}
               onChange={(e) => setCurrentAnswer(e.target.value)}
               placeholder="Share your answer..."
-              className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 min-h-[100px] sm:min-h-[120px]"
+              className="flex-1 px-4 py-3 border border-purple-300/25 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 text-gray-900 min-h-[100px] sm:min-h-[120px]"
               disabled={loading}
               required
             />
@@ -558,21 +569,32 @@ function BMNLAssessmentPageContent() {
               type="button"
               onClick={toggleRecording}
               disabled={loading}
-              className={`w-11 h-11 rounded-full flex items-center justify-center text-white text-xl ${
+              className={`w-11 h-11 rounded-full flex items-center justify-center text-white ${
                 isRecording
                   ? 'bg-red-600 hover:bg-red-700 animate-pulse'
                   : 'bg-purple-600 hover:bg-purple-700'
               } disabled:bg-gray-300 disabled:cursor-not-allowed`}
               aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+              title={speechSupported ? 'Voice input' : 'Voice input unavailable on this browser'}
             >
-              {isRecording ? '■' : '🎤'}
+              {isRecording ? (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <rect x="6" y="6" width="12" height="12" rx="2" />
+                </svg>
+              ) : (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <rect x="9" y="2" width="6" height="12" rx="3" />
+                  <path d="M5 10v2a7 7 0 0 0 14 0v-2" />
+                  <path d="M12 19v3" />
+                </svg>
+              )}
             </button>
           </div>
 
           <button
             type="submit"
             disabled={!currentAnswer.trim() || loading || isRecording}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+            className="w-full bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-2xl transition-colors"
           >
             {loading ? 'Processing...' : currentQuestionIndex < BMNL_QUESTIONS.length - 1 ? 'Next Question' : 'Complete Assessment'}
           </button>
@@ -585,10 +607,10 @@ function BMNLAssessmentPageContent() {
 export default function BMNLAssessmentPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-purple-100">Loading...</p>
         </div>
       </div>
     }>

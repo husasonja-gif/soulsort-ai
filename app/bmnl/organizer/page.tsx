@@ -102,76 +102,76 @@ export default function BMNLOrganizerDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-6xl">
         {/* Header */}
         <div className="mb-8 sm:mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-900 dark:text-gray-900">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-white">
             Organizer Dashboard
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-600">
-            Burning Man Netherlands - Cultural Onboarding
+          <p className="text-lg text-purple-100">
+            SoulSort Events Demo - Cultural Onboarding
           </p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-2xl font-bold text-gray-900">{stats.total}</div>
-            <div className="text-sm text-gray-600">Total Participants</div>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4">
+            <div className="text-2xl font-bold text-white">{stats.total}</div>
+            <div className="text-sm text-purple-100/80">Total Participants</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-2xl font-bold text-gray-900">{stats.completed}</div>
-            <div className="text-sm text-gray-600">Completed Radars</div>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4">
+            <div className="text-2xl font-bold text-white">{stats.completed}</div>
+            <div className="text-sm text-purple-100/80">Completed Radars</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-2xl font-bold text-gray-900">{stats.basic_gate}</div>
-            <div className="text-sm text-gray-600">Basic Gate Experience</div>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4">
+            <div className="text-2xl font-bold text-white">{stats.basic_gate}</div>
+            <div className="text-sm text-purple-100/80">Basic Gate Experience</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-2xl font-bold text-gray-900">{stats.needs_orientation}</div>
-            <div className="text-sm text-gray-600">Needs Orientation</div>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4">
+            <div className="text-2xl font-bold text-white">{stats.needs_orientation}</div>
+            <div className="text-sm text-purple-100/80">Needs Orientation</div>
           </div>
-          <div className="bg-white border border-gray-200 rounded-lg p-4 col-span-2 sm:col-span-1">
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4 col-span-2 sm:col-span-1">
             <div className="text-2xl font-bold text-purple-600">{stats.flagged}</div>
-            <div className="text-sm text-gray-600">Flagged for Review</div>
+            <div className="text-sm text-purple-100/80">Flagged for Review</div>
           </div>
         </div>
 
         {/* Disclaimer */}
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-8">
-          <p className="text-sm text-purple-800">
+        <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4 mb-8">
+          <p className="text-sm text-purple-100">
             <strong>Important:</strong> AI flags → humans decide. No automatic exclusion. All flagged participants require human review.
           </p>
         </div>
 
         {/* Flagged Participants Table */}
         {flaggedParticipants.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8 mb-8">
-            <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-900">
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 sm:p-8 mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold mb-6 text-white">
               Flagged Participants
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Flag Reason(s)</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Severity</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                  <tr className="border-b border-purple-300/20">
+                    <th className="text-left py-3 px-4 font-semibold text-purple-100">Email</th>
+                    <th className="text-left py-3 px-4 font-semibold text-purple-100">Flag Reason(s)</th>
+                    <th className="text-left py-3 px-4 font-semibold text-purple-100">Severity</th>
+                    <th className="text-left py-3 px-4 font-semibold text-purple-100">Status</th>
+                    <th className="text-left py-3 px-4 font-semibold text-purple-100">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {flaggedParticipants.map((participant) => (
-                    <tr key={participant.id} className="border-b border-gray-100">
-                      <td className="py-3 px-4 text-gray-900">{participant.email}</td>
+                    <tr key={participant.id} className="border-b border-purple-300/10">
+                      <td className="py-3 px-4 text-white">{participant.email}</td>
                       <td className="py-3 px-4">
                         <div className="space-y-1">
                           {participant.flags.map((flag) => (
                             <span
                               key={flag.id}
-                              className="inline-block mr-2 px-2 py-1 text-xs rounded bg-purple-100 text-purple-800"
+                              className="inline-block mr-2 px-2 py-1 text-xs rounded bg-purple-500/20 text-purple-100 border border-purple-300/20"
                             >
                               {flag.flag_type}: {flag.flag_reason}
                             </span>
@@ -184,12 +184,12 @@ export default function BMNLOrganizerDashboard() {
                         ) : participant.flags.some(f => f.severity === 'medium') ? (
                           <span className="text-purple-600 font-semibold">Medium</span>
                         ) : (
-                          <span className="text-gray-600">Low</span>
+                          <span className="text-purple-100/80">Low</span>
                         )}
                       </td>
                       <td className="py-3 px-4">
                         {participant.flags.some(f => f.reviewed_at) ? (
-                          <span className="text-green-600">Reviewed</span>
+                          <span className="text-emerald-300">Reviewed</span>
                         ) : (
                           <span className="text-purple-600">Pending</span>
                         )}
@@ -197,7 +197,7 @@ export default function BMNLOrganizerDashboard() {
                       <td className="py-3 px-4">
                         <Link
                           href={`/bmnl/organizer/participant/${participant.id}`}
-                          className="text-purple-600 hover:underline"
+                          className="text-purple-300 hover:underline"
                         >
                           View Details
                         </Link>
@@ -211,30 +211,30 @@ export default function BMNLOrganizerDashboard() {
         )}
 
         {/* All Participants Table */}
-        <div className="bg-white border border-gray-200 rounded-lg p-6 sm:p-8 mb-8">
-          <h2 className="text-xl sm:text-2xl font-bold mb-6 text-gray-900">
+        <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 sm:p-8 mb-8">
+          <h2 className="text-xl sm:text-2xl font-bold mb-6 text-white">
             All Participants
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Status</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Gate Experience</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Completed</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Actions</th>
+                <tr className="border-b border-purple-300/20">
+                  <th className="text-left py-3 px-4 font-semibold text-purple-100">Email</th>
+                  <th className="text-left py-3 px-4 font-semibold text-purple-100">Status</th>
+                  <th className="text-left py-3 px-4 font-semibold text-purple-100">Gate Experience</th>
+                  <th className="text-left py-3 px-4 font-semibold text-purple-100">Completed</th>
+                  <th className="text-left py-3 px-4 font-semibold text-purple-100">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {participants.map((participant) => (
-                  <tr key={participant.id} className="border-b border-gray-100">
-                    <td className="py-3 px-4 text-gray-900">{participant.email}</td>
+                  <tr key={participant.id} className="border-b border-purple-300/10">
+                    <td className="py-3 px-4 text-white">{participant.email}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 text-xs rounded ${
                         participant.status === 'completed' ? 'bg-green-100 text-green-800' :
                         participant.status === 'flagged' ? 'bg-purple-100 text-purple-800' :
-                        'bg-gray-100 text-gray-800'
+                        'bg-white/20 text-purple-100'
                       }`}>
                         {participant.status}
                       </span>
@@ -243,10 +243,10 @@ export default function BMNLOrganizerDashboard() {
                       {participant.gate_experience === 'needs_orientation' ? (
                         <span className="text-purple-600">Needs Orientation</span>
                       ) : (
-                        <span className="text-gray-600">Basic</span>
+                        <span className="text-purple-100/80">Basic</span>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-gray-600">
+                    <td className="py-3 px-4 text-purple-100/80">
                       {participant.assessment_completed_at
                         ? new Date(participant.assessment_completed_at).toLocaleDateString()
                         : '-'}
@@ -254,7 +254,7 @@ export default function BMNLOrganizerDashboard() {
                     <td className="py-3 px-4">
                       <Link
                         href={`/bmnl/organizer/participant/${participant.id}`}
-                        className="text-purple-600 hover:underline"
+                        className="text-purple-300 hover:underline"
                       >
                         View
                       </Link>
@@ -267,10 +267,10 @@ export default function BMNLOrganizerDashboard() {
         </div>
 
         {/* Footer */}
-        <footer className="text-center text-sm text-gray-600 dark:text-gray-600">
+        <footer className="text-center text-sm text-purple-100/80">
           <p>
             Powered by{' '}
-            <Link href="https://soulsortai.com" className="text-purple-600 dark:text-purple-600 hover:underline">
+            <Link href="https://soulsortai.com" className="text-purple-300 hover:underline">
               SoulSort
             </Link>
           </p>

@@ -42,24 +42,24 @@ function BMNLLoginContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-md">
-        <div className="bg-white dark:bg-white rounded-lg p-6 sm:p-8 shadow-lg">
+        <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 sm:p-8 shadow-lg">
           <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-900 dark:text-gray-900">
-              Where the Sheep Sleep
+            <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-white">
+              SoulSort Events Demo
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-600 italic mb-4">
-              Burning Man Netherlands
+            <p className="text-lg text-purple-100 italic mb-4">
+              Cultural Onboarding
             </p>
-            <p className="text-gray-700 dark:text-gray-700">
+            <p className="text-purple-50/90">
               Start onboarding by authenticating your email. Check your spam for the magic link.
             </p>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-purple-100 mb-2">
                 Email Address
               </label>
               <input
@@ -69,14 +69,14 @@ function BMNLLoginContent() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-white dark:text-gray-900 dark:placeholder-gray-600"
+                className="w-full px-4 py-2.5 border border-purple-300/25 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 text-gray-900 placeholder-gray-600"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading || !email}
-              className="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+              className="w-full bg-gradient-to-r from-fuchsia-500 to-purple-600 hover:from-fuchsia-600 hover:to-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-2xl transition-colors"
             >
               {loading ? 'Sending link…' : 'Send magic link'}
             </button>
@@ -88,24 +88,24 @@ function BMNLLoginContent() {
                 {message}
               </p>
               {message.includes('Check your email') && (
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-purple-100/75">
                   If you can't find the link, check your spam folder.
                 </p>
               )}
             </div>
           )}
 
-          <div className="mt-6 text-center text-sm text-gray-500">
-            <Link href="/bmnl" className="text-purple-600 hover:underline">
+          <div className="mt-6 text-center text-sm text-purple-100/80">
+            <Link href="/bmnl" className="text-purple-300 hover:underline">
               ← Back to landing page
             </Link>
           </div>
         </div>
 
-        <footer className="text-center text-sm text-gray-600 dark:text-gray-600 mt-8">
+        <footer className="text-center text-sm text-purple-100/80 mt-8">
           <p>
             Powered by{' '}
-            <Link href="https://soulsortai.com" className="text-purple-600 dark:text-purple-600 hover:underline">
+            <Link href="https://soulsortai.com" className="text-purple-300 hover:underline">
               SoulSort
             </Link>
           </p>

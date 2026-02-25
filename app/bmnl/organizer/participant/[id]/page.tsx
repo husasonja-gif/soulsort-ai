@@ -141,43 +141,43 @@ function ParticipantDetailContent() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
       <div className="container mx-auto px-4 py-8 sm:py-12 max-w-4xl">
         {/* Header */}
         <div className="mb-6">
-          <Link href="/bmnl/organizer" className="text-purple-600 hover:underline mb-4 inline-block">
+          <Link href="/bmnl/organizer" className="text-purple-300 hover:underline mb-4 inline-block">
             ← Back to Organizer Dashboard
           </Link>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-gray-900 dark:text-gray-900">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-white">
             Participant Details
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-600">{data.participant.email}</p>
+          <p className="text-lg text-purple-100">{data.participant.email}</p>
         </div>
 
         {/* Status Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <div className="text-sm text-gray-600 mb-1">Status</div>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4">
+            <div className="text-sm text-purple-100/80 mb-1">Status</div>
             <div className={`text-lg font-semibold ${
               data.participant.status === 'completed' ? 'text-green-600' :
               data.participant.status === 'flagged' ? 'text-purple-600' :
-              'text-gray-600'
+              'text-purple-100'
             }`}>
               {data.participant.status}
             </div>
           </div>
-          <div className={`bg-white border rounded-lg p-4 ${
-            data.participant.needs_human_review ? 'border-purple-200 bg-purple-50' : 'border-gray-200'
+          <div className={`backdrop-blur-xl border rounded-2xl p-4 ${
+            data.participant.needs_human_review ? 'border-purple-300/30 bg-purple-500/15' : 'border-purple-300/20 bg-white/10'
           }`}>
-            <div className="text-sm text-gray-600 mb-1">Needs Review</div>
-            <div className={`text-lg font-semibold ${data.participant.needs_human_review ? 'text-purple-600' : 'text-gray-600'}`}>
+            <div className="text-sm text-purple-100/80 mb-1">Needs Review</div>
+            <div className={`text-lg font-semibold ${data.participant.needs_human_review ? 'text-purple-200' : 'text-purple-100'}`}>
               {data.participant.needs_human_review ? 'Yes' : 'No'}
             </div>
           </div>
           {data.participant.assessment_completed_at && (
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="text-sm text-gray-600 mb-1">Completed</div>
-              <div className="text-lg font-semibold text-gray-900">
+            <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-4">
+              <div className="text-sm text-purple-100/80 mb-1">Completed</div>
+              <div className="text-lg font-semibold text-white">
                 {new Date(data.participant.assessment_completed_at).toLocaleDateString()}
               </div>
             </div>
@@ -186,26 +186,26 @@ function ParticipantDetailContent() {
 
         {/* Flags Section */}
         {data.flags && data.flags.length > 0 && (
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Flags</h2>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4 text-white">Flags</h2>
             <div className="space-y-2">
               {data.flags.map((flag) => (
-                <div key={flag.id} className="bg-white rounded p-3 border border-purple-200">
+                <div key={flag.id} className="bg-white/10 rounded-xl p-3 border border-purple-300/20">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="px-2 py-1 text-xs rounded bg-purple-100 text-purple-800 font-semibold">
+                    <span className="px-2 py-1 text-xs rounded bg-purple-500/20 text-purple-100 font-semibold border border-purple-300/20">
                       {flag.flag_type}
                     </span>
                     <span className={`text-sm font-semibold ${
                       flag.severity === 'high' ? 'text-red-600' :
                       flag.severity === 'medium' ? 'text-purple-600' :
-                      'text-gray-600'
+                      'text-purple-100/80'
                     }`}>
                       {flag.severity}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-700">{flag.flag_reason}</p>
+                  <p className="text-sm text-purple-50/90">{flag.flag_reason}</p>
                   {flag.question_number && (
-                    <p className="text-xs text-gray-500 mt-1">Question {flag.question_number}</p>
+                    <p className="text-xs text-purple-100/70 mt-1">Question {flag.question_number}</p>
                   )}
                 </div>
               ))}
@@ -215,16 +215,16 @@ function ParticipantDetailContent() {
 
         {/* Radar Chart */}
         {data.radar && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Radar Profile</h2>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4 text-white">Radar Profile</h2>
             <BMNLRadarChart data={data.radar} />
           </div>
         )}
 
         {/* Full Chat History */}
         {data.chat_history && data.chat_history.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Full Conversation History</h2>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4 text-white">Full Conversation History</h2>
             <div className="space-y-4 max-h-[600px] overflow-y-auto">
               {data.chat_history.map((message, index) => (
                 <div
@@ -232,20 +232,20 @@ function ParticipantDetailContent() {
                   className={`p-4 rounded-lg ${
                     message.role === 'user'
                       ? 'bg-purple-50 border border-purple-200 ml-8'
-                      : 'bg-gray-50 border border-gray-200 mr-8'
+                      : 'bg-white/10 border border-purple-300/20 mr-8'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <span className={`text-xs font-semibold ${
-                      message.role === 'user' ? 'text-purple-700' : 'text-gray-700'
+                      message.role === 'user' ? 'text-purple-200' : 'text-purple-100'
                     }`}>
                       {message.role === 'user' ? 'Participant' : 'System'}
                     </span>
-                    <span className="text-xs text-gray-500">
+                    <span className="text-xs text-purple-100/70">
                       {new Date(message.timestamp).toLocaleString()}
                     </span>
                   </div>
-                  <div className="text-gray-900 whitespace-pre-wrap">{message.content}</div>
+                  <div className="text-purple-50 whitespace-pre-wrap">{message.content}</div>
                 </div>
               ))}
             </div>
@@ -254,16 +254,16 @@ function ParticipantDetailContent() {
 
         {/* Answers (fallback if no chat history) */}
         {!data.chat_history && data.answers && data.answers.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-bold mb-4 text-gray-900">Assessment Answers</h2>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 mb-8">
+            <h2 className="text-xl font-bold mb-4 text-white">Assessment Answers</h2>
             <div className="space-y-6">
               {data.answers.map((answer, index) => (
-                <div key={index} className="border-b border-gray-100 pb-4 last:border-b-0">
-                  <div className="font-semibold text-gray-900 mb-2">
+                <div key={index} className="border-b border-purple-300/20 pb-4 last:border-b-0">
+                  <div className="font-semibold text-white mb-2">
                     Question {answer.question_number}: {answer.question_text}
                   </div>
-                  <div className="text-gray-700 whitespace-pre-wrap">{answer.raw_answer}</div>
-                  <div className="text-xs text-gray-500 mt-2">
+                  <div className="text-purple-50/90 whitespace-pre-wrap">{answer.raw_answer}</div>
+                  <div className="text-xs text-purple-100/70 mt-2">
                     Answered: {new Date(answer.answered_at).toLocaleString()}
                   </div>
                 </div>
@@ -274,15 +274,15 @@ function ParticipantDetailContent() {
 
         {/* Review Notes */}
         {data.participant.review_notes && (
-          <div className="bg-purple-50 border border-purple-200 rounded-lg p-6 mb-8">
-            <h2 className="text-xl font-bold mb-2 text-gray-900">Review Notes</h2>
-            <p className="text-gray-700">{data.participant.review_notes}</p>
+          <div className="bg-white/10 backdrop-blur-xl border border-purple-300/20 rounded-2xl p-6 mb-8">
+            <h2 className="text-xl font-bold mb-2 text-white">Review Notes</h2>
+            <p className="text-purple-50/90">{data.participant.review_notes}</p>
           </div>
         )}
 
         {/* Footer */}
-        <footer className="text-center text-sm text-gray-600 dark:text-gray-600 mt-8">
-          <Link href="/bmnl/organizer" className="text-purple-600 hover:underline">
+        <footer className="text-center text-sm text-purple-100/80 mt-8">
+          <Link href="/bmnl/organizer" className="text-purple-300 hover:underline">
             ← Back to Organizer Dashboard
           </Link>
         </footer>
