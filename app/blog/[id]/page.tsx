@@ -315,14 +315,6 @@ function MagicBlogPostContent() {
 
       <section>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Sources mentioned:{' '}
-          <a href="https://www.theguardian.com/music/2024/feb/11/daytime-clubbing-rave-generation-day-fever-club-london-outernet" target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 hover:underline">mainstream rave culture</a>
-          {' '}•{' '}
-          <a href="https://eric.ed.gov/?id=EJ1376440" target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 hover:underline">consent education review</a>
-          {' '}•{' '}
-          <a href="https://www.jotform.com/blog/event-registration-questions/" target="_blank" rel="noopener noreferrer" className="text-purple-600 dark:text-purple-400 hover:underline">event intake form examples</a>
-        </p>
-        <p className="text-sm text-gray-500 dark:text-gray-400">
           Back to{' '}
           <Link href="/blog" className="text-purple-600 dark:text-purple-400 hover:underline">the blog index</Link>
         </p>

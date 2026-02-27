@@ -90,6 +90,7 @@ function BMNLAssessmentPageContent() {
   const [gamingCount, setGamingCount] = useState(0)
   const [phobicCount, setPhobicCount] = useState(0)
   const chatEndRef = useRef<HTMLDivElement | null>(null)
+  const shouldKeepRecordingRef = useRef(false)
   const BMNL_QUESTIONS = getBMNLQuestions(userLang)
 
   useEffect(() => {
@@ -151,44 +152,53 @@ function BMNLAssessmentPageContent() {
       if (SpeechRecognition) {
         setSpeechSupported(true)
         const recognitionInstance = new SpeechRecognition()
-        recognitionInstance.continuous = false
+        recognitionInstance.continuous = true
         recognitionInstance.interimResults = true
         recognitionInstance.lang = navigator.language || 'en-US'
-
-        // Use a ref-like pattern to track final transcript per recording session
-        let sessionFinalTranscript = ''
-        
-        recognitionInstance.onstart = () => {
-          // Reset transcript when starting a new recording session
-          sessionFinalTranscript = ''
-        }
+        recognitionInstance.onstart = () => setIsRecording(true)
         
         recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+          let finalTranscript = ''
           let interimTranscript = ''
 
-          for (let i = event.resultIndex; i < event.results.length; i++) {
+          // Rebuild transcript from all results to avoid repeated word loops.
+          for (let i = 0; i < event.results.length; i++) {
             const transcript = event.results[i][0].transcript
             if (event.results[i].isFinal) {
-              sessionFinalTranscript += transcript + ' '
+              finalTranscript += transcript + ' '
             } else {
-              interimTranscript += transcript
+              interimTranscript += transcript + ' '
             }
           }
 
-          setCurrentAnswer((sessionFinalTranscript + interimTranscript).trimStart())
+          setCurrentAnswer(`${finalTranscript}${interimTranscript}`.trim())
         }
 
         recognitionInstance.onerror = (event: any) => {
           console.error('Speech recognition error:', event.error)
-          if (event.error === 'no-speech' || event.error === 'audio-capture') {
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            shouldKeepRecordingRef.current = false
+            setIsRecording(false)
+            return
+          }
+          if (!shouldKeepRecordingRef.current) {
             setIsRecording(false)
           }
         }
 
         recognitionInstance.onend = () => {
-          setIsRecording(false)
-          // Reset transcript when recording ends
-          sessionFinalTranscript = ''
+          if (shouldKeepRecordingRef.current) {
+            window.setTimeout(() => {
+              try {
+                recognitionInstance.start()
+              } catch (error) {
+                console.error('Error restarting recognition:', error)
+                setIsRecording(false)
+              }
+            }, 150)
+          } else {
+            setIsRecording(false)
+          }
         }
 
         setRecognition(recognitionInstance)
@@ -205,15 +215,18 @@ function BMNLAssessmentPageContent() {
     }
 
     if (isRecording) {
+      shouldKeepRecordingRef.current = false
       recognition.stop()
       setIsRecording(false)
     } else {
       setCurrentAnswer('') // Clear previous answer
       try {
+        shouldKeepRecordingRef.current = true
         recognition.start()
         setIsRecording(true)
       } catch (error) {
         console.error('Error starting recognition:', error)
+        shouldKeepRecordingRef.current = false
         alert('Could not start recording. Please try again.')
       }
     }
@@ -306,6 +319,7 @@ function BMNLAssessmentPageContent() {
       if (data.signal?.is_garbage) {
         // Stop any active recording
         if (isRecording && recognition) {
+          shouldKeepRecordingRef.current = false
           recognition.stop()
           setIsRecording(false)
         }
@@ -329,6 +343,7 @@ function BMNLAssessmentPageContent() {
         
         // Stop any active recording
         if (isRecording && recognition) {
+          shouldKeepRecordingRef.current = false
           recognition.stop()
           setIsRecording(false)
         }
@@ -428,6 +443,7 @@ function BMNLAssessmentPageContent() {
         
         // Stop any active recording and clear answer for next question
         if (isRecording && recognition) {
+          shouldKeepRecordingRef.current = false
           recognition.stop()
           setIsRecording(false)
         }
@@ -443,6 +459,7 @@ function BMNLAssessmentPageContent() {
         // All questions answered - complete assessment
         // Stop any active recording
         if (isRecording && recognition) {
+          shouldKeepRecordingRef.current = false
           recognition.stop()
           setIsRecording(false)
         }
