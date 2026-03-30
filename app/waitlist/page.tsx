@@ -20,24 +20,24 @@ export default function WaitlistPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
+        <div className="max-w-md rounded-2xl border border-purple-300/20 bg-white/10 p-8 text-center shadow-lg backdrop-blur-xl">
           <div className="text-6xl mb-4">✨</div>
-          <h1 className="text-2xl font-bold mb-4">You're on the list!</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="mb-4 text-2xl font-bold text-white">You're on the list!</h1>
+          <p className="mb-6 text-purple-100/80">
             We'll notify you when new features launch and when we're ready for more users.
           </p>
-          <a href="/" className="text-purple-600 hover:underline">Back to home</a>
+          <a href="/" className="text-purple-300 hover:underline">Back to home</a>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold mb-2 text-center">Join the Waitlist</h1>
-        <p className="text-gray-600 text-center mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
+      <div className="w-full max-w-md rounded-2xl border border-purple-300/20 bg-white/10 p-8 shadow-lg backdrop-blur-xl">
+        <h1 className="mb-2 text-center text-3xl font-bold text-white">Join the Waitlist</h1>
+        <p className="mb-6 text-center text-purple-100/80">
           Be the first to know about new features and early access.
         </p>
         
@@ -48,12 +48,12 @@ export default function WaitlistPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="mb-4 w-full rounded-xl border border-purple-300/25 bg-white/90 px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+            className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 px-6 py-3 font-semibold text-white transition-colors hover:from-fuchsia-600 hover:to-purple-700 disabled:opacity-50"
           >
             {loading ? 'Joining...' : 'Join Waitlist'}
           </button>

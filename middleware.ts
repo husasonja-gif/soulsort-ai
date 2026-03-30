@@ -52,23 +52,26 @@ export async function middleware(request: NextRequest) {
   // 🚫 Logged-in users shouldn't see login - but check if they need onboarding with skipChat
   if (pathname.startsWith('/login') && user) {
     const skipChat = request.nextUrl.searchParams.get('skipChat')
+    const redirectTarget = request.nextUrl.searchParams.get('redirect')
     const { data: profile } = await supabase
       .from('user_profiles')
       .select('onboarding_completed')
       .eq('id', user.id)
       .maybeSingle()
     
-    // If they need onboarding and have skipChat param, send them to onboarding
-    if ((!profile || !profile.onboarding_completed) && skipChat === 'true') {
+    // If onboarding is incomplete, always route to onboarding first.
+    if (!profile || !profile.onboarding_completed) {
       const url = request.nextUrl.clone()
       url.pathname = '/onboarding'
-      url.searchParams.set('skipChat', 'true')
+      if (skipChat === 'true') {
+        url.searchParams.set('skipChat', 'true')
+      }
       return NextResponse.redirect(url)
     }
     
-    // Otherwise redirect to dashboard
+    // For onboarded users, honor explicit redirect if present.
     const url = request.nextUrl.clone()
-    url.pathname = '/dashboard'
+    url.pathname = redirectTarget && redirectTarget.startsWith('/') ? redirectTarget : '/dashboard'
     return NextResponse.redirect(url)
   }
 

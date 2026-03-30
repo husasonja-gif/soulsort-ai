@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import type { EmailOtpType } from '@supabase/supabase-js'
 
 /**
  * Auth Callback Handler
@@ -45,57 +46,56 @@ function AuthCallbackContent() {
 
         // Check for code in query params (PKCE flow)
         const code = searchParams.get('code')
+        const tokenHash = searchParams.get('token_hash')
+        const otpTypeParam = searchParams.get('type')
 
         console.log('Auth callback - code:', code ? 'present' : 'missing')
+        console.log('Auth callback - token_hash:', tokenHash ? 'present' : 'missing')
         console.log('Auth callback - hash tokens:', accessToken ? 'present' : 'missing')
         console.log('Current URL:', typeof window !== 'undefined' ? window.location.href : 'N/A')
 
-        const redirectAfterAuth = async () => {
-          // Wait a bit for session to be set and cookies to be written
-          await new Promise(resolve => setTimeout(resolve, 1000))
-          
-          // Verify session exists with retry
-          let session = null
-          let retries = 3
-          while (retries > 0 && !session) {
-            const { data: { session: currentSession } } = await supabase.auth.getSession()
-            if (currentSession) {
-              session = currentSession
+        const redirectAfterAuth = async (seedSession?: unknown) => {
+          const hasSeedSession = Boolean(seedSession)
+
+          // Wait a bit for session to be set and cookies to be written.
+          // Real users can be slower than local dev, so we must be patient here.
+          await new Promise(resolve => setTimeout(resolve, hasSeedSession ? 350 : 900))
+
+          // Verify user exists with retry (more reliable than checking getSession first).
+          let user: any = null
+          let retries = hasSeedSession ? 8 : 12
+          while (retries > 0 && !user) {
+            const { data: userData, error: userError } = await supabase.auth.getUser()
+
+            if (userError) {
+              // Ignore PKCE verifier noise; still keep retrying.
+              const msg = userError.message || ''
+              if (
+                msg.includes('PKCE code verifier') ||
+                msg.includes('code verifier')
+              ) {
+                // continue retry loop
+              } else {
+                console.error('Error getting user:', userError)
+                setError(userError.message)
+                return
+              }
+            }
+
+            if (userData?.user) {
+              user = userData.user
               break
             }
-            await new Promise(resolve => setTimeout(resolve, 500))
+
+            await new Promise(resolve => setTimeout(resolve, hasSeedSession ? 250 : 500))
             retries--
-          }
-          
-          if (!session) {
-            console.error('No session found after auth (after retries)')
-            setError('Session not found. Please try logging in again.')
-            setTimeout(() => {
-              window.location.href = '/login?error=no_session'
-            }, 2000)
-            return
-          }
-          
-          const { data: { user }, error: userError } = await supabase.auth.getUser()
-          
-          if (userError) {
-            console.error('Error getting user:', userError)
-            // Only show error if it's a real error, not just PKCE code verifier warning
-            if (!userError.message.includes('PKCE code verifier') && !userError.message.includes('code verifier')) {
-              setError(userError.message)
-              setTimeout(() => {
-                window.location.href = '/login?error=auth_failed'
-              }, 2000)
-            }
-            return
           }
 
           if (!user) {
-            console.error('No user found after auth')
-            setError('No user found after authentication')
-            setTimeout(() => {
-              window.location.href = '/login?error=no_user'
-            }, 2000)
+            console.error('No user found after auth (after retries)')
+            // IMPORTANT: do NOT redirect back to /login here.
+            // Redirects cause the “loop back to email input” symptom.
+            setError('Almost there—finishing sign-in. If this persists, please try again.')
             return
           }
 
@@ -314,7 +314,32 @@ function AuthCallbackContent() {
           window.history.replaceState({}, '', url.toString())
 
           // Redirect based on onboarding status
-          await redirectAfterAuth()
+          await redirectAfterAuth(data?.session)
+        } else if (tokenHash && otpTypeParam) {
+          // Token-hash OTP flow (Supabase magic links can use this format)
+          console.log('Processing token_hash OTP flow')
+          const otpType = otpTypeParam as EmailOtpType
+          const { data, error: verifyError } = await supabase.auth.verifyOtp({
+            type: otpType,
+            token_hash: tokenHash,
+          })
+
+          if (verifyError) {
+            console.error('Token-hash OTP verification error:', verifyError)
+            setError(verifyError.message)
+            setTimeout(() => {
+              window.location.href = `/login?error=${encodeURIComponent(verifyError.message)}`
+            }, 1200)
+            return
+          }
+
+          if (!data?.session) {
+            // Fallback: some flows may still set session asynchronously
+            await redirectAfterAuth()
+            return
+          }
+
+          await redirectAfterAuth(data.session)
         } else if (accessToken && refreshToken) {
           // Implicit flow - set session directly
           console.log('Processing implicit flow')
@@ -347,9 +372,16 @@ function AuthCallbackContent() {
           window.history.replaceState({}, '', window.location.pathname)
 
           // Redirect based on onboarding status
-          await redirectAfterAuth()
+          await redirectAfterAuth(data.session)
         } else {
-          // No auth params found - redirect to login
+          // No explicit params: check for an already-established session before failing
+          const { data: userData } = await supabase.auth.getUser()
+          if (userData?.user) {
+            console.log('No auth params but user session exists, continuing redirect')
+            await redirectAfterAuth()
+            return
+          }
+
           console.error('No auth params found in URL')
           console.log('Full URL:', window.location.href)
           setError('No authentication parameters found')
@@ -370,11 +402,15 @@ function AuthCallbackContent() {
   }, [router, searchParams])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
         <p className="text-gray-600">Completing sign in...</p>
-        {/* Errors hidden during auth flow to avoid confusion */}
+        {error ? (
+          <p className="mt-3 text-sm text-red-600">
+            {error}
+          </p>
+        ) : null}
       </div>
     </div>
   )
@@ -383,7 +419,7 @@ function AuthCallbackContent() {
 export default function AuthCallbackPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>

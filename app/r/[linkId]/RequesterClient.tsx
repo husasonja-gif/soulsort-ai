@@ -676,7 +676,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
   if (flowState === 'intro') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
           <h1 className="text-3xl font-bold mb-4 text-purple-600">Save time, test the vibe</h1>
           <p className="text-gray-700 mb-4 text-lg">
@@ -717,7 +717,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
   if (flowState === 'consent-denied') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
         <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
           <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
             {chatHistory.map((msg, idx) => (

@@ -40,10 +40,10 @@ export default async function RequesterPage({
 
   if (!link) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
-        <div className="text-center p-8 bg-white rounded-lg shadow-lg max-w-md">
-          <h1 className="text-2xl font-bold mb-4">Link Not Found</h1>
-          <p className="text-gray-600">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
+        <div className="max-w-md rounded-2xl border border-purple-300/20 bg-white/10 p-8 text-center shadow-lg backdrop-blur-xl">
+          <h1 className="mb-4 text-2xl font-bold text-white">Link Not Found</h1>
+          <p className="text-purple-100/80">
             This compatibility link is invalid or has expired.
           </p>
         </div>

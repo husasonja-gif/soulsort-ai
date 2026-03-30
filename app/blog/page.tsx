@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import ThemeToggle from '@/components/ThemeToggle'
 import { blogPosts } from '@/lib/blogPosts'
 
 export const metadata: Metadata = {
@@ -17,10 +16,6 @@ export default function BlogPage() {
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_10%_10%,#f5d0fe_0%,#f3e8ff_28%,#ffffff_58%)] dark:bg-[radial-gradient(circle_at_20%_15%,#581c87_0%,#1f2937_42%,#111827_70%)]">
       <div className="pointer-events-none absolute -top-24 -left-12 h-72 w-72 rounded-full bg-pink-300/30 blur-3xl dark:bg-fuchsia-500/20" />
       <div className="pointer-events-none absolute top-24 -right-14 h-72 w-72 rounded-full bg-violet-300/30 blur-3xl dark:bg-purple-500/20" />
-
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle />
-      </div>
 
       <div className="container relative z-10 mx-auto max-w-4xl px-4 py-12 sm:py-16">
         {/* Header */}

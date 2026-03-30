@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import RadarChart from '@/components/RadarChart'
 import ShareCard from '@/components/ShareCard'
-import ThemeToggle from '@/components/ThemeToggle'
 import DeepInsightsSection from '@/components/DeepInsightsSection'
 import type { UserRadarProfile, ConsentRecord } from '@/lib/types'
 
@@ -97,7 +96,6 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
           <h1 className="text-3xl font-bold text-purple-600 dark:text-purple-400">Your SoulSort Profile</h1>
         </div>
         <div className="flex gap-2 items-center">
-          <ThemeToggle />
           <button
             onClick={handleLogout}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:text-gray-100"

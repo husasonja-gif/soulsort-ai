@@ -2,7 +2,6 @@ import Link from 'next/link'
 import Script from 'next/script'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import ThemeToggle from '@/components/ThemeToggle'
 import { blogPosts, getBlogPostById } from '@/lib/blogPosts'
 
 interface BlogPostPageProps {
@@ -90,7 +89,7 @@ function PrimaryBlogPostContent() {
         <h2 className="mb-3 text-2xl font-bold text-gray-900 dark:text-gray-100">Most People Hate AI Dating Apps - Here&apos;s Why</h2>
         <p>
           Men describe the experience as exhausting and demoralizing. No matter which premiums they buy, they often
-          remain invisible: ignored, unseen, ghosted. Women, queers, and sex-positive profiles face the opposite: too
+          remain invisible: ignored, unseen, ghosted. Women, queers, and values-led profiles face the opposite: too
           much noise, objectification, and emotional labor. It&apos;s a lose-lose setup. And now, as platforms double down
           on AI, the problem is likely getting worse.
         </p>
@@ -139,7 +138,7 @@ function PrimaryBlogPostContent() {
         <p>
           The great &quot;de-centering&quot; of romantic relationships is already underway. People are increasingly finding
           fulfillment from investing in friendships, chosen family, and non-romantic forms of intimacy. After actively
-          dating online as a sex-positive queer woman, I can feel that pull myself.
+          dating online as a queer woman, I can feel that pull myself.
         </p>
       </section>
 
@@ -294,7 +293,7 @@ function MagicBlogPostContent() {
           I&apos;m building this consciously and slowly, grounded in lived experience and continuous feedback.
         </p>
         <p>
-          I&apos;ve spent years attending sex-positive raves, kink events, and queer gatherings. I&apos;ve seen what happens when
+          I&apos;ve spent years attending raves, intimate events, and queer gatherings. I&apos;ve seen what happens when
           spaces grow without intentional cultural scaffolding. I&apos;ve also seen the magic that&apos;s possible when
           organizers get selection right.
         </p>
@@ -359,10 +358,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_10%_10%,#f5d0fe_0%,#f3e8ff_28%,#ffffff_58%)] dark:bg-[radial-gradient(circle_at_20%_15%,#581c87_0%,#1f2937_42%,#111827_70%)]">
       <div className="pointer-events-none absolute -top-24 -left-12 h-72 w-72 rounded-full bg-pink-300/30 blur-3xl dark:bg-fuchsia-500/20" />
       <div className="pointer-events-none absolute top-24 -right-14 h-72 w-72 rounded-full bg-violet-300/30 blur-3xl dark:bg-purple-500/20" />
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle />
-      </div>
-
       <article className="container relative z-10 mx-auto max-w-3xl px-4 py-12 sm:py-16">
         <Script
           id={`blogposting-jsonld-${post.id}`}
@@ -393,7 +388,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Content */}
         <div className="rounded-2xl border border-white/60 bg-white/75 p-8 shadow-[0_8px_30px_rgba(168,85,247,0.12)] backdrop-blur-xl dark:border-purple-300/15 dark:bg-gray-900/65 dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)] sm:p-12">
-          <div className="prose prose-lg dark:prose-invert max-w-none">
+          <div className="prose prose-lg prose-p:my-5 prose-p:leading-8 prose-headings:mb-4 prose-headings:mt-10 dark:prose-invert max-w-none">
             {post.id === 'for-the-love-of-magic-event-cultural-onboarding' ? (
               <MagicBlogPostContent />
             ) : (

@@ -52,15 +52,20 @@ function LoginPageContent() {
 
       // Check for code in query params (PKCE flow)
       const code = searchParams.get('code')
+      const tokenHash = searchParams.get('token_hash')
+      const otpType = searchParams.get('type')
 
       // Only process if we have auth params
-      if (!code && !accessToken) {
+      if (!code && !accessToken && !tokenHash) {
         return
       }
 
       if (code) {
         // PKCE flow - redirect to callback page which handles this
         router.push(`/auth/callback?code=${code}`)
+      } else if (tokenHash && otpType) {
+        // Token-hash flow - forward to callback handler
+        router.push(`/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=${encodeURIComponent(otpType)}`)
       } else if (accessToken && refreshToken) {
         // Implicit flow - set session directly
         const { error } = await supabase.auth.setSession({
@@ -148,13 +153,13 @@ function LoginPageContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
-      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
+      <div className="w-full max-w-md rounded-2xl border border-purple-300/20 bg-white/10 p-8 shadow-lg backdrop-blur-xl">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             SoulSort AI
           </h1>
-          <p className="text-gray-600">Sign in with a magic link</p>
+          <p className="text-purple-100/85">Sign in with a magic link</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -164,13 +169,13 @@ function LoginPageContent() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
+            className="w-full rounded-xl border border-purple-300/25 bg-white/90 px-4 py-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+            className="w-full rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 px-6 py-3 font-semibold text-white transition-colors hover:from-fuchsia-600 hover:to-purple-700 disabled:opacity-50"
           >
             {loading ? 'Sending link…' : 'Send magic link'}
           </button>
@@ -178,19 +183,19 @@ function LoginPageContent() {
 
         {message && (
           <div className="mt-4 text-center">
-            <p className={`${message.includes('error') || message.includes('Error') ? 'text-red-600' : 'text-gray-600'}`}>
+              <p className={`${message.includes('error') || message.includes('Error') ? 'text-red-300' : 'text-purple-100/85'}`}>
               {message}
             </p>
             {message.includes('Check your email') && (
-              <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-2 text-sm text-purple-100/70">
                 If you can't find the link, check your spam folder.
               </p>
             )}
           </div>
         )}
 
-        <div className="mt-6 text-center text-sm text-gray-500">
-          <Link href="/" className="text-purple-600 hover:underline">
+        <div className="mt-6 text-center text-sm text-purple-100/70">
+          <Link href="/" className="text-purple-300 hover:underline">
             ← Back to home
           </Link>
         </div>
@@ -202,7 +207,7 @@ function LoginPageContent() {
 export default function LoginPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-50 to-pink-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>

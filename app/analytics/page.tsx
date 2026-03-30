@@ -1,101 +1,46 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import ThemeToggle from '@/components/ThemeToggle'
-import MetricCard from './components/MetricCard'
-import FunnelChart from './components/FunnelChart'
-import CostChart from './components/CostChart'
-import EngagementChart from './components/EngagementChart'
-import GrowthLoopChart from './components/GrowthLoopChart'
-import DistributionChart from './components/DistributionChart'
-import EntropyChart from './components/EntropyChart'
-import WordCountChart from './components/WordCountChart'
-import ArchetypeTable from './components/ArchetypeTable'
+import Link from 'next/link'
 
 interface MetricsData {
-  total_requesters: number
-  completion_rate: number
-  avg_cost: number
-  dau: number
-  funnel: {
-    stage: string
-    count: number
-    conversion_rate: number
-  }[]
-  growth_loop: {
-    shares: number
-    signups: number
-    conversion_rate: number
-    avg_radars_per_requester: number
+  range: { key: string; days: number }
+  generated_at: string
+  radars: {
+    all_time: { user: number; requester: number; total: number }
+    in_range: { user: number; requester: number; total: number }
+    split: { user_share_pct: number; requester_share_pct: number }
   }
-  cost_trends: {
-    date: string
-    cost: number
-    calls: number
-  }[]
-  engagement: {
-    dau: number
-    mau: number
-    stickiness: number
-    avg_completion_time: number
+  deep_insights: {
+    all_time: { user_with_copy: number; requester_with_copy: number; total_with_copy: number; coverage_pct: number }
+    in_range: { user_with_copy: number; requester_with_copy: number; total_with_copy: number; coverage_pct: number }
   }
-  feedback?: {
-    total: number
-    positive: number
-    negative: number
-    positive_percentage: number
-    negative_percentage: number
+  quality: {
+    v4_axis_completeness: { user_pct: number; requester_pct: number }
   }
-  requester?: {
-    total_flows: number
-    avg_requests_per_user: number
-    median_requests_per_user: number
-    distribution: {
-      '0': number
-      '1': number
-      '2-3': number
-      '4-10': number
-      '10+': number
-    }
+  adoption: {
+    unique_user_profiles_generated_in_range: number
+    unique_links_assessed_in_range: number
   }
-  cost?: {
-    avg_cost_per_profile: number
-    total_profile_cost: number
-    total_requester_cost: number
-    total_cost_all: number
-    total_profiles: number
-  }
-  qc?: {
-    total_profiles: number
-    total_users_onboarded?: number
-    missing_answer_rate: number
-    default_clustering_rate: number
-    avg_cost_per_profile?: number
-    distributions: Record<string, { bins: number[]; median: number; iqr: number; defaultClustering: number }>
-    entropy_saturation: { date: string; entropy: number; saturation: number }[]
-    missing_wordcount: {
-      missing_rate: { q1: number; q2: number; q3: number; q4: number }
-      word_count_bins: Record<string, { '0': number; '1-5': number; '6-15': number; '16-30': number; '31+': number }>
-    }
-    archetypes: {
-      signature: string
-      count: number
-      percentage: number
-      median: { st: number; se: number; root: number; search: number; rel: number; ero: number; con: number }
-    }[]
-  }
+  trend: Array<{ date: string; user_radars: number; requester_radars: number; total_radars: number }>
+}
+
+function StatCard({ title, value, subtitle }: { title: string; value: string | number; subtitle?: string }) {
+  return (
+    <div className="rounded-2xl border border-purple-300/20 bg-white/10 p-5 backdrop-blur-xl">
+      <p className="text-xs uppercase tracking-wide text-purple-200/90">{title}</p>
+      <p className="mt-2 text-3xl font-bold text-white">{value}</p>
+      {subtitle ? <p className="mt-1 text-sm text-purple-100/80">{subtitle}</p> : null}
+    </div>
+  )
 }
 
 export default function AnalyticsDashboard() {
-  const router = useRouter()
   const [dateRange, setDateRange] = useState<'7d' | '30d' | '90d'>('30d')
   const [metrics, setMetrics] = useState<MetricsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Fetch metrics on mount and when date range changes
-  // Middleware already protects this route, so we can directly fetch
   useEffect(() => {
     fetchMetrics(dateRange)
   }, [dateRange])
@@ -107,33 +52,11 @@ export default function AnalyticsDashboard() {
       const response = await fetch(`/api/analytics/metrics?range=${range}`)
       if (!response.ok) {
         if (response.status === 401) {
-          // Not authenticated - redirect to login (shouldn't happen due to middleware, but handle it)
           window.location.href = '/login?redirect=/analytics'
           return
-        } else if (response.status === 403) {
-          // Authenticated but not admin
-          const errorData = await response.json().catch(() => ({}))
-          console.error('Access denied details:', errorData)
-          
-          if (errorData.details) {
-            const { userEmail, adminEmails, debug } = errorData.details
-            setError(
-              `Access denied. Your email "${userEmail}" is not in the admin list.\n\n` +
-              `Admin emails configured: ${adminEmails || 'NOT SET'}\n\n` +
-              `Debug info:\n` +
-              `- Your email (lowercase): ${debug?.userEmailLower || userEmail}\n` +
-              `- Admin emails (parsed): ${JSON.stringify(debug?.adminEmailsParsed || [])}\n\n` +
-              `Please verify:\n` +
-              `1. Your email matches exactly (case-insensitive)\n` +
-              `2. ADMIN_EMAILS is set in Vercel environment variables\n` +
-              `3. The variable is set for Production environment\n` +
-              `4. You've redeployed after setting the variable`
-            )
-          } else {
-            setError('Access denied. Admin access required. Please ensure your email is set in the ADMIN_EMAILS environment variable.')
-          }
         } else {
-          setError('Failed to fetch metrics')
+          const payload = await response.json().catch(() => ({}))
+          setError(payload?.error || 'Failed to fetch metrics')
         }
         return
       }
@@ -149,10 +72,10 @@ export default function AnalyticsDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-300">Loading analytics...</p>
+            <p className="text-purple-100">Loading analytics...</p>
           </div>
         </div>
       </div>
@@ -161,24 +84,24 @@ export default function AnalyticsDashboard() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-red-900 dark:text-red-300 mb-2">Access Denied</h2>
-            <div className="text-red-700 dark:text-red-300 mb-4 whitespace-pre-line">{error}</div>
+          <div className="rounded-2xl border border-red-500/30 bg-red-900/20 p-6">
+            <h2 className="mb-2 text-xl font-semibold text-red-200">Access Denied</h2>
+            <div className="mb-4 whitespace-pre-line text-red-200/90">{error}</div>
             <div className="flex gap-4">
-              <a
+              <Link
                 href="/dashboard"
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                className="rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-fuchsia-600 hover:to-purple-700"
               >
                 Go to Dashboard
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/login"
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm font-medium dark:text-gray-100"
+                className="rounded-xl border border-purple-300/30 bg-white/10 px-4 py-2 text-sm font-medium text-purple-100 hover:bg-white/20"
               >
                 Login with Different Account
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -186,31 +109,44 @@ export default function AnalyticsDashboard() {
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-purple-600 dark:text-purple-400">Analytics Dashboard</h1>
-          <div className="flex gap-2 items-center">
-            <ThemeToggle />
-            <a
-              href="/dashboard"
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-            >
-              Back to Dashboard
-            </a>
+  if (!metrics) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="rounded-2xl border border-purple-300/20 bg-white/10 p-6 backdrop-blur-xl">
+            <p className="text-purple-100">No metrics available yet for this range.</p>
           </div>
         </div>
+      </div>
+    )
+  }
 
-        {/* Date Range Selector */}
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Analytics Dashboard</h1>
+            <p className="mt-1 text-sm text-purple-100/80">
+              Radar-first metrics (user vs requester) with deep-insights coverage.
+            </p>
+          </div>
+          <Link
+            href="/dashboard"
+            className="rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-600 px-4 py-2 text-sm font-medium text-white hover:from-fuchsia-600 hover:to-purple-700"
+          >
+            Back to Dashboard
+          </Link>
+        </div>
+
         <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="mb-2 block text-sm font-medium text-purple-100">
             Date Range
           </label>
           <select
             value={dateRange}
             onChange={(e) => setDateRange(e.target.value as '7d' | '30d' | '90d')}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="rounded-xl border border-purple-300/25 bg-white/10 px-4 py-2 text-purple-100 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="7d">Last 7 days</option>
             <option value="30d">Last 30 days</option>
@@ -218,143 +154,99 @@ export default function AnalyticsDashboard() {
           </select>
         </div>
 
-        {/* Key Metrics Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <MetricCard
-            title="Total Profiles"
-            value={metrics?.qc?.total_profiles ?? 0}
-            subtitle={`${dateRange} period`}
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Total Radars (All-Time)"
+            value={metrics.radars.all_time.total}
+            subtitle="Primary go-to-market KPI"
           />
-          <MetricCard
-            title="Missing Answer Rate"
-            value={metrics?.qc?.missing_answer_rate ? `${(metrics.qc.missing_answer_rate * 100).toFixed(1)}%` : '0%'}
-            subtitle="QC: Missing answers"
+          <StatCard
+            title="User Radars (All-Time)"
+            value={metrics.radars.all_time.user}
+            subtitle={`${metrics.radars.split.user_share_pct.toFixed(1)}% of total`}
           />
-          <MetricCard
-            title="Default Clustering"
-            value={metrics?.qc?.default_clustering_rate ? `${(metrics.qc.default_clustering_rate * 100).toFixed(1)}%` : '0%'}
-            subtitle="% in 45-55 band"
+          <StatCard
+            title="Requester Radars (All-Time)"
+            value={metrics.radars.all_time.requester}
+            subtitle={`${metrics.radars.split.requester_share_pct.toFixed(1)}% of total`}
           />
-          <MetricCard
-            title="Avg Cost/Profile"
-            value={metrics?.cost?.avg_cost_per_profile ? `$${metrics.cost.avg_cost_per_profile.toFixed(4)}` : (metrics?.qc?.avg_cost_per_profile ? `$${metrics.qc.avg_cost_per_profile.toFixed(4)}` : '$0.0000')}
-            subtitle="Profile generation only"
-          />
-          {metrics?.cost?.total_cost_all !== undefined && (
-            <MetricCard
-              title="Total Cost (All)"
-              value={`$${metrics.cost.total_cost_all.toFixed(2)}`}
-              subtitle={`Profiles: $${metrics.cost.total_profile_cost.toFixed(2)}, Requesters: $${(metrics.cost.total_requester_cost || 0).toFixed(2)}`}
-            />
-          )}
-          {metrics?.qc?.total_users_onboarded && metrics.qc.total_users_onboarded !== metrics.qc.total_profiles && (
-            <MetricCard
-              title="Trace Coverage"
-              value={`${metrics.qc.total_profiles}/${metrics.qc.total_users_onboarded}`}
-              subtitle={`${Math.round((metrics.qc.total_profiles / metrics.qc.total_users_onboarded) * 100)}% have traces`}
-            />
-          )}
-          <MetricCard
-            title="Total Requester Flows"
-            value={metrics?.requester?.total_flows ?? 0}
-            subtitle={`Completed in ${dateRange}`}
-          />
-          <MetricCard
-            title="Avg Requests/User"
-            value={metrics?.requester?.avg_requests_per_user ? metrics.requester.avg_requests_per_user.toFixed(2) : '0.00'}
-            subtitle={`Mean (median: ${metrics?.requester?.median_requests_per_user?.toFixed(1) ?? '0'})`}
+          <StatCard
+            title={`Radars (${metrics.range.days}d)`}
+            value={metrics.radars.in_range.total}
+            subtitle={`${metrics.radars.in_range.user} user / ${metrics.radars.in_range.requester} requester`}
           />
         </div>
 
-        {/* Feedback Metrics */}
-        {metrics?.feedback && metrics.feedback.total > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <MetricCard
-              title="Feedback Response Rate"
-              value={`${metrics.feedback.total} responses`}
-              subtitle={`${dateRange} period`}
-            />
-            <MetricCard
-              title="Positive Feedback"
-              value={`${metrics.feedback.positive_percentage.toFixed(1)}%`}
-              subtitle={`${metrics.feedback.positive} of ${metrics.feedback.total}`}
-            />
-            <MetricCard
-              title="Negative Feedback"
-              value={`${metrics.feedback.negative_percentage.toFixed(1)}%`}
-              subtitle={`${metrics.feedback.negative} of ${metrics.feedback.total}`}
-            />
-          </div>
-        )}
-
-        {/* Charts */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <FunnelChart data={metrics?.funnel || []} />
-          <GrowthLoopChart data={metrics?.growth_loop} />
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            title="Deep Insights Coverage (All-Time)"
+            value={`${metrics.deep_insights.all_time.coverage_pct.toFixed(1)}%`}
+            subtitle={`${metrics.deep_insights.all_time.total_with_copy} radars with generated copy`}
+          />
+          <StatCard
+            title={`Deep Insights (${metrics.range.days}d)`}
+            value={`${metrics.deep_insights.in_range.coverage_pct.toFixed(1)}%`}
+            subtitle={`${metrics.deep_insights.in_range.user_with_copy} user / ${metrics.deep_insights.in_range.requester_with_copy} requester`}
+          />
+          <StatCard
+            title="V4 Completeness (User)"
+            value={`${metrics.quality.v4_axis_completeness.user_pct.toFixed(1)}%`}
+            subtitle="All 7 axes present"
+          />
+          <StatCard
+            title="V4 Completeness (Requester)"
+            value={`${metrics.quality.v4_axis_completeness.requester_pct.toFixed(1)}%`}
+            subtitle="All 7 axes present"
+          />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <CostChart data={metrics?.cost_trends || []} />
-          <EngagementChart data={metrics?.engagement} />
-        </div>
-
-        {/* QC Analytics Panels */}
-        {metrics?.qc && (
-          <>
-            {/* Row 1: B1 Distributions + B3 Missing/Word Count */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <DistributionChart distributions={metrics.qc.distributions} />
-              <WordCountChart
-                missingRate={metrics.qc.missing_wordcount.missing_rate}
-                wordCountBins={metrics.qc.missing_wordcount.word_count_bins}
-              />
+        <div className="mb-8 rounded-2xl border border-purple-300/20 bg-white/10 p-6 backdrop-blur-xl">
+          <h2 className="mb-4 text-xl font-semibold text-white">Adoption Snapshot</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div className="rounded-xl border border-purple-300/20 bg-white/10 p-4">
+              <p className="text-sm text-purple-100/80">Unique users generating profile radars ({metrics.range.days}d)</p>
+              <p className="mt-1 text-2xl font-bold text-white">{metrics.adoption.unique_user_profiles_generated_in_range}</p>
             </div>
-
-            {/* Row 2: B2 Entropy/Saturation */}
-            <div className="mb-8">
-              <EntropyChart data={metrics.qc.entropy_saturation || []} />
-            </div>
-
-            {/* Row 3: A2 Archetypes */}
-            <div className="mb-8">
-              <ArchetypeTable archetypes={metrics.qc.archetypes || []} />
-            </div>
-          </>
-        )}
-
-        {/* Requester Spread Metrics */}
-        {metrics?.requester && (
-          <div className="mb-8">
-            <h2 className="text-2xl font-semibold mb-4 text-purple-600 dark:text-purple-400">Requester Spread</h2>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              <div className="mb-6">
-                <h3 className="text-lg font-medium mb-4 text-gray-900 dark:text-gray-100">Distribution of Requests per User</h3>
-                <div className="grid grid-cols-5 gap-4">
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['0']}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">0 requests</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['1']}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">1 request</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['2-3']}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">2-3 requests</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['4-10']}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">4-10 requests</div>
-                  </div>
-                  <div className="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">{metrics.requester.distribution['10+']}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">10+ requests</div>
-                  </div>
-                </div>
-              </div>
+            <div className="rounded-xl border border-purple-300/20 bg-white/10 p-4">
+              <p className="text-sm text-purple-100/80">Unique links receiving requester radars ({metrics.range.days}d)</p>
+              <p className="mt-1 text-2xl font-bold text-white">{metrics.adoption.unique_links_assessed_in_range}</p>
             </div>
           </div>
-        )}
+        </div>
+
+        <div className="rounded-2xl border border-purple-300/20 bg-white/10 p-6 backdrop-blur-xl">
+          <h2 className="mb-4 text-xl font-semibold text-white">Daily Radar Trend ({metrics.range.days}d)</h2>
+          {metrics.trend.length === 0 ? (
+            <p className="text-purple-100/80">No radar generation events found in this range.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-purple-300/20 text-left text-purple-100">
+                    <th className="py-2 pr-4">Date</th>
+                    <th className="py-2 pr-4">User Radars</th>
+                    <th className="py-2 pr-4">Requester Radars</th>
+                    <th className="py-2 pr-4">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {metrics.trend.map((row) => (
+                    <tr key={row.date} className="border-b border-purple-300/10 text-purple-50">
+                      <td className="py-2 pr-4">{row.date}</td>
+                      <td className="py-2 pr-4">{row.user_radars}</td>
+                      <td className="py-2 pr-4">{row.requester_radars}</td>
+                      <td className="py-2 pr-4 font-semibold">{row.total_radars}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p className="mt-4 text-xs text-purple-100/70">
+            Legacy analytics panels were removed. This dashboard now uses radar source-of-truth tables only:
+            <code className="ml-1">user_radar_profiles</code> and <code className="ml-1">requester_assessments</code>.
+          </p>
+        </div>
       </div>
     </div>
   )
