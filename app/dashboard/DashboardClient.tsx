@@ -106,7 +106,7 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
         </div>
       </div>
 
-      {/* Radar Chart */}
+      {/* Radar Chart + Deep Insights + Analytics consent */}
       <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
         <h2 className="text-xl font-semibold mb-4 text-purple-300">Your SoulSort Radar</h2>
         {radarData ? (
@@ -124,6 +124,20 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
                 insightOverrides={radarProfile?.deep_insights_copy || null}
               />
             </div>
+            {/* Analytics consent - minimal, below insights */}
+            <div className="mt-4 pt-4 border-t border-purple-300/20 flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="analytics-checkbox"
+                checked={analyticsOptIn}
+                onChange={(e) => handleConsentChange('analytics', e.target.checked)}
+                disabled={updating}
+                className="w-4 h-4 accent-purple-600 cursor-pointer flex-shrink-0"
+              />
+              <label htmlFor="analytics-checkbox" className="text-sm text-gray-400 cursor-pointer">
+                My data can be used for anonymized aggregate analytics
+              </label>
+            </div>
           </>
         ) : (
           <div className="text-center py-12 text-gray-400">
@@ -135,6 +149,63 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
         )}
       </section>
 
+      {/* Share Link */}
+      <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-3 text-purple-300">Your Vibe-Check Link</h2>
+        <div className="flex gap-2">
+          <input
+            value={shareLink}
+            readOnly
+            className="flex-1 px-3 py-2 border border-purple-300/30 rounded-xl bg-white/10 text-sm text-gray-200"
+          />
+          <button
+            onClick={async () => {
+              await navigator.clipboard.writeText(shareLink)
+              fetch('/api/analytics/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  event_type: 'share_clicked',
+                  event_data: { share_method: 'copy_link' },
+                }),
+              }).catch(err => console.error('Analytics tracking error:', err))
+            }}
+            className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl hover:opacity-90 transition-opacity text-sm font-medium"
+          >
+            Copy
+          </button>
+        </div>
+        <p className="text-sm text-gray-400 mt-2 italic">
+          Share in your bio, socials or at parties — invite people to vibe-check against your radar.
+        </p>
+        <div className="mt-4">
+          <button
+            onClick={() => {
+              const newState = !showShareCard
+              setShowShareCard(newState)
+              if (newState) {
+                fetch('/api/analytics/track', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    event_type: 'share_clicked',
+                    event_data: { share_method: 'qr_code' },
+                  }),
+                }).catch(err => console.error('Analytics tracking error:', err))
+              }
+            }}
+            className="px-4 py-2 border border-purple-300/30 bg-white/10 text-purple-200 rounded-xl hover:bg-white/20 transition-colors text-sm font-medium"
+          >
+            {showShareCard ? 'Hide' : 'Generate'} shareable radar
+          </button>
+        </div>
+        {showShareCard && radarData && (
+          <div className="mt-6 pt-6 border-t border-purple-300/20">
+            <ShareCard radarData={radarData} shareLink={shareLink} />
+          </div>
+        )}
+      </section>
+
       {/* Dealbreakers */}
       {radarProfile && radarProfile.dealbreakers.length > 0 && (
         <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
@@ -142,100 +213,17 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
           <ul className="space-y-2">
             {radarProfile.dealbreakers.map((db, idx) => (
               <li key={idx} className="flex items-start gap-2">
-                <span className="text-purple-300 mt-1 text-lg">🚩</span>
+                <span className="mt-1 w-5 h-5 flex-shrink-0 rounded-full bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round">
+                    <path d="M18 6L6 18M6 6l12 12"/>
+                  </svg>
+                </span>
                 <span className="text-gray-200">{db}</span>
               </li>
             ))}
           </ul>
         </section>
       )}
-
-      {/* Sharing & Consent */}
-      <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-white">Sharing & Consent</h2>
-
-        <div className="space-y-4">
-          <div className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              id="analytics-checkbox"
-              checked={analyticsOptIn}
-              onChange={(e) => handleConsentChange('analytics', e.target.checked)}
-              disabled={updating}
-              className="mt-1 w-5 h-5 text-purple-600 rounded accent-purple-600 cursor-pointer flex-shrink-0"
-            />
-            <label htmlFor="analytics-checkbox" className="flex-1 cursor-pointer">
-              <span className="font-medium text-gray-100">My data can be used for anonymized aggregate analytics</span>
-              <p className="text-sm text-gray-300 mt-1">
-                Help improve SoulSort by allowing your anonymized data to be used for archetype analysis. No raw responses are stored.
-              </p>
-            </label>
-          </div>
-
-          <div className="pt-2">
-            <div className="text-sm text-gray-300 mb-2">Your share link</div>
-            <div className="flex gap-2">
-              <input
-                value={shareLink}
-                readOnly
-                className="flex-1 px-3 py-2 border border-purple-300/30 rounded-xl bg-white/10 text-sm text-gray-200"
-              />
-              <button
-                onClick={async () => {
-                  await navigator.clipboard.writeText(shareLink)
-                  // Track share action
-                  fetch('/api/analytics/track', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      event_type: 'share_clicked',
-                      event_data: {
-                        share_method: 'copy_link',
-                      },
-                    }),
-                  }).catch(err => console.error('Analytics tracking error:', err))
-                }}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-              >
-                Copy
-              </button>
-            </div>
-            <p className="text-sm text-gray-400 mt-2 italic">
-              Use this link in your socials/ bios/ at parties to ask others to vibe check against you. Spark better conversations and invite interpretation!
-            </p>
-            <div className="mt-4">
-              <button
-                onClick={() => {
-                  const newState = !showShareCard
-                  setShowShareCard(newState)
-                  
-                  // Track QR code generation when share card is shown
-                  if (newState) {
-                    fetch('/api/analytics/track', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({
-                        event_type: 'share_clicked',
-                        event_data: {
-                          share_method: 'qr_code',
-                        },
-                      }),
-                    }).catch(err => console.error('Analytics tracking error:', err))
-                  }
-                }}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-              >
-                {showShareCard ? 'Hide' : 'Generate'} shareable radar
-              </button>
-            </div>
-            {showShareCard && radarData && (
-              <div className="mt-6 pt-6 border-t border-purple-300/20">
-                <ShareCard radarData={radarData} shareLink={shareLink} />
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
 
       {/* Warning Zone */}
       <section className="bg-red-900/20 rounded-2xl border border-red-500/30 p-6">

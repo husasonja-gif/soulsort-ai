@@ -49,32 +49,32 @@ function DotBar({
   const range = projectRangeWithNuance(zoneStart, zoneEnd)
   return (
     <div className="space-y-1">
-      <div className="hidden sm:flex items-center gap-2 text-sm text-gray-300">
+      <div className="hidden sm:flex items-center gap-2 text-sm text-gray-200">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 min-w-[110px] h-[1px] bg-gray-500 rounded">
+        <div className="relative flex-1 min-w-[110px] h-[2px] bg-white/20 rounded">
           <span
-            className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
+            className="absolute top-1/2 -translate-y-1/2 h-[8px] rounded-full shadow-[0_0_8px_rgba(192,132,252,0.6)]"
             style={{
               left: `${range.start}%`,
               width: `${range.end - range.start}%`,
-              backgroundImage: `linear-gradient(90deg, ${lineColor}, #8b5cf6)`,
+              backgroundImage: `linear-gradient(90deg, #e879f9, #a855f7)`,
             }}
           />
         </div>
         <span className="whitespace-nowrap">{rightLabel}</span>
       </div>
       <div className="sm:hidden space-y-1">
-        <div className="relative h-[1px] bg-gray-500 rounded">
+        <div className="relative h-[2px] bg-white/20 rounded">
           <span
-            className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
+            className="absolute top-1/2 -translate-y-1/2 h-[8px] rounded-full shadow-[0_0_8px_rgba(192,132,252,0.6)]"
             style={{
               left: `${range.start}%`,
               width: `${range.end - range.start}%`,
-              backgroundImage: `linear-gradient(90deg, ${lineColor}, #8b5cf6)`,
+              backgroundImage: `linear-gradient(90deg, #e879f9, #a855f7)`,
             }}
           />
         </div>
-        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-300">
+        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-200">
           <span className="leading-tight">{leftLabel}</span>
           <span className="text-right leading-tight">{rightLabel}</span>
         </div>
@@ -108,29 +108,29 @@ function ComparisonBar({
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-3 text-xs font-semibold">
-        <span style={{ color: YOU_COLOR }}>You</span>
-        <span style={{ color: THEM_COLOR }}>Them</span>
+        <span style={{ color: '#f472b6' }}>You</span>
+        <span style={{ color: '#a855f7' }}>Them</span>
       </div>
       <div className="space-y-1">
-        <div className="relative h-[1px] bg-gray-500 rounded">
+        <div className="relative h-[2px] bg-white/20 rounded">
           <span
-            className="absolute top-1/2 -translate-y-[calc(50%+4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(236,72,153,0.15)]"
+            className="absolute top-1/2 -translate-y-[calc(50%+5px)] h-[8px] rounded-full shadow-[0_0_8px_rgba(244,114,182,0.7)]"
             style={{
               left: `${yRange.start}%`,
               width: `${yRange.end - yRange.start}%`,
-              backgroundImage: 'linear-gradient(90deg, #f5d0fe, #d946ef)',
+              backgroundImage: 'linear-gradient(90deg, #f9a8d4, #f472b6)',
             }}
           />
           <span
-            className="absolute top-1/2 -translate-y-[calc(50%-4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(124,58,237,0.15)]"
+            className="absolute top-1/2 -translate-y-[calc(50%-5px)] h-[8px] rounded-full shadow-[0_0_8px_rgba(168,85,247,0.7)]"
             style={{
               left: `${tRange.start}%`,
               width: `${tRange.end - tRange.start}%`,
-              backgroundImage: 'linear-gradient(90deg, #ddd6fe, #7c3aed)',
+              backgroundImage: 'linear-gradient(90deg, #c4b5fd, #a855f7)',
             }}
           />
         </div>
-        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-300">
+        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-200">
           <span className="leading-tight">{leftLabel}</span>
           <span className="text-right leading-tight">{rightLabel}</span>
         </div>
@@ -151,14 +151,14 @@ function InsightCard({
   onReveal: () => void
 }) {
   return (
-    <div className="border border-purple-300/20 rounded-xl bg-white/10 backdrop-blur-sm p-4">
+    <div className="border border-purple-300/20 rounded-xl bg-gray-900/60 p-4">
       <button
         type="button"
         onClick={onReveal}
         className="w-full text-left flex items-center justify-between gap-3"
       >
-        <div className="font-semibold text-white">{area.title}</div>
-        {!expanded && <div className="text-xs text-purple-300">In words</div>}
+        <div className="font-bold text-white">{area.title}</div>
+        {!expanded && <div className="text-xs text-purple-300 font-medium">In words</div>}
       </button>
 
       <div className="mt-3 space-y-3">

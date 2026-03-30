@@ -70,9 +70,9 @@ function AxisTick({
       onMouseEnter={() => onAxisHover?.(key)}
       onMouseLeave={() => onAxisHover?.(null)}
     >
-      <text textAnchor={textAnchor} fill="#4b5563" className="dark:fill-gray-300 font-medium">
-        <tspan x={0} dy={0} fontSize={isMobile ? 11 : 13}>{line1}</tspan>
-        {line2 ? <tspan x={0} dy={isMobile ? 13 : 15} fontSize={isMobile ? 11 : 13}>{line2}</tspan> : null}
+      <text textAnchor={textAnchor} fill="#ffffff" className="font-semibold">
+        <tspan x={0} dy={0} fontSize={isMobile ? 12 : 14}>{line1}</tspan>
+        {line2 ? <tspan x={0} dy={isMobile ? 13 : 15} fontSize={isMobile ? 12 : 14}>{line2}</tspan> : null}
       </text>
     </g>
   )
@@ -184,29 +184,29 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
           <Radar
             name="Them"
             dataKey="user"
-            stroke="#9333ea"
-            fill="#9333ea"
-            fillOpacity={0.3}
-            strokeWidth={2}
+            stroke="#a855f7"
+            fill="#a855f7"
+            fillOpacity={0.35}
+            strokeWidth={2.5}
           />
           <Radar
             name="You"
             dataKey="requester"
-            stroke="#d946ef"
-            fill="#d946ef"
-            fillOpacity={0.3}
-            strokeWidth={2}
+            stroke="#f472b6"
+            fill="#f472b6"
+            fillOpacity={0.25}
+            strokeWidth={2.5}
           />
         </RechartsRadarChart>
       </ResponsiveContainer>
       <div className="mt-2 flex items-center justify-center gap-6 text-sm font-medium">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: '#9333ea' }} />
-          <span className="text-gray-700 dark:text-gray-200">Them</span>
+          <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: '#a855f7' }} />
+          <span className="text-gray-200">Them</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: '#d946ef' }} />
-          <span className="text-gray-700 dark:text-gray-200">You</span>
+          <span className="inline-block w-3 h-3 rounded-sm" style={{ backgroundColor: '#f472b6' }} />
+          <span className="text-gray-200">You</span>
         </div>
       </div>
     </div>

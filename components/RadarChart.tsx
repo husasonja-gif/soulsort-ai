@@ -71,9 +71,9 @@ function AxisTick({
       onMouseEnter={() => onAxisHover?.(key)}
       onMouseLeave={() => onAxisHover?.(null)}
     >
-      <text textAnchor={textAnchor} fill="#4b5563" className="dark:fill-gray-300 font-medium">
-        <tspan x={0} dy={0} fontSize={isMobile ? 11 : 13}>{line1}</tspan>
-        {line2 ? <tspan x={0} dy={isMobile ? 13 : 15} fontSize={isMobile ? 11 : 13}>{line2}</tspan> : null}
+      <text textAnchor={textAnchor} fill="#ffffff" className="font-semibold">
+        <tspan x={0} dy={0} fontSize={isMobile ? 12 : 14}>{line1}</tspan>
+        {line2 ? <tspan x={0} dy={isMobile ? 13 : 15} fontSize={isMobile ? 12 : 14}>{line2}</tspan> : null}
       </text>
     </g>
   )

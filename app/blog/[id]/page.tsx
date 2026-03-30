@@ -355,9 +355,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(circle_at_10%_10%,#f5d0fe_0%,#f3e8ff_28%,#ffffff_58%)] dark:bg-[radial-gradient(circle_at_20%_15%,#581c87_0%,#1f2937_42%,#111827_70%)]">
-      <div className="pointer-events-none absolute -top-24 -left-12 h-72 w-72 rounded-full bg-pink-300/30 blur-3xl dark:bg-fuchsia-500/20" />
-      <div className="pointer-events-none absolute top-24 -right-14 h-72 w-72 rounded-full bg-violet-300/30 blur-3xl dark:bg-purple-500/20" />
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
+      <div className="pointer-events-none absolute -top-24 -left-12 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute top-24 -right-14 h-72 w-72 rounded-full bg-purple-500/20 blur-3xl" />
       <article className="container relative z-10 mx-auto max-w-3xl px-4 py-12 sm:py-16">
         <Script
           id={`blogposting-jsonld-${post.id}`}
@@ -367,28 +367,28 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
         {/* Header */}
         <div className="mb-8">
-          <Link href="/blog" className="mb-4 inline-flex items-center rounded-full bg-white/70 px-4 py-2 text-purple-700 transition-colors hover:bg-white dark:bg-gray-900/60 dark:text-purple-300 dark:hover:bg-gray-900/90">
+          <Link href="/blog" className="mb-4 inline-flex items-center rounded-full bg-white/10 border border-purple-300/20 px-4 py-2 text-purple-300 transition-colors hover:bg-white/20">
             ← Back to Blog
           </Link>
-          <div className="mb-4 flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-            <span className="rounded-full bg-gradient-to-r from-fuchsia-500/20 to-violet-500/20 px-3 py-1 text-xs font-semibold text-fuchsia-700 dark:text-fuchsia-300">
+          <div className="mb-4 flex items-center gap-3 text-sm text-gray-400 mt-4">
+            <span className="rounded-full bg-gradient-to-r from-fuchsia-500/30 to-violet-500/30 px-3 py-1 text-xs font-semibold text-fuchsia-300">
               {post.category}
             </span>
             <span>{post.date}</span>
             <span>•</span>
             <span>{post.readTime}</span>
           </div>
-          <h1 className="mb-4 text-4xl font-bold text-gray-900 sm:text-5xl dark:text-gray-100">
+          <h1 className="mb-4 text-4xl font-bold text-white sm:text-5xl">
             {post.title}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-gray-400">
             By {post.author}
           </p>
         </div>
 
         {/* Content */}
-        <div className="rounded-2xl border border-white/60 bg-white/75 p-8 shadow-[0_8px_30px_rgba(168,85,247,0.12)] backdrop-blur-xl dark:border-purple-300/15 dark:bg-gray-900/65 dark:shadow-[0_8px_30px_rgba(0,0,0,0.35)] sm:p-12">
-          <div className="prose prose-lg prose-p:my-5 prose-p:leading-8 prose-headings:mb-4 prose-headings:mt-10 dark:prose-invert max-w-none">
+        <div className="rounded-2xl border border-purple-300/20 bg-white/10 backdrop-blur-xl p-8 shadow-[0_8px_30px_rgba(0,0,0,0.35)] sm:p-12">
+          <div className="prose prose-lg prose-invert prose-p:my-5 prose-p:leading-8 prose-headings:mb-4 prose-headings:mt-10 prose-headings:text-white prose-p:text-gray-300 prose-a:text-purple-400 prose-strong:text-white max-w-none">
             {post.id === 'for-the-love-of-magic-event-cultural-onboarding' ? (
               <MagicBlogPostContent />
             ) : (
@@ -401,7 +401,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         <div className="mt-12 text-center">
           <Link
             href="/blog"
-            className="text-purple-600 dark:text-purple-400 hover:underline"
+            className="text-purple-400 hover:underline"
           >
             ← Back to Blog
           </Link>
