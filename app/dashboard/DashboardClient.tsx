@@ -90,15 +90,16 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
   } : null
 
   return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-purple-600 dark:text-purple-400">Your SoulSort Profile</h1>
+          <h1 className="text-3xl font-bold text-purple-300">Your SoulSort Profile</h1>
         </div>
         <div className="flex gap-2 items-center">
           <button
             onClick={handleLogout}
-            className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors dark:text-gray-100"
+            className="px-4 py-2 border border-purple-300/30 rounded-xl bg-white/10 hover:bg-white/20 text-purple-100 transition-colors"
           >
             Log out
           </button>
@@ -106,12 +107,12 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
       </div>
 
       {/* Radar Chart */}
-      <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 text-purple-600 dark:text-purple-400">Your SoulSort Radar</h2>
+      <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-purple-300">Your SoulSort Radar</h2>
         {radarData ? (
           <>
             <RadarChart data={radarData} label="Your Profile" />
-            <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            <p className="mt-3 text-xs text-gray-400">
               Hover over each axis label to see its explanation.
             </p>
             <div className="mt-6">
@@ -125,9 +126,9 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
             </div>
           </>
         ) : (
-          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+          <div className="text-center py-12 text-gray-400">
             <p>Complete onboarding to see your radar profile.</p>
-            <a href="/onboarding" className="text-purple-600 dark:text-purple-400 hover:underline mt-2 inline-block">
+            <a href="/onboarding" className="text-purple-300 hover:underline mt-2 inline-block">
               Start onboarding →
             </a>
           </div>
@@ -136,13 +137,13 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
 
       {/* Dealbreakers */}
       {radarProfile && radarProfile.dealbreakers.length > 0 && (
-        <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4 text-purple-600 dark:text-purple-400">Your Dealbreakers</h2>
+        <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
+          <h2 className="text-xl font-semibold mb-4 text-purple-300">Your Dealbreakers</h2>
           <ul className="space-y-2">
             {radarProfile.dealbreakers.map((db, idx) => (
-              <li key={idx} className="flex items-start gap-2 text-gray-700 dark:text-gray-200">
-                <span className="text-purple-600 dark:text-purple-400 mt-1 text-lg">🚩</span>
-                <span className="text-gray-900 dark:text-gray-100">{db}</span>
+              <li key={idx} className="flex items-start gap-2">
+                <span className="text-purple-300 mt-1 text-lg">🚩</span>
+                <span className="text-gray-200">{db}</span>
               </li>
             ))}
           </ul>
@@ -150,8 +151,8 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
       )}
 
       {/* Sharing & Consent */}
-      <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-        <h2 className="text-xl font-semibold mb-4 dark:text-gray-100">Sharing & Consent</h2>
+      <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4 text-white">Sharing & Consent</h2>
 
         <div className="space-y-4">
           <div className="flex items-start gap-3">
@@ -164,20 +165,20 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
               className="mt-1 w-5 h-5 text-purple-600 rounded accent-purple-600 cursor-pointer flex-shrink-0"
             />
             <label htmlFor="analytics-checkbox" className="flex-1 cursor-pointer">
-              <span className="font-medium dark:text-gray-100">My data can be used for anonymized aggregate analytics</span>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+              <span className="font-medium text-gray-100">My data can be used for anonymized aggregate analytics</span>
+              <p className="text-sm text-gray-300 mt-1">
                 Help improve SoulSort by allowing your anonymized data to be used for archetype analysis. No raw responses are stored.
               </p>
             </label>
           </div>
 
           <div className="pt-2">
-            <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">Your share link</div>
+            <div className="text-sm text-gray-300 mb-2">Your share link</div>
             <div className="flex gap-2">
               <input
                 value={shareLink}
                 readOnly
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-sm dark:text-gray-100"
+                className="flex-1 px-3 py-2 border border-purple-300/30 rounded-xl bg-white/10 text-sm text-gray-200"
               />
               <button
                 onClick={async () => {
@@ -199,7 +200,7 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
                 Copy
               </button>
             </div>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 italic">
+            <p className="text-sm text-gray-400 mt-2 italic">
               Use this link in your socials/ bios/ at parties to ask others to vibe check against you. Spark better conversations and invite interpretation!
             </p>
             <div className="mt-4">
@@ -228,7 +229,7 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
               </button>
             </div>
             {showShareCard && radarData && (
-              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="mt-6 pt-6 border-t border-purple-300/20">
                 <ShareCard radarData={radarData} shareLink={shareLink} />
               </div>
             )}
@@ -237,18 +238,19 @@ export default function DashboardClient({ radarProfile, consents, shareLink, use
       </section>
 
       {/* Warning Zone */}
-      <section className="bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800 p-6">
-        <h2 className="text-xl font-semibold mb-4 text-red-900 dark:text-red-300">Warning: irrevocable step</h2>
+      <section className="bg-red-900/20 rounded-2xl border border-red-500/30 p-6">
+        <h2 className="text-xl font-semibold mb-4 text-red-300">Warning: irrevocable step</h2>
         <button
           onClick={handleDelete}
           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
         >
           Delete my profile and all data
         </button>
-        <p className="text-sm text-red-700 dark:text-red-300 mt-2">
+        <p className="text-sm text-red-300 mt-2">
           This action cannot be undone. All your data will be permanently deleted.
         </p>
       </section>
+    </div>
     </div>
   )
 }

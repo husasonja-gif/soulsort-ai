@@ -489,13 +489,13 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'dealbreakers') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">{t('ui.onboarding.title', userLang)}</h1>
-          <p className="text-gray-700 dark:text-gray-300 mb-6">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-8">
+          <h1 className="text-3xl font-bold mb-2 text-white">{t('ui.onboarding.title', userLang)}</h1>
+          <p className="text-gray-300 mb-6">
             {skipChat ? 'Section 1 of 1: Dealbreakers' : 'Section 1 of 2: Dealbreakers'}
           </p>
-          <p className="text-lg font-medium mb-6 text-gray-900 dark:text-gray-100">
+          <p className="text-lg font-medium mb-6 text-gray-100">
             {t('ui.onboarding.dealbreakers.title', userLang)}
           </p>
 
@@ -503,22 +503,22 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             {dealbreakerOptions.map((option) => (
               <label
                 key={option}
-                className="flex items-center gap-3 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                className="flex items-center gap-3 p-4 border border-purple-300/20 rounded-xl bg-white/5 hover:bg-white/10 cursor-pointer transition-colors"
               >
                 <input
                   type="checkbox"
                   checked={dealbreakers.includes(option)}
                   onChange={() => handleDealbreakerToggle(option)}
-                  className="w-5 h-5 text-purple-600 dark:text-purple-400 rounded"
+                  className="w-5 h-5 text-purple-600 rounded accent-purple-600"
                 />
-                <span className="flex-1 text-gray-900 dark:text-gray-100">{option}</span>
+                <span className="flex-1 text-gray-100">{option}</span>
               </label>
             ))}
           </div>
 
           <button
             onClick={handleDealbreakersNext}
-            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+            className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
           >
             Continue to Preferences
           </button>
@@ -529,13 +529,13 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'preferences') {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2 text-gray-900 dark:text-gray-100">{t('ui.onboarding.title', userLang)}</h1>
-          <p className="text-gray-700 dark:text-gray-300 mb-6">
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
+        <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-8">
+          <h1 className="text-3xl font-bold mb-2 text-white">{t('ui.onboarding.title', userLang)}</h1>
+          <p className="text-gray-300 mb-6">
             {skipChat ? 'Section 1 of 1: Preferences' : 'Section 2 of 2: Preferences'}
           </p>
-          <p className="text-lg font-medium mb-6 text-gray-900 dark:text-gray-100">
+          <p className="text-lg font-medium mb-6 text-gray-100">
             {t('ui.onboarding.preferences.title', userLang)}
           </p>
 
@@ -543,18 +543,18 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             {preferenceLabels.map((pref) => (
               <div key={pref.id} className="space-y-2 relative">
                 {openSliderInfo === pref.id && (
-                  <div className="text-xs text-gray-700 dark:text-gray-200 bg-purple-50 dark:bg-gray-700 border border-purple-200 dark:border-gray-600 rounded-lg p-2">
+                  <div className="text-xs text-gray-200 bg-white/10 border border-purple-300/20 rounded-xl p-2">
                     {pref.info}
                   </div>
                 )}
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.label}</span>
+                  <span className="text-sm font-medium text-gray-100">{pref.label}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-gray-900 dark:text-gray-100">{pref.opposite}</span>
+                    <span className="text-sm font-medium text-gray-100">{pref.opposite}</span>
                     <button
                       type="button"
                       onClick={() => setOpenSliderInfo(openSliderInfo === pref.id ? null : pref.id)}
-                      className="w-5 h-5 rounded-full border border-purple-400 text-purple-600 text-xs font-bold flex items-center justify-center hover:bg-purple-50 dark:hover:bg-gray-700"
+                      className="w-5 h-5 rounded-full border border-purple-400 text-purple-300 text-xs font-bold flex items-center justify-center hover:bg-white/10"
                       aria-label={`More info for ${pref.id}`}
                     >
                       i
@@ -567,7 +567,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
                   max="100"
                   value={preferences[pref.id]}
                   onChange={(e) => handlePreferenceChange(pref.id, parseInt(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-purple-600"
                 />
               </div>
             ))}
@@ -575,7 +575,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
           <button
             onClick={handlePreferencesNext}
-            className="w-full px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+            className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
           >
             {skipChat ? 'Complete Profile' : 'Continue to Chat'}
           </button>
@@ -586,24 +586,24 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
   if (section === 'chat') {
     return (
-      <div className="h-[100dvh] bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-2 sm:px-4 sm:py-8">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-none sm:rounded-lg shadow-lg p-3 sm:p-8 flex flex-col h-[100dvh] sm:h-[calc(100dvh-4rem)]">
-          <h1 className="text-2xl font-bold mb-4 dark:text-white">Let's Chat</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+      <div className="h-[100dvh] bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 px-2 sm:px-4 sm:py-8">
+        <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl rounded-none sm:rounded-2xl border-0 sm:border border-purple-300/20 p-3 sm:p-8 flex flex-col h-[100dvh] sm:h-[calc(100dvh-4rem)]">
+          <h1 className="text-2xl font-bold mb-4 text-white">Let's Chat</h1>
+          <p className="text-gray-300 mb-4 text-sm">
             {t('ui.onboarding.chat.intro', userLang, { count: chatQuestions.length })}
           </p>
 
-          <div ref={chatContainerRef} className="flex-1 overflow-y-auto overscroll-contain space-y-4 mb-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto overscroll-contain space-y-4 mb-3 p-3 sm:p-4 bg-white/5 rounded-xl">
             {chatHistory.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
+                  className={`max-w-[80%] p-3 rounded-xl ${
                     msg.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-800 dark:text-gray-100'
+                      : 'bg-white/10 border border-purple-300/20 text-gray-200'
                   }`}
                 >
                   {msg.role === 'assistant'
@@ -614,8 +614,8 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 p-3 rounded-lg">
-                  <span className="animate-pulse dark:text-gray-100">Thinking...</span>
+                <div className="bg-white/10 border border-purple-300/20 p-3 rounded-xl">
+                  <span className="animate-pulse text-gray-300">Thinking...</span>
                 </div>
               </div>
             )}
@@ -624,12 +624,12 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
 
           {!chatComplete ? (
             <form onSubmit={handleChatSubmit} className="mt-auto flex gap-2 items-end pb-[calc(env(safe-area-inset-bottom)+0.25rem)]">
-              <div className="flex-1 flex items-end border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700">
+              <div className="flex-1 flex items-end border border-purple-300/30 rounded-xl px-3 py-2 bg-white/10">
                 <textarea
                   value={currentMessage}
                   onChange={(e) => setCurrentMessage(e.target.value)}
                   placeholder={t('ui.onboarding.chat.audio.hint', userLang)}
-                  className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
+                  className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
                   disabled={loading}
                   autoComplete="off"
                   rows={1}
@@ -669,7 +669,7 @@ export default function OnboardingClient({ userId, skipChat = false }: Onboardin
             </form>
           ) : (
             <div className="text-center py-4">
-              <p className="text-gray-600 dark:text-gray-300">Generating your profile...</p>
+              <p className="text-gray-300">Generating your profile...</p>
             </div>
           )}
         </div>

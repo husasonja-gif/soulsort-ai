@@ -176,7 +176,8 @@ export default function BMNLRadarChart({ data }: BMNLRadarChartProps) {
                     y={labelY + dy + (wordIndex - (words.length - 1) / 2) * lineHeight}
                     textAnchor={textAnchor}
                     dominantBaseline="middle"
-                    className="font-semibold fill-gray-800"
+                    className="font-semibold"
+                    fill="#e9d5ff"
                     style={{ 
                       fontSize: '20px',
                     }}
@@ -191,7 +192,8 @@ export default function BMNLRadarChart({ data }: BMNLRadarChartProps) {
                   y={labelY + dy}
                   textAnchor={textAnchor}
                   dominantBaseline="middle"
-                  className="font-semibold fill-gray-800"
+                  className="font-semibold"
+                  fill="#e9d5ff"
                   style={{ 
                     fontSize: '22px',
                   }}

@@ -118,10 +118,10 @@ function ParticipantDetailContent() {
 
   if (authenticating || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{authenticating ? 'Checking authentication...' : 'Loading...'}</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-gray-300">{authenticating ? 'Checking authentication...' : 'Loading...'}</p>
         </div>
       </div>
     )
@@ -129,10 +129,10 @@ function ParticipantDetailContent() {
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
         <div className="text-center">
-          <p className="text-gray-600">No data found</p>
-          <Link href="/bmnl/organizer" className="text-purple-600 hover:underline mt-4 block">
+          <p className="text-gray-300">No data found</p>
+          <Link href="/bmnl/organizer" className="text-purple-300 hover:underline mt-4 block">
             ← Back to Organizer Dashboard
           </Link>
         </div>
@@ -294,10 +294,10 @@ function ParticipantDetailContent() {
 export default function ParticipantDetailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
+          <p className="text-gray-300">Loading...</p>
         </div>
       </div>
     }>

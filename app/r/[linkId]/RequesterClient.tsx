@@ -677,36 +677,36 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   if (flowState === 'intro') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
-          <h1 className="text-3xl font-bold mb-4 text-purple-600">Save time, test the vibe</h1>
-          <p className="text-gray-700 mb-4 text-lg">
+        <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-8 text-center">
+          <h1 className="text-3xl font-bold mb-4 text-purple-300">Save time, test the vibe</h1>
+          <p className="text-gray-200 mb-4 text-lg">
             Just 9 questions. Get clarity if they are worth your time. You keep the results, they can only see them if you want them to.
           </p>
-          <p className="text-sm text-gray-500 mb-6">
+          <p className="text-sm text-gray-400 mb-6">
             Your responses are analyzed by AI and compared against their profile. No raw data is stored-only compatibility metrics.
           </p>
           
           {/* Analytics consent toggle - privacy-first, default OFF */}
-          <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div className="mb-6 p-4 bg-white/10 rounded-xl border border-purple-300/20">
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
                 checked={analyticsOptIn}
                 onChange={(e) => setAnalyticsOptIn(e.target.checked)}
-                className="mt-1 w-4 h-4 text-purple-600 rounded"
+                className="mt-1 w-4 h-4 text-purple-600 rounded accent-purple-600"
               />
-              <span className="text-sm text-gray-700 dark:text-gray-300">
+              <span className="text-sm text-gray-300">
                 I consent to anonymized analytics being used to improve SoulSort (no raw answers stored).
               </span>
             </label>
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 ml-7">
+            <p className="text-xs text-gray-400 mt-2 ml-7">
               Optional. You can still complete the vibe check without this.
             </p>
           </div>
           
           <button
             onClick={handleStart}
-            className="px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+            className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
           >
             Start vibe check
           </button>
@@ -718,18 +718,18 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
   if (flowState === 'consent-denied') {
     return (
       <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-8">
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-gray-50 rounded-lg">
+        <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-8">
+          <div className="flex-1 overflow-y-auto space-y-4 mb-4 p-4 bg-white/5 rounded-xl">
             {chatHistory.map((msg, idx) => (
               <div
                 key={idx}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[80%] p-3 rounded-lg ${
+                  className={`max-w-[80%] p-3 rounded-xl ${
                     msg.role === 'user'
                       ? 'bg-purple-600 text-white'
-                      : 'bg-white border border-gray-200 text-gray-800'
+                      : 'bg-white/10 border border-purple-300/20 text-gray-200'
                   }`}
                 >
                   {msg.content}
@@ -767,21 +767,21 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
     const hasQuickReplyFieldCaptured = quickReplyField ? !!structuredFields[quickReplyField] : false
     
     return (
-      <div className="h-[100dvh] bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-2 sm:px-4 sm:py-8">
-        <div className="max-w-3xl mx-auto bg-white dark:bg-gray-800 rounded-none sm:rounded-lg shadow-lg p-3 sm:p-8 flex flex-col h-[100dvh] sm:h-[calc(100dvh-4rem)]">
-          <h1 className="text-2xl font-bold mb-4 text-purple-600 dark:text-purple-400">Vibe-check</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm">
+      <div className="h-[100dvh] bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 px-2 sm:px-4 sm:py-8">
+        <div className="max-w-3xl mx-auto bg-white/10 backdrop-blur-xl rounded-none sm:rounded-2xl border-0 sm:border border-purple-300/20 p-3 sm:p-8 flex flex-col h-[100dvh] sm:h-[calc(100dvh-4rem)]">
+          <h1 className="text-2xl font-bold mb-4 text-purple-300">Vibe-check</h1>
+          <p className="text-gray-300 mb-4 text-sm">
             You'll get the best results by answering honestly and reflectively on what feels true for you in this moment.
           </p>
-          <p className="text-gray-500 dark:text-gray-400 mb-4 text-xs">
+          <p className="text-gray-400 mb-4 text-xs">
             You can answer in any language.
           </p>
-          <div className="mb-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="mb-3 flex items-center gap-2 text-xs text-gray-400">
             <span>Voice language</span>
             <select
               value={voiceLang}
               onChange={(e) => setVoiceLang(e.target.value as VoiceLangOption)}
-              className="px-2 py-1 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200"
+              className="px-2 py-1 rounded-lg border border-purple-300/30 bg-white/10 text-gray-200"
             >
               <option value="auto">Auto (browser)</option>
               <option value="sv-SE">Svenska</option>
@@ -799,17 +799,17 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             </select>
           </div>
 
-          <div ref={chatContainerRef} className="flex-1 overflow-y-auto overscroll-contain space-y-4 mb-3 p-3 sm:p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+          <div ref={chatContainerRef} className="flex-1 overflow-y-auto overscroll-contain space-y-4 mb-3 p-3 sm:p-4 bg-white/5 rounded-xl">
             {chatHistory.map((msg, idx) => (
               <div key={idx} className="space-y-2">
                 <div
                   className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] p-3 rounded-lg ${
+                    className={`max-w-[80%] p-3 rounded-xl ${
                       msg.role === 'user'
                         ? 'bg-purple-600 text-white'
-                        : 'bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 text-gray-800 dark:text-gray-100'
+                        : 'bg-white/10 border border-purple-300/20 text-gray-200'
                     }`}
                   >
                     {msg.content}
@@ -820,8 +820,8 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             ))}
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-gray-600 border border-gray-200 dark:border-gray-500 p-3 rounded-lg">
-                  <span className="animate-pulse dark:text-gray-100">Thinking...</span>
+                <div className="bg-white/10 border border-purple-300/20 p-3 rounded-xl">
+                  <span className="animate-pulse text-gray-300">Thinking...</span>
                 </div>
               </div>
             )}
@@ -835,7 +835,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
                 <button
                   key={idx}
                   onClick={() => handleQuickReplySelect(option, currentQuestionIndex)}
-                  className="px-4 py-2 bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-200 rounded-full text-sm font-medium hover:bg-purple-200 dark:hover:bg-purple-800 transition-colors border border-purple-300 dark:border-purple-700"
+                  className="px-4 py-2 bg-white/10 text-purple-200 rounded-full text-sm font-medium hover:bg-white/20 transition-colors border border-purple-300/30"
                   disabled={loading}
                 >
                   {option.label}
@@ -844,7 +844,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
             </div>
           )}
           <form onSubmit={handleChatSubmit} className="mt-auto flex gap-2 items-end pb-[calc(env(safe-area-inset-bottom)+0.25rem)]">
-            <div className="flex-1 flex items-end border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700">
+            <div className="flex-1 flex items-end border border-purple-300/30 rounded-xl px-3 py-2 bg-white/10">
               <textarea
                 value={currentMessage}
                 onChange={(e) => setCurrentMessage(e.target.value)}
@@ -853,7 +853,7 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
                     ? 'Or answer in any language...'
                     : 'Answer in any language...'
                 }
-                className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
+                className="flex-1 bg-transparent border-none focus:outline-none text-white placeholder-gray-400 resize-none overflow-y-auto min-h-[40px] max-h-[140px]"
                 disabled={loading}
                 autoComplete="off"
                 rows={1}
@@ -897,19 +897,19 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
 
   if (flowState === 'results' && assessment) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 py-12 px-4">
-        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-          <h1 className="text-3xl font-bold mb-2 text-center text-purple-600">Compatibility Results</h1>
+      <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950 to-gray-900 py-12 px-4">
+        <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-8">
+          <h1 className="text-3xl font-bold mb-2 text-center text-purple-300">Compatibility Results</h1>
 
           {/* Summary */}
-          <div className="bg-purple-50 dark:bg-purple-950/30 rounded-lg p-6 mb-8">
-            <h2 className="font-semibold text-lg mb-3 text-purple-600">Summary</h2>
-            <p className="text-gray-700 dark:text-gray-200">{assessment.summary}</p>
+          <div className="bg-white/10 rounded-2xl border border-purple-300/20 p-6 mb-8">
+            <h2 className="font-semibold text-lg mb-3 text-purple-300">Summary</h2>
+            <p className="text-gray-200">{assessment.summary}</p>
           </div>
 
           {/* Radar Overlay */}
           <div className="mb-8">
-            <h2 className="font-semibold text-lg mb-4 text-center text-purple-600">Radar Comparison</h2>
+            <h2 className="font-semibold text-lg mb-4 text-center text-purple-300">Radar Comparison</h2>
             <RadarOverlay
               userData={assessment.userRadar}
               requesterData={assessment.requesterRadar}
@@ -931,13 +931,13 @@ export default function RequesterClient({ linkId, userId }: RequesterClientProps
           <FeedbackSection linkId={linkId} />
 
           {/* CTA to create account */}
-          <div className="text-center mt-8 pt-8 border-t border-gray-200">
-            <p className="text-gray-700 mb-4">
+          <div className="text-center mt-8 pt-8 border-t border-purple-300/20">
+            <p className="text-gray-300 mb-4">
               Want to create your own vibe-check link and see how others match with you?
             </p>
             <a
               href="/login"
-              className="inline-block px-8 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+              className="inline-block px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-semibold hover:opacity-90 transition-opacity"
             >
               Create Your Profile
             </a>
@@ -979,23 +979,23 @@ function FeedbackSection({ linkId }: { linkId: string }) {
 
   if (submitted) {
     return (
-      <div className="text-center mt-6 pt-6 border-t border-gray-200">
-        <p className="text-sm text-gray-600">Thank you for your feedback!</p>
+      <div className="text-center mt-6 pt-6 border-t border-purple-300/20">
+        <p className="text-sm text-gray-400">Thank you for your feedback!</p>
       </div>
     )
   }
 
   return (
-    <div className="mt-8 pt-8 border-t border-gray-200">
-      <p className="text-center text-gray-700 mb-4 font-medium">Does the result resonate?</p>
+    <div className="mt-8 pt-8 border-t border-purple-300/20">
+      <p className="text-center text-gray-300 mb-4 font-medium">Does the result resonate?</p>
       <div className="flex gap-4 justify-center">
         <button
           onClick={() => handleFeedback('positive')}
           disabled={feedback !== null}
-          className={`px-6 py-3 rounded-lg font-semibold transition-colors border-2 ${
+          className={`px-6 py-3 rounded-xl font-semibold transition-colors border-2 ${
             feedback === 'positive'
-              ? 'bg-white text-purple-600 border-purple-600'
-              : 'bg-white text-purple-600 border-purple-600 hover:bg-purple-50'
+              ? 'bg-purple-600 text-white border-purple-600'
+              : 'bg-white/10 text-purple-300 border-purple-400/40 hover:bg-white/20'
           } disabled:opacity-50`}
         >
           Yeah, that landed
@@ -1003,10 +1003,10 @@ function FeedbackSection({ linkId }: { linkId: string }) {
         <button
           onClick={() => handleFeedback('negative')}
           disabled={feedback !== null}
-          className={`px-6 py-3 rounded-lg font-semibold transition-colors border-2 ${
+          className={`px-6 py-3 rounded-xl font-semibold transition-colors border-2 ${
             feedback === 'negative'
-              ? 'bg-white text-purple-600 border-purple-600'
-              : 'bg-white text-purple-600 border-purple-600 hover:bg-purple-50'
+              ? 'bg-purple-600 text-white border-purple-600'
+              : 'bg-white/10 text-purple-300 border-purple-400/40 hover:bg-white/20'
           } disabled:opacity-50`}
         >
           Hmm, not quite

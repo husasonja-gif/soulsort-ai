@@ -26,13 +26,13 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
       // Wait for rendering to complete
       await new Promise(resolve => setTimeout(resolve, 300))
       
-      // Force white background for PNG and convert all colors to hex
+      // Force dark background for PNG
       const originalBg = cardRef.current.style.backgroundColor
-      cardRef.current.style.backgroundColor = '#ffffff'
+      cardRef.current.style.backgroundColor = '#0b0a14'
       
       try {
         const canvas = await html2canvas(cardRef.current, {
-          backgroundColor: '#ffffff',
+          backgroundColor: '#0b0a14',
           scale: 2,
           logging: false,
           useCORS: true,
@@ -149,17 +149,12 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
     <div className="w-full max-w-lg mx-auto">
       <div
         ref={cardRef}
-        className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
-        style={{ 
-          minHeight: '400px',
-          backgroundColor: '#ffffff',
-          color: '#1f2937',
-          borderColor: '#e5e7eb'
-        }}
+        className="bg-white/10 backdrop-blur-xl p-6 sm:p-8 rounded-2xl border border-purple-300/20"
+        style={{ minHeight: '400px' }}
       >
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-purple-600 dark:text-purple-400 mb-1" style={{ color: '#9333ea' }}>SoulSort AI</h2>
-          <p className="text-gray-600 dark:text-gray-300 text-sm" style={{ color: '#4b5563' }}>Curious how we align?</p>
+          <h2 className="text-2xl font-bold text-purple-300 mb-1">SoulSort AI</h2>
+          <p className="text-gray-300 text-sm">Curious how we align?</p>
         </div>
 
         <div className="flex items-center justify-center mb-6">
@@ -180,8 +175,8 @@ export default function ShareCard({ radarData, shareLink }: ShareCardProps) {
         </div>
 
         <div className="text-center mb-4">
-          <p className="text-xs text-gray-500 dark:text-gray-400 break-all font-mono" style={{ color: '#6b7280' }}>{shareLink}</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1" style={{ color: '#9ca3af' }}>soulsort.ai - privacy-first - {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
+          <p className="text-xs text-gray-400 break-all font-mono">{shareLink}</p>
+          <p className="text-xs text-gray-500 mt-1">soulsort.ai - privacy-first - {new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</p>
         </div>
       </div>
 

@@ -49,9 +49,9 @@ function DotBar({
   const range = projectRangeWithNuance(zoneStart, zoneEnd)
   return (
     <div className="space-y-1">
-      <div className="hidden sm:flex items-center gap-2 text-sm text-gray-800 dark:text-gray-200">
+      <div className="hidden sm:flex items-center gap-2 text-sm text-gray-300">
         <span className="whitespace-nowrap">{leftLabel}</span>
-        <div className="relative flex-1 min-w-[110px] h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative flex-1 min-w-[110px] h-[1px] bg-gray-500 rounded">
           <span
             className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
             style={{
@@ -64,7 +64,7 @@ function DotBar({
         <span className="whitespace-nowrap">{rightLabel}</span>
       </div>
       <div className="sm:hidden space-y-1">
-        <div className="relative h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative h-[1px] bg-gray-500 rounded">
           <span
             className="absolute top-1/2 -translate-y-1/2 h-[6px] rounded shadow-[0_0_0_1px_rgba(167,139,250,0.15)]"
             style={{
@@ -74,7 +74,7 @@ function DotBar({
             }}
           />
         </div>
-        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-800 dark:text-gray-200">
+        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-300">
           <span className="leading-tight">{leftLabel}</span>
           <span className="text-right leading-tight">{rightLabel}</span>
         </div>
@@ -112,7 +112,7 @@ function ComparisonBar({
         <span style={{ color: THEM_COLOR }}>Them</span>
       </div>
       <div className="space-y-1">
-        <div className="relative h-[1px] bg-gray-700 dark:bg-gray-300 rounded">
+        <div className="relative h-[1px] bg-gray-500 rounded">
           <span
             className="absolute top-1/2 -translate-y-[calc(50%+4px)] h-[6px] rounded shadow-[0_0_0_1px_rgba(236,72,153,0.15)]"
             style={{
@@ -130,7 +130,7 @@ function ComparisonBar({
             }}
           />
         </div>
-        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-800 dark:text-gray-200">
+        <div className="flex items-start justify-between gap-3 text-[12px] text-gray-300">
           <span className="leading-tight">{leftLabel}</span>
           <span className="text-right leading-tight">{rightLabel}</span>
         </div>
@@ -151,14 +151,14 @@ function InsightCard({
   onReveal: () => void
 }) {
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white/60 dark:bg-gray-800/60 p-4">
+    <div className="border border-purple-300/20 rounded-xl bg-white/10 backdrop-blur-sm p-4">
       <button
         type="button"
         onClick={onReveal}
         className="w-full text-left flex items-center justify-between gap-3"
       >
-        <div className="font-semibold text-gray-900 dark:text-gray-100">{area.title}</div>
-        {!expanded && <div className="text-xs text-gray-500 dark:text-gray-400">In words</div>}
+        <div className="font-semibold text-white">{area.title}</div>
+        {!expanded && <div className="text-xs text-purple-300">In words</div>}
       </button>
 
       <div className="mt-3 space-y-3">
@@ -210,7 +210,7 @@ function InsightCard({
       </div>
 
       {expanded && (
-        <div className="mt-4 text-sm text-gray-700 dark:text-gray-300 leading-relaxed border-t border-gray-100 dark:border-gray-700 pt-4">
+        <div className="mt-4 text-sm text-gray-300 leading-relaxed border-t border-purple-300/20 pt-4">
           {area.insight}
         </div>
       )}
@@ -245,9 +245,9 @@ export default function DeepInsightsSection({
   }, [mode, userRadar, requesterRadar, userPreferences, requesterPreferences, userSignalScores, requesterSignalScores])
 
   return (
-    <section className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+    <section className="bg-white/10 backdrop-blur-xl rounded-2xl border border-purple-300/20 p-6 mb-6">
       <div className="flex items-center justify-between gap-4 mb-4">
-        <h2 className="text-xl font-semibold text-purple-600 dark:text-purple-400">Deep Insights</h2>
+        <h2 className="text-xl font-semibold text-purple-300">Deep Insights</h2>
       </div>
 
       <div className="space-y-4">

@@ -143,12 +143,12 @@ export default function RadarOverlay({ userData, requesterData }: RadarOverlayPr
         <div
           className={
             isMobile
-              ? 'mb-3 w-full rounded-2xl px-3 py-2 bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/70 dark:to-purple-800/40 text-gray-800 dark:text-gray-100 shadow-sm'
-              : 'absolute z-20 left-1/2 -translate-x-1/2 top-2 max-w-xl rounded-2xl px-4 py-3 bg-gradient-to-r from-purple-100 to-purple-50 dark:from-purple-900/70 dark:to-purple-800/40 text-gray-800 dark:text-gray-100 shadow-sm'
+              ? 'mb-3 w-full rounded-2xl px-3 py-2 bg-purple-900/70 backdrop-blur-sm border border-purple-300/20 text-gray-100 shadow-sm'
+              : 'absolute z-20 left-1/2 -translate-x-1/2 top-2 max-w-xl rounded-2xl px-4 py-3 bg-purple-900/70 backdrop-blur-sm border border-purple-300/20 text-gray-100 shadow-sm'
           }
         >
           <div className="flex items-start gap-2">
-            <span className="mt-0.5 w-5 h-5 rounded-full border border-purple-400 text-purple-600 text-xs font-bold flex items-center justify-center bg-white/70 dark:bg-gray-900/40">
+            <span className="mt-0.5 w-5 h-5 rounded-full border border-purple-400 text-purple-300 text-xs font-bold flex items-center justify-center bg-gray-900/60">
               i
             </span>
             <p className="text-xs sm:text-sm leading-snug">{AXIS_DESCRIPTIONS[hoveredAxis]}</p>
