@@ -4,16 +4,16 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: "/edge/",
-        destination: "https://soulsort-edge.vercel.app/edge/beta",
+        source: "/edge",
+        destination: "https://soulsort-edge.vercel.app/edge",
       },
       {
         source: "/edge/",
-        destination: "https://soulsort-edge.vercel.app/edge/beta/",
+        destination: "https://soulsort-edge.vercel.app/edge/",
       },
       {
         source: "/edge/:path*",
-        destination: "https://soulsort-edge.vercel.app/edge/beta/:path*",
+        destination: "https://soulsort-edge.vercel.app/edge/:path*",
       },
     ];
   },
