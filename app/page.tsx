@@ -322,7 +322,8 @@ export default function LandingPage() {
             Login
           </Link>
         </div>
-        <p>© 2025 SoulSort AI. Privacy-first vibe filtering.</p>
+        <p>© SoulSort AI. Privacy-first vibe filtering.</p>
+        <p className="mt-3 text-xs text-purple-100/30">KVK: 42049281 · VAT: NL005455917B63</p>
       </footer>
     </div>
     </>
