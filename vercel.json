@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/portal",
+      "destination": "https://soulsort-portal.vercel.app/portal"
+    },
+    {
+      "source": "/portal/:path*",
+      "destination": "https://soulsort-portal.vercel.app/portal/:path*"
+    }
+  ]
+}
