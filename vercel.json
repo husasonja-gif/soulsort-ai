@@ -7,6 +7,14 @@
     {
       "source": "/portal/:path*",
       "destination": "https://soulsort-portal.vercel.app/portal/:path*"
+    },
+    {
+      "source": "/edge",
+      "destination": "https://soulsort-edge.vercel.app/edge"
+    },
+    {
+      "source": "/edge/:path*",
+      "destination": "https://soulsort-edge.vercel.app/edge/:path*"
     }
   ]
 }

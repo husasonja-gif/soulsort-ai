@@ -55,11 +55,11 @@ const nextConfig: NextConfig = {
           source: "/portal/:path*",
           destination: `${PORTAL_URL}/portal/:path*`,
         },
-        { source: "/edge/beta", destination: `${EDGE_URL}/edge/beta` },
-        { source: "/edge/beta/", destination: `${EDGE_URL}/edge/beta/` },
+        { source: "/edge", destination: `${EDGE_URL}/edge` },
+        { source: "/edge/", destination: `${EDGE_URL}/edge/` },
         {
-          source: "/edge/beta/:path*",
-          destination: `${EDGE_URL}/edge/beta/:path*`,
+          source: "/edge/:path*",
+          destination: `${EDGE_URL}/edge/:path*`,
         },
       ],
     };
