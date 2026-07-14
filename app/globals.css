@@ -1,8 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0b0a14;
-  --foreground: #ededed;
+  --background: #050508;
+  --foreground: #e8e8ec;
+  --muted: #888894;
+  --accent: #ff2fd0;
+  --accent-dim: rgba(255, 47, 208, 0.35);
+  --border: #1a1a24;
+  --panel: #0c0c12;
 }
 
 @theme inline {
@@ -12,22 +17,60 @@
   --font-mono: var(--font-geist-mono);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* Mobile keyboard handling */
+.font-data {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
+}
+
+.glow-accent {
+  text-shadow: 0 0 32px var(--accent-dim);
+}
+
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom, 1rem);
 }
 
-/* Ensure inputs are visible on mobile when keyboard is open */
 @media (max-width: 640px) {
   input[type="text"],
   input[type="email"],
   textarea {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: 16px;
+  }
+}
+
+@keyframes pulse-enter {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse-enter {
+  animation: pulse-enter 2.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-enter {
+    animation: none;
+    opacity: 1;
   }
 }

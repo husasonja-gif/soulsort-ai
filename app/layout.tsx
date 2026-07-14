@@ -14,23 +14,34 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://soulsortai.com'
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://soulsortai.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
-  title: "SoulSort AI - A Vibe-Check Engine",
-  description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+  title: {
+    default: "SoulSort PORTAL — Hype & onboarding for high-trust spaces",
+    template: "%s | SoulSort PORTAL",
+  },
+  description:
+    "The world's first hype-and-onboarding tool for raves, festivals, and sex-positive parties. Attendees arrive prepared; organizers get anonymous crowd insight — never individual answers.",
   openGraph: {
-    title: "SoulSort AI - A Vibe-Check Engine",
-    description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+    title: "SoulSort PORTAL — Hype & onboarding for high-trust spaces",
+    description:
+      "Behavioural onboarding for high-trust spaces. Anonymous play, aggregate crowd reads, API-ready for your RSVP flow.",
     type: "website",
     url: appUrl,
-    siteName: "SoulSort AI",
+    siteName: "SoulSort",
+    locale: "en_GB",
   },
   twitter: {
-    card: "summary",
-    title: "SoulSort AI - A Vibe-Check Engine",
-    description: "Map how you connect & spark better conversations. Share your radar. Compare alignment before you invest energy.",
+    card: "summary_large_image",
+    title: "SoulSort PORTAL",
+    description:
+      "The world's first hype-and-onboarding tool for high-trust spaces.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
@@ -44,9 +55,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
         <Analytics />
       </body>
     </html>
