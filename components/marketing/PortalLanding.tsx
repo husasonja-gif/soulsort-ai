@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { PortalBannerHero } from "@/components/marketing/PortalBannerHero";
 import { PortalVotingDemo } from "@/components/marketing/PortalVotingDemo";
-import { AttendeeDashboardMockup } from "@/components/marketing/AttendeeDashboardMockup";
-import { OrganizerDashboardMockups } from "@/components/marketing/OrganizerDashboardMockups";
+import { ParticipantDashboardShowcase } from "@/components/marketing/ParticipantDashboardShowcase";
+import { OrganizerShowcaseGrid } from "@/components/marketing/OrganizerShowcaseGrid";
 import { OrganizerWaitlistForm } from "@/components/marketing/OrganizerWaitlistForm";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
@@ -119,7 +119,7 @@ export function PortalLanding() {
 
       {/* 5. Dashboards */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-7xl">
           <h2 className="text-center text-3xl font-bold leading-tight sm:text-4xl">
             Feedback is how we evolve: SoulSort shows you where you are at, both as a
             participant and as an organizer.
@@ -128,19 +128,13 @@ export function PortalLanding() {
             Organizers see the crowd — never an individual&apos;s answers. Pre-aggregated
             only, with a k-anonymity floor.
           </p>
-          <div className="mt-12 grid gap-10 md:grid-cols-2 md:items-start">
-            <div>
-              <h3 className="mb-4 text-center font-data text-xs uppercase tracking-widest text-[var(--accent)]">
-                Participant
-              </h3>
-              <AttendeeDashboardMockup />
-            </div>
-            <div>
-              <h3 className="mb-4 text-center font-data text-xs uppercase tracking-widest text-[var(--accent)]">
-                Organizer
-              </h3>
-              <OrganizerDashboardMockups />
-            </div>
+
+          <div className="mt-16 flex justify-center">
+            <ParticipantDashboardShowcase />
+          </div>
+
+          <div className="mt-20">
+            <OrganizerShowcaseGrid />
           </div>
         </div>
       </section>

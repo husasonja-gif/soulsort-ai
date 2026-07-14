@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SoulSort Portal — voting demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; background: #06040a; overflow: hidden; }
+    canvas { display: block; width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <canvas id="c" width="1080" height="1080"></canvas>
+  <script>
+    const W = 1080;
+    const H = 1080;
+    const canvas = document.getElementById("c");
+    const ctx = canvas.getContext("2d");
+
+    const RESISTANCE_GAIN = 5.5;
+    const PORTAL_RX = 0.74;
+    const PORTAL_RY = 1.02;
+    const PORTAL_OUTER = 0.44;
+    const PORTAL_INNER = 0.22;
+    /** Square play field — matches PortalOrbitField viewBox (-1..1), sized for center gap. */
+    const FIELD_SIZE = Math.round(W * 0.46);
+    const FIELD_HALF = FIELD_SIZE / 2;
+    const LOOP_SEC = 8;
+    const FPS = 30;
+    const ACCENT = "#ff2fd0";
+
+    const STATEMENT = "You messed up.";
+    const PROMPT = "How would you try to fix things?";
+
+    const PORTAL_META = {
+      desire: { name: "DESIRE", gift: "deep intimacy", shadow: "taking without seeing", deg: 45 },
+      power: { name: "POWER", gift: "taking up space", shadow: "shrinking others", deg: 135 },
+      community: { name: "COMMUNITY", gift: "belonging", shadow: "policing", deg: 225 },
+      safety: { name: "SAFETY", gift: "peace", shadow: "avoiding life", deg: 315 },
+    };
+
+    const PORTAL_RING = ["desire", "power", "community", "safety"];
+    const COMMUNITY = portalCenter("community");
+    const SAFETY = portalCenter("safety");
+
+    function portalCenter(id) {
+      const rad = (PORTAL_META[id].deg * Math.PI) / 180;
+      return {
+        id,
+        x: Math.cos(rad) * PORTAL_RX,
+        y: -Math.sin(rad) * PORTAL_RY,
+      };
+    }
+
+    function fieldToScreen(fx, fy) {
+      const cx = W / 2;
+      const cy = H / 2;
+      return { x: cx + fx * FIELD_HALF, y: cy + fy * FIELD_HALF };
+    }
+
+    function fieldRadius(r) {
+      return r * FIELD_HALF;
+    }
+
+    function hypot(x, y) {
+      return Math.sqrt(x * x + y * y);
+    }
+
+    function commitmentRadius(x, y, target) {
+      const dist = hypot(x, y);
+      const entry = hypot(target.x, target.y);
+      return entry > 0 ? Math.min(1, Math.max(0, dist / entry)) : 0;
+    }
+
+    function applyResistance(fromX, fromY, toX, toY, target) {
+      const dx = toX - fromX;
+      const dy = toY - fromY;
+      const rFrom = commitmentRadius(fromX, fromY, target);
+      const rTo = commitmentRadius(toX, toY, target);
+      const r = Math.max(rFrom, rTo);
+      const movingOutward = hypot(toX, toY) > hypot(fromX, fromY) + 0.004;
+      const gain = movingOutward ? RESISTANCE_GAIN : RESISTANCE_GAIN * 0.4;
+      const resistance = 1 + gain * Math.pow(r, 1.5);
+      let nx = fromX + dx / resistance;
+      let ny = fromY + dy / resistance;
+      const dist = hypot(nx, ny);
+      if (dist > 1) {
+        nx /= dist;
+        ny /= dist;
+      }
+      return { x: nx, y: ny };
+    }
+
+    /** Community dwell → reversal → Safety landing. */
+    function buildPath() {
+      const points = [{ x: 0, y: 0, t: 0, phase: "start" }];
+      let x = 0;
+      let y = 0;
+      let t = 0;
+
+      const steps = [
+        // pick up + move toward community
+        { raw: [-0.06, 0.08], ms: 180, target: COMMUNITY },
+        { raw: [-0.18, 0.22], ms: 220, target: COMMUNITY },
+        { raw: [-0.32, 0.42], ms: 260, target: COMMUNITY },
+        { raw: [-0.44, 0.58], ms: 300, target: COMMUNITY },
+        // dwell at community
+        { raw: [COMMUNITY.x * 0.88, COMMUNITY.y * 0.9], ms: 340, target: COMMUNITY },
+        { raw: [COMMUNITY.x * 0.94, COMMUNITY.y * 0.95], ms: 420, target: COMMUNITY },
+        { raw: [COMMUNITY.x * 0.97, COMMUNITY.y * 0.97], ms: 380, target: COMMUNITY },
+        // hesitation / reversal toward safety
+        { raw: [COMMUNITY.x * 0.82, COMMUNITY.y * 0.86], ms: 140, target: COMMUNITY },
+        { raw: [-0.1, 0.55], ms: 200, target: SAFETY },
+        { raw: [0.12, 0.62], ms: 240, target: SAFETY },
+        { raw: [0.34, 0.68], ms: 280, target: SAFETY },
+        { raw: [SAFETY.x * 0.9, SAFETY.y * 0.92], ms: 260, target: SAFETY },
+        { raw: [SAFETY.x, SAFETY.y], ms: 160, target: SAFETY },
+      ];
+
+      for (const s of steps) {
+        const next = applyResistance(x, y, s.raw[0], s.raw[1], s.target);
+        x = next.x;
+        y = next.y;
+        t += s.ms;
+        points.push({ x, y, t, phase: s.target.id });
+      }
+      return { points, totalMs: t, reversals: 1, dwellCommunityMs: 1140 };
+    }
+
+    const PATH = buildPath();
+
+    function pathAtMs(ms) {
+      const loopMs = PATH.totalMs + 1600;
+      const m = ms % loopMs;
+      if (m > PATH.totalMs) {
+        const p = PATH.points[PATH.points.length - 1];
+        const fade = (m - PATH.totalMs) / 1600;
+        return {
+          x: p.x,
+          y: p.y,
+          trail: PATH.points,
+          absorbed: true,
+          fade,
+          dragging: false,
+          landedPortal: "safety",
+        };
+      }
+      const pts = PATH.points;
+      for (let i = 1; i < pts.length; i++) {
+        if (m <= pts[i].t) {
+          const a = pts[i - 1];
+          const b = pts[i];
+          const u = (m - a.t) / (b.t - a.t);
+          const x = a.x + (b.x - a.x) * u;
+          const y = a.y + (b.y - a.y) * u;
+          const trail = pts.slice(0, i).concat([{ x, y, t: m }]);
+          return {
+            x,
+            y,
+            trail,
+            absorbed: false,
+            fade: 0,
+            dragging: m > 120,
+            landedPortal: null,
+          };
+        }
+      }
+      const last = pts[pts.length - 1];
+      return {
+        x: last.x,
+        y: last.y,
+        trail: pts,
+        absorbed: false,
+        fade: 0,
+        dragging: true,
+        landedPortal: null,
+      };
+    }
+
+    const METRICS = [
+      { key: "decision_speed", value: "1.18s", start: 0.07 },
+      { key: "latency", value: "4.21s", start: 0.2 },
+      { key: "dwell_community", value: "684ms", start: 0.42 },
+      { key: "reversal", value: "1", start: 0.58 },
+    ];
+
+    function wrapText(text, maxWidth, fontSize, font) {
+      ctx.font = font;
+      const words = text.split(" ");
+      const lines = [];
+      let line = "";
+      for (const word of words) {
+        const test = line ? line + " " + word : word;
+        if (ctx.measureText(test).width > maxWidth && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+      if (line) lines.push(line);
+      return lines;
+    }
+
+    function drawBackground() {
+      const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.55);
+      g.addColorStop(0, "#120a1c");
+      g.addColorStop(1, "#06040a");
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+
+      // node field dots — center cluster like gameplay
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      const cx = W / 2;
+      const cy = H / 2;
+      for (let i = 0; i < 28; i++) {
+        const a = (i / 28) * Math.PI * 2;
+        const r = 8 + (i % 6) * 7;
+        const px = cx + Math.cos(a) * r;
+        const py = cy + Math.sin(a) * r;
+        ctx.beginPath();
+        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    function drawPortals(t, activePortal) {
+      const pulse = 0.5 + 0.5 * Math.sin(t * Math.PI * 2 * 1.2);
+      const outerR = fieldRadius(PORTAL_OUTER);
+      const innerR = fieldRadius(PORTAL_INNER);
+      const TEXT_MUTED = "#aeaebc";
+
+      for (const id of PORTAL_RING) {
+        const p = portalCenter(id);
+        const { x, y } = fieldToScreen(p.x, p.y);
+        const meta = PORTAL_META[id];
+        const isActive = activePortal === id;
+        const ringPulse = isActive ? 1 + pulse * 0.08 : 1;
+
+        ctx.save();
+        ctx.strokeStyle = `rgba(255, 47, 208, ${isActive ? 0.9 : 0.78})`;
+        ctx.lineWidth = isActive ? 2.5 + pulse * 1.5 : 2;
+        ctx.shadowColor = ACCENT;
+        ctx.shadowBlur = isActive ? 16 + pulse * 10 : 8;
+        ctx.fillStyle = isActive ? "rgba(255,47,208,0.12)" : "rgba(255,47,208,0.1)";
+        ctx.beginPath();
+        ctx.arc(x, y, outerR * ringPulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = isActive ? "rgba(255,47,208,0.05)" : "rgba(255,47,208,0.03)";
+        ctx.strokeStyle = "rgba(255,47,208,0.32)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.arc(x, y, innerR * ringPulse, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // door-screen labels — centered inside portal (pic 2)
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        const nameSize = Math.round(FIELD_SIZE * 0.042);
+        const lineSize = Math.round(FIELD_SIZE * 0.028);
+        const lineGap = Math.round(FIELD_SIZE * 0.034);
+        const blockH = nameSize + lineGap * 2 + lineSize * 2;
+        let ly = y - blockH / 2 + nameSize / 2;
+
+        ctx.font = `600 ${nameSize}px "Consolas", "Courier New", monospace`;
+        ctx.fillStyle = ACCENT;
+        ctx.shadowColor = "rgba(255,47,208,0.35)";
+        ctx.shadowBlur = 10;
+        ctx.fillText(meta.name, x, ly);
+        ctx.shadowBlur = 0;
+
+        ly += lineGap + lineSize / 2;
+        ctx.font = `${lineSize}px system-ui, sans-serif`;
+        ctx.fillStyle = TEXT_MUTED;
+        ctx.fillText(`Light: ${meta.gift}`, x, ly);
+
+        ly += lineGap + lineSize / 2;
+        ctx.fillText(`Shadow: ${meta.shadow}`, x, ly);
+
+        ctx.restore();
+      }
+    }
+
+    function drawTrail(trail) {
+      if (!trail || trail.length < 2) return;
+      ctx.save();
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      for (let i = 1; i < trail.length; i++) {
+        const a = fieldToScreen(trail[i - 1].x, trail[i - 1].y);
+        const b = fieldToScreen(trail[i].x, trail[i].y);
+        const alpha = (i / trail.length) * 0.42;
+        ctx.strokeStyle = `rgba(255, 47, 208, ${alpha})`;
+        ctx.lineWidth = 3 + (i / trail.length) * 4;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+      for (let i = 0; i < trail.length; i += 2) {
+        const pt = fieldToScreen(trail[i].x, trail[i].y);
+        const alpha = (i / trail.length) * 0.18;
+        ctx.fillStyle = `rgba(199, 125, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawMouseCursor(cx, cy, grabbing) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(1.35, 1.35);
+      // white pointer arrow
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#1a1a1a";
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      if (grabbing) {
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, 14);
+        ctx.lineTo(4, 10);
+        ctx.lineTo(7, 16);
+        ctx.lineTo(9, 15);
+        ctx.lineTo(6, 9);
+        ctx.lineTo(11, 9);
+      } else {
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, 16);
+        ctx.lineTo(4, 12);
+        ctx.lineTo(7, 18);
+        ctx.lineTo(9, 17);
+        ctx.lineTo(6, 11);
+        ctx.lineTo(11, 11);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawCard(fx, fy, absorbed, fade, dragging) {
+      const { x, y } = fieldToScreen(fx, fy);
+      const cardW = Math.round(FIELD_SIZE * 0.5);
+      const padX = 18;
+      const padY = 16;
+      const alpha = absorbed ? Math.max(0, 1 - fade * 1.4) : 1;
+
+      ctx.save();
+      ctx.globalAlpha = alpha;
+
+      const stmtFont = `600 ${Math.round(FIELD_SIZE * 0.038)}px system-ui, sans-serif`;
+      const promptFont = `600 ${Math.round(FIELD_SIZE * 0.032)}px system-ui, sans-serif`;
+      const stmtLines = wrapText(STATEMENT, cardW - padX * 2, 20, stmtFont);
+      const promptLines = wrapText(PROMPT, cardW - padX * 2, 17, promptFont);
+      const cardH = padY * 2 + stmtLines.length * 24 + 8 + promptLines.length * 22;
+
+      const left = x - cardW / 2;
+      const top = y - cardH / 2;
+      const r = 14;
+
+      if (absorbed) {
+        ctx.shadowColor = "#6fa8ff";
+        ctx.shadowBlur = 30 * (1 - fade);
+      } else {
+        ctx.shadowColor = ACCENT;
+        ctx.shadowBlur = dragging ? 28 : 18;
+      }
+
+      ctx.fillStyle = "#0c0c12";
+      ctx.strokeStyle = ACCENT;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.roundRect(left, top, cardW, cardH, r);
+      ctx.fill();
+      ctx.stroke();
+
+      let ty = top + padY + 18;
+      ctx.font = stmtFont;
+      ctx.fillStyle = "#f2f2f5";
+      ctx.textAlign = "left";
+      for (const line of stmtLines) {
+        ctx.fillText(line, left + padX, ty);
+        ty += 24;
+      }
+      ty += 6;
+      ctx.font = promptFont;
+      ctx.fillStyle = "#f2f2f5";
+      for (const line of promptLines) {
+        ctx.fillText(line, left + padX, ty);
+        ty += 22;
+      }
+
+      // white mouse on card — visible once dragging starts
+      if (!absorbed && dragging) {
+        drawMouseCursor(left + cardW * 0.72, top + cardH * 0.35, true);
+      } else if (!absorbed && fade === 0) {
+        drawMouseCursor(left + cardW * 0.68, top + cardH * 0.42, false);
+      }
+
+      ctx.restore();
+    }
+
+    function typeProgress(loopT, start) {
+      if (loopT < start) return 0;
+      return Math.min(1, (loopT - start) / 0.11);
+    }
+
+    function drawTerminal(loopT) {
+      const pad = 28;
+      const boxW = 360;
+      const boxH = 168;
+      const x = W - boxW - pad;
+      const y = pad;
+
+      ctx.save();
+      ctx.fillStyle = "rgba(6, 4, 10, 0.82)";
+      ctx.strokeStyle = "rgba(79, 216, 196, 0.35)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x, y, boxW, boxH, 6);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = '15px "Consolas", "Courier New", monospace';
+      ctx.fillStyle = "#4fd8c4";
+      ctx.fillText("tracking.exe", x + 14, y + 26);
+
+      let lineY = y + 52;
+      for (const m of METRICS) {
+        const prog = typeProgress(loopT, m.start);
+        const chars = Math.floor(m.key.length * prog);
+        const keyShown = m.key.slice(0, chars);
+        const valProg = Math.max(0, Math.min(1, (prog - 0.55) / 0.45));
+        const valChars = Math.floor(m.value.length * valProg);
+        const valShown = m.value.slice(0, valChars);
+
+        if (prog <= 0) continue;
+
+        ctx.fillStyle = "rgba(154, 138, 170, 0.9)";
+        ctx.fillText("> ", x + 14, lineY);
+        ctx.fillStyle = "#c77dff";
+        ctx.fillText(keyShown, x + 30, lineY);
+        if (valProg > 0) {
+          ctx.fillStyle = "#ece2f6";
+          ctx.fillText(": " + valShown, x + 30 + ctx.measureText(keyShown).width, lineY);
+        }
+        if (prog < 1 && chars < m.key.length) {
+          ctx.fillStyle = "#4fd8c4";
+          ctx.fillRect(x + 30 + ctx.measureText(keyShown).width + 2, lineY - 12, 8, 14);
+        }
+        lineY += 28;
+      }
+      ctx.restore();
+    }
+
+    function activePortalAt(ms) {
+      const m = ms % (PATH.totalMs + 1600);
+      if (m > PATH.totalMs) return "safety";
+      const pts = PATH.points;
+      for (let i = 1; i < pts.length; i++) {
+        if (m <= pts[i].t) return pts[i].phase === "start" ? null : pts[i].phase;
+      }
+      return "safety";
+    }
+
+    function renderFrame(frameIndex) {
+      const loopT = (frameIndex % (LOOP_SEC * FPS)) / (LOOP_SEC * FPS);
+      const ms = loopT * (PATH.totalMs + 1600);
+      const state = pathAtMs(ms);
+      const activePortal = state.absorbed ? "safety" : activePortalAt(ms);
+
+      drawBackground();
+      drawPortals(loopT, activePortal);
+      drawTrail(state.trail);
+      drawCard(state.x, state.y, state.absorbed, state.fade, state.dragging);
+      drawTerminal(loopT);
+    }
+
+    window.renderFrame = renderFrame;
+    window.LOOP_FRAMES = LOOP_SEC * FPS;
+
+    if (location.search.includes("preview")) {
+      let frame = 0;
+      function tick() {
+        renderFrame(frame++);
+        requestAnimationFrame(tick);
+      }
+      tick();
+    }
+  </script>
+</body>
+</html>
