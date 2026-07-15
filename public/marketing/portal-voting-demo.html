@@ -17,7 +17,7 @@
     const H = 1080;
     const PREVIEW_ZOOM = IS_PREVIEW ? 1.48 : 1;
     const PREVIEW_PAN_X = IS_PREVIEW ? -0.14 * W : 0;
-    const PREVIEW_PAN_Y = IS_PREVIEW ? 0.07 * H : 0;
+    const PREVIEW_PAN_Y = IS_PREVIEW ? 0.09 * H : 0;
     const canvas = document.getElementById("c");
     const ctx = canvas.getContext("2d");
 
@@ -420,7 +420,7 @@
       const boxW = 360;
       const boxH = 168;
       const x = W - boxW - pad;
-      const y = pad;
+      const y = IS_PREVIEW ? 88 : pad;
 
       ctx.save();
       ctx.fillStyle = "rgba(6, 4, 10, 0.82)";

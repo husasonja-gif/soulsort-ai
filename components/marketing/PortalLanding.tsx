@@ -54,10 +54,12 @@ export function PortalLanding() {
         className="relative z-10 border-t border-[var(--border)] px-4 py-20"
       >
         <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-center md:gap-12">
-          <div className="flex justify-center md:justify-start">
-            <PortalVotingDemo />
+          <div className="flex w-full min-w-0 justify-center md:justify-start">
+            <div className="w-full min-w-0 max-w-lg">
+              <PortalVotingDemo />
+            </div>
           </div>
-          <div>
+          <div className="min-w-0">
             <h2 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
               Not another survey - next-gen onboarding based on{" "}
               <span className="text-[var(--soulsort-lime)]">drag physics</span>
@@ -72,11 +74,14 @@ export function PortalLanding() {
 
       {/* 3. Pre-game / attendee profile */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-center text-3xl font-bold leading-tight sm:text-4xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
             We are under-utilizing the pre-game: community mindset is a muscle that can be
-            trained. PORTAL points out reflexes, blind-spots and nudges towards personal growth.
+            trained.
           </h2>
+          <p className="mx-auto mt-4 max-w-3xl text-lg leading-relaxed text-[var(--muted)]">
+            PORTAL points out reflexes, blind-spots and nudges towards personal growth.
+          </p>
           <div className="mt-12 flex justify-center">
             <ParticipantDashboardShowcase />
           </div>
@@ -85,11 +90,13 @@ export function PortalLanding() {
 
       {/* 4. Problem */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-4xl">
-          <h2 className="text-center text-3xl font-bold leading-tight text-[var(--soulsort-lime)] sm:text-4xl">
-            High-trust spaces carry high stakes — SoulSort solves the problem of a dead
-            house-rules check-box.
+        <div className="mx-auto max-w-4xl text-center">
+          <h2 className="text-3xl font-bold leading-tight text-[var(--soulsort-lime)] sm:text-4xl">
+            High-trust spaces carry high stakes
           </h2>
+          <p className="mx-auto mt-4 max-w-3xl text-lg leading-relaxed text-[var(--muted)]">
+            SoulSort solves the problem of a dead house-rules check-box.
+          </p>
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 opacity-70">
               <p className="font-data text-xs uppercase text-[var(--muted)]">Before</p>
@@ -116,7 +123,7 @@ export function PortalLanding() {
 
       {/* 5. Feedback + organizer dashboard */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-7xl min-w-0 px-0">
           <h2 className="text-center text-3xl font-bold leading-tight sm:text-4xl">
             Feedback is how we evolve: SoulSort shows you where you are at, both as a
             participant and as an organizer.

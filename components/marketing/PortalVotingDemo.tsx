@@ -25,7 +25,7 @@ export function PortalVotingDemo() {
 
   if (reducedMotion) {
     return (
-      <div className="mx-auto aspect-square w-full max-w-lg overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a]">
+      <div className="mx-auto aspect-square w-full min-w-0 max-w-lg overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a]">
         <video
           src="/marketing/portal-voting-demo.mp4"
           muted
@@ -40,7 +40,7 @@ export function PortalVotingDemo() {
   }
 
   return (
-    <div className="mx-auto aspect-square w-full max-w-lg overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a]">
+    <div className="mx-auto aspect-square w-full min-w-0 max-w-lg overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a]">
       <iframe
         src="/marketing/portal-voting-demo.html?preview"
         title="PORTAL drag physics demo"

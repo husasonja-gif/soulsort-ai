@@ -33,11 +33,11 @@ function PullBar({ pct }: { pct: number }) {
 
 function MixBar({ segments }: { segments: Array<{ pct: number; tone: string }> }) {
   return (
-    <div className="mt-2 flex h-2 overflow-hidden rounded-full bg-[#1a1024]">
+    <div className="mt-2 flex h-2 min-w-0 overflow-hidden rounded-full bg-[#1a1024]">
       {segments.map((seg, i) => (
         <div
           key={i}
-          className="h-full"
+          className="h-full min-w-0"
           style={{ width: `${seg.pct}%`, backgroundColor: seg.tone }}
           aria-hidden
         />
@@ -48,7 +48,7 @@ function MixBar({ segments }: { segments: Array<{ pct: number; tone: string }> }
 
 export function WhereTheCrowdWentMockup() {
   return (
-    <div className="space-y-4 text-xs leading-relaxed">
+    <div className="min-w-0 space-y-4 text-xs leading-relaxed">
       <p className="text-center text-[10px] text-[var(--muted)]">
         Average portal pull — Power, Desire, Community, Safety.
       </p>
@@ -83,22 +83,26 @@ export function WhereTheCrowdWentMockup() {
         ))}
       </svg>
 
-      <div>
-          <div className="flex justify-between gap-2 text-[#ece2f6]">
-            <span>Community — looking after others, holding the group</span>
-            <span style={{ color: LIME }}>29%</span>
-          </div>
-          <PullBar pct={29} />
+      <div className="min-w-0">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-2">
+          <span className="min-w-0 break-words text-[#ece2f6]">
+            Community — looking after others, holding the group
+          </span>
+          <span className="shrink-0 font-medium" style={{ color: LIME }}>
+            29%
+          </span>
         </div>
+        <PullBar pct={29} />
+      </div>
 
-      <dl className="space-y-2">
+      <dl className="min-w-0 space-y-2">
         <div>
           <Label>Observation</Label>
-          <dd className="mt-0.5 text-[#ece2f6]">Community is running high.</dd>
+          <dd className="mt-0.5 break-words text-[#ece2f6]">Community is running high.</dd>
         </div>
         <div>
           <Label>Could mean</Label>
-          <dd className="mt-0.5 text-[#d8cce6]">
+          <dd className="mt-0.5 break-words text-[#d8cce6]">
             A crowd that self-governs well and holds each other; your job is lighter here.
           </dd>
         </div>
@@ -129,7 +133,7 @@ const CATEGORY_ROWS = [
   {
     name: "Intimacy",
     gloss: "moments of closeness, wanting, sex/connection",
-    badge: "32% · Power-led",
+    badge: "32% · Desire-led",
     segments: [
       { pct: 32, tone: LIME },
       { pct: 28, tone: LIME_MID },
@@ -140,11 +144,11 @@ const CATEGORY_ROWS = [
   {
     name: "Play",
     gloss: "moments of fun, dancing, silliness, expression",
-    badge: "47% · Power-led",
+    badge: "41% · Safety-led",
     segments: [
-      { pct: 47, tone: LIME },
-      { pct: 20, tone: LIME_MID },
-      { pct: 18, tone: LIME_SOFT },
+      { pct: 41, tone: LIME },
+      { pct: 24, tone: LIME_MID },
+      { pct: 20, tone: LIME_SOFT },
       { pct: 15, tone: LIME_DIM },
     ],
   },
@@ -163,22 +167,25 @@ const CATEGORY_ROWS = [
 
 export function HowTheyShowUpMockup() {
   return (
-    <div className="space-y-3 text-xs leading-relaxed">
+    <div className="min-w-0 space-y-3 text-xs leading-relaxed">
       <p className="text-center text-[10px] text-[var(--muted)]">
         Bar width = share of landings in that portal.
       </p>
       {CATEGORY_ROWS.map((row) => (
-        <div key={row.name} className="rounded-lg border border-[var(--border)] bg-[#0e0814] px-3 py-2.5">
+        <div
+          key={row.name}
+          className="min-w-0 rounded-lg border border-[var(--border)] bg-[#0e0814] px-3 py-2.5"
+        >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="font-semibold text-[#ece2f6]">{row.name}</span>
             <span
-              className="rounded-full border px-2 py-0.5 text-[10px] font-medium"
+              className="shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium whitespace-nowrap"
               style={{ color: LIME, borderColor: LIME_DIM, backgroundColor: LIME_SOFT }}
             >
               {row.badge}
             </span>
           </div>
-          <p className="mt-1 text-[#b8a8c8]">
+          <p className="mt-1 break-words text-[#b8a8c8]">
             {row.name} — {row.gloss}
           </p>
           <MixBar segments={[...row.segments]} />
@@ -190,18 +197,20 @@ export function HowTheyShowUpMockup() {
 
 export function ReadingTheRoomMockup() {
   return (
-    <div className="space-y-3 text-xs leading-relaxed">
+    <div className="min-w-0 space-y-3 text-xs leading-relaxed">
       <dl className="space-y-2">
         <div>
           <Label>Observation</Label>
-          <dd className="mt-0.5 text-[#ece2f6]">
+          <dd className="mt-0.5 break-words text-[#ece2f6]">
             The game has specific consent scenarios. This crowd leaned room-first (taking care of
             others) — expect overall considerate attendees.
           </dd>
         </div>
         <div>
           <Label>Could mean</Label>
-          <dd className="mt-0.5 text-[#d8cce6]">strong collective instincts; the door can be light.</dd>
+          <dd className="mt-0.5 break-words text-[#d8cce6]">
+            strong collective instincts; the door can be light.
+          </dd>
         </div>
         <div>
           <Label>Try</Label>
@@ -211,12 +220,12 @@ export function ReadingTheRoomMockup() {
         </div>
       </dl>
 
-      <p className="text-[#d8cce6]">
+      <p className="break-words text-[#d8cce6]">
         Across 126 room-attuned choices, the crowd leaned toward{" "}
         <strong className="text-[#f5eef8]">the room</strong>.
       </p>
 
-      <div>
+      <div className="min-w-0">
         <div className="relative h-2 overflow-hidden rounded-full bg-[#1a1024]">
           <div
             className="absolute inset-0 rounded-full"
@@ -230,17 +239,21 @@ export function ReadingTheRoomMockup() {
             aria-hidden
           />
         </div>
-        <div className="mt-1.5 flex justify-between text-[10px] font-medium">
-          <span style={{ color: LIME_MID }}>you first</span>
-          <span style={{ color: LIME }}>room first</span>
+        <div className="mt-1.5 flex justify-between gap-2 text-[10px] font-medium">
+          <span className="shrink-0" style={{ color: LIME_MID }}>
+            you first
+          </span>
+          <span className="shrink-0" style={{ color: LIME }}>
+            room first
+          </span>
         </div>
       </div>
 
-      <div className="space-y-2 pt-1">
+      <div className="min-w-0 space-y-2 pt-1">
         <div className="flex flex-col gap-1.5">
           <span className="text-[#b8a8c8]">Crowd is good at</span>
           <span
-            className="rounded-full border px-2.5 py-1 text-[10px] font-medium"
+            className="inline-block max-w-full break-words rounded-full border px-2.5 py-1 text-[10px] font-medium"
             style={{ color: LIME, borderColor: LIME_DIM }}
           >
             partner goes still - nervous laugh - the repair
@@ -249,7 +262,7 @@ export function ReadingTheRoomMockup() {
         <div className="flex flex-col gap-1.5">
           <span className="text-[#b8a8c8]">Crowd is weak at</span>
           <span
-            className="rounded-full border px-2.5 py-1 text-[10px] font-medium"
+            className="inline-block max-w-full break-words rounded-full border px-2.5 py-1 text-[10px] font-medium"
             style={{ color: LIME_MID, borderColor: LIME_DIM }}
           >
             the dancefloor push - your own limit

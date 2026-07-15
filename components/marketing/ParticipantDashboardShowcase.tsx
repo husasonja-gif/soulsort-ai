@@ -10,7 +10,7 @@ export function ParticipantDashboardShowcase() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-sm">
+    <div className="mx-auto w-full min-w-0 max-w-sm px-2 sm:px-0">
       <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-black shadow-[0_0_48px_rgba(255,47,208,0.08)]">
         <video
           src="/marketing/attendee-dashboard.mp4"
