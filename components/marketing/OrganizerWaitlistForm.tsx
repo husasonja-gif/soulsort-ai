@@ -50,7 +50,7 @@ export function OrganizerWaitlistForm({ id = "organizers" }: { id?: string }) {
 
   return (
     <form id={id} onSubmit={handleSubmit} className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row">
         <label htmlFor={`${id}-email`} className="sr-only">
           Work email
         </label>
@@ -62,12 +62,12 @@ export function OrganizerWaitlistForm({ id = "organizers" }: { id?: string }) {
           placeholder="you@yourclub.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="min-h-[48px] flex-1 rounded-lg border border-[var(--border)] bg-black px-4 text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30"
+          className="min-h-[48px] min-w-0 w-full flex-1 rounded-lg border border-[var(--border)] bg-black px-4 text-[var(--foreground)] placeholder:text-[var(--muted)] focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/30"
         />
         <button
           type="submit"
           disabled={loading}
-          className="min-h-[48px] rounded-lg border border-[var(--accent)] bg-[var(--accent)] px-6 font-data text-sm font-medium text-black transition hover:brightness-110 disabled:opacity-50"
+          className="min-h-[48px] w-full shrink-0 rounded-lg border border-[var(--accent)] bg-[var(--accent)] px-6 font-data text-sm font-medium text-black transition hover:brightness-110 disabled:opacity-50 sm:w-auto"
         >
           {loading ? "Sending…" : "Join pilot waitlist"}
         </button>

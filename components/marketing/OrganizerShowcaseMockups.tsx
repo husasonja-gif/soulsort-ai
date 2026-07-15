@@ -49,10 +49,7 @@ function MixBar({ segments }: { segments: Array<{ pct: number; tone: string }> }
 export function WhereTheCrowdWentMockup() {
   return (
     <div className="min-w-0 space-y-4 text-xs leading-relaxed">
-      <p className="text-center text-[10px] text-[var(--muted)]">
-        Average portal pull — Power, Desire, Community, Safety.
-      </p>
-      <svg viewBox="0 0 120 120" className="mx-auto h-24 w-24" aria-hidden>
+      <svg viewBox="0 0 120 120" className="mx-auto h-20 w-20 sm:h-24 sm:w-24" aria-hidden>
         <circle cx="60" cy="60" r="48" fill="none" stroke={LIME_DIM} strokeWidth="1" />
         {[
           [60, 18],
@@ -168,18 +165,15 @@ const CATEGORY_ROWS = [
 export function HowTheyShowUpMockup() {
   return (
     <div className="min-w-0 space-y-3 text-xs leading-relaxed">
-      <p className="text-center text-[10px] text-[var(--muted)]">
-        Bar width = share of landings in that portal.
-      </p>
       {CATEGORY_ROWS.map((row) => (
         <div
           key={row.name}
           className="min-w-0 rounded-lg border border-[var(--border)] bg-[#0e0814] px-3 py-2.5"
         >
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
             <span className="font-semibold text-[#ece2f6]">{row.name}</span>
             <span
-              className="shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium whitespace-nowrap"
+              className="w-fit max-w-full rounded-full border px-2 py-0.5 text-[10px] font-medium break-words"
               style={{ color: LIME, borderColor: LIME_DIM, backgroundColor: LIME_SOFT }}
             >
               {row.badge}
@@ -202,20 +196,20 @@ export function ReadingTheRoomMockup() {
         <div>
           <Label>Observation</Label>
           <dd className="mt-0.5 break-words text-[#ece2f6]">
-            The game has specific consent scenarios. This crowd leaned room-first (taking care of
-            others) — expect overall considerate attendees.
+            This crowd leaned room-first (taking care of others) — expect overall considerate
+            attendees.
           </dd>
         </div>
         <div>
           <Label>Could mean</Label>
           <dd className="mt-0.5 break-words text-[#d8cce6]">
-            strong collective instincts; the door can be light.
+            Strong collective instincts; the door can be light.
           </dd>
         </div>
         <div>
           <Label>Try</Label>
           <TryBox>
-            name the 1–2 challenges (below) anyway — a light reminder still helps.
+            Name the 1–2 challenges (below) anyway — a light reminder still helps.
           </TryBox>
         </div>
       </dl>
@@ -256,7 +250,7 @@ export function ReadingTheRoomMockup() {
             className="inline-block max-w-full break-words rounded-full border px-2.5 py-1 text-[10px] font-medium"
             style={{ color: LIME, borderColor: LIME_DIM }}
           >
-            partner goes still - nervous laugh - the repair
+            Partner goes still - nervous laugh - the repair
           </span>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -265,7 +259,7 @@ export function ReadingTheRoomMockup() {
             className="inline-block max-w-full break-words rounded-full border px-2.5 py-1 text-[10px] font-medium"
             style={{ color: LIME_MID, borderColor: LIME_DIM }}
           >
-            the dancefloor push - your own limit
+            The dancefloor push - your own limit
           </span>
         </div>
       </div>

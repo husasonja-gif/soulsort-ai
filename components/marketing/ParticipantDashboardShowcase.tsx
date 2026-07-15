@@ -1,30 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function ParticipantDashboardShowcase() {
-  const [reducedMotion, setReducedMotion] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [controls, setControls] = useState(true);
 
   useEffect(() => {
-    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobile = window.matchMedia("(max-width: 640px)").matches;
+    const touch = window.matchMedia("(pointer: coarse)").matches;
+    const useControls = reduced || mobile || touch;
+
+    setControls(useControls);
+
+    const video = videoRef.current;
+    if (!video || useControls) return;
+
+    video.play().catch(() => setControls(true));
   }, []);
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-sm px-2 sm:px-0">
+    <div className="mx-auto w-full min-w-0 max-w-[200px] sm:max-w-xs">
       <div className="overflow-hidden rounded-2xl border border-[var(--border)] bg-black shadow-[0_0_48px_rgba(255,47,208,0.08)]">
         <video
+          ref={videoRef}
           src="/marketing/attendee-dashboard.mp4"
-          autoPlay={!reducedMotion}
           muted
-          loop={!reducedMotion}
+          loop
           playsInline
-          controls={reducedMotion}
+          controls={controls}
           preload="metadata"
-          className="w-full object-cover object-top"
+          className="h-auto max-h-[320px] w-full object-contain object-top sm:max-h-[480px]"
           aria-label="SoulSort PORTAL participant profile dashboard recording"
         />
       </div>
-      <p className="mt-3 text-center font-data text-[10px] uppercase tracking-widest text-[var(--muted)]">
+      <p className="mt-3 text-center font-data text-[10px] uppercase tracking-wide text-[var(--muted)]">
         Participant profile — yours only
       </p>
     </div>

@@ -10,40 +10,40 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 
 export function PortalLanding() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-[var(--background)]">
+    <div className="relative min-h-screen w-full overflow-x-clip bg-[var(--background)]">
       <div
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_70%_20%,rgba(255,47,208,0.06),transparent_50%)]"
         aria-hidden
       />
 
       {/* 1. Hero */}
-      <section className="relative z-10 mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-24">
-        <div>
-          <p className="font-data text-xs uppercase tracking-[0.25em] text-[var(--accent)]">
+      <section className="relative z-10 mx-auto grid max-w-6xl min-w-0 gap-10 px-4 py-16 md:grid-cols-2 md:items-center md:py-24">
+        <div className="min-w-0">
+          <p className="font-data text-xs uppercase tracking-[0.2em] text-[var(--accent)] sm:tracking-[0.25em]">
             SoulSort PORTAL
           </p>
-          <h1 className="mt-4 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl glow-accent">
+          <h1 className="mt-4 break-words text-3xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl glow-accent">
             High-trust events need a crowd that knows how to vibe.
           </h1>
-          <p className="mt-6 max-w-lg text-lg leading-relaxed text-[var(--muted)]">
+          <p className="mt-6 max-w-lg text-base leading-relaxed text-[var(--muted)] sm:text-lg">
             Set the tone upfront &amp; know what kind of crowd is stepping through your door.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mt-8 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
             <a
               href="#organizers"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--accent)] bg-[var(--accent)] px-6 font-data text-sm font-medium text-black transition hover:brightness-110"
+              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg border border-[var(--accent)] bg-[var(--accent)] px-4 font-data text-sm font-medium text-black transition hover:brightness-110 sm:w-auto sm:px-6"
             >
               Bring PORTAL to your space
             </a>
             <a
               href="/portal"
-              className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--border)] px-6 font-data text-sm text-[var(--foreground)] transition hover:border-[var(--accent)]"
+              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg border border-[var(--border)] px-4 font-data text-sm text-[var(--foreground)] transition hover:border-[var(--accent)] sm:w-auto sm:px-6"
             >
               See how it works
             </a>
           </div>
         </div>
-        <div className="h-[280px] sm:h-[340px] md:h-[400px]">
+        <div className="h-[240px] min-w-0 sm:h-[340px] md:h-[400px]">
           <PortalBannerHero />
         </div>
       </section>
@@ -51,16 +51,16 @@ export function PortalLanding() {
       {/* 2. Drag physics — demo left, copy right */}
       <section
         id="how-it-works"
-        className="relative z-10 border-t border-[var(--border)] px-4 py-20"
+        className="relative z-10 border-t border-[var(--border)] px-4 py-16 sm:py-20"
       >
-        <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-center md:gap-12">
+        <div className="mx-auto grid min-w-0 max-w-6xl gap-10 md:grid-cols-2 md:items-center md:gap-12">
           <div className="flex w-full min-w-0 justify-center md:justify-start">
             <div className="w-full min-w-0 max-w-lg">
               <PortalVotingDemo />
             </div>
           </div>
           <div className="min-w-0">
-            <h2 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
+            <h2 className="break-words text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
               Not another survey - next-gen onboarding based on{" "}
               <span className="text-[var(--soulsort-lime)]">drag physics</span>
             </h2>
@@ -74,8 +74,8 @@ export function PortalLanding() {
 
       {/* 3. Pre-game / attendee profile */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
+        <div className="mx-auto min-w-0 max-w-4xl text-center">
+          <h2 className="break-words text-2xl font-bold leading-tight sm:text-4xl">
             We are under-utilizing the pre-game: community mindset is a muscle that can be
             trained.
           </h2>
@@ -90,8 +90,8 @@ export function PortalLanding() {
 
       {/* 4. Problem */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-4xl text-center">
-          <h2 className="text-3xl font-bold leading-tight text-[var(--soulsort-lime)] sm:text-4xl">
+        <div className="mx-auto min-w-0 max-w-4xl text-center">
+          <h2 className="break-words text-2xl font-bold leading-tight text-[var(--soulsort-lime)] sm:text-4xl">
             High-trust spaces carry high stakes
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-lg leading-relaxed text-[var(--muted)]">
@@ -123,8 +123,8 @@ export function PortalLanding() {
 
       {/* 5. Feedback + organizer dashboard */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-7xl min-w-0 px-0">
-          <h2 className="text-center text-3xl font-bold leading-tight sm:text-4xl">
+        <div className="mx-auto min-w-0 max-w-7xl overflow-x-clip px-0">
+          <h2 className="break-words text-center text-2xl font-bold leading-tight sm:text-4xl">
             Feedback is how we evolve: SoulSort shows you where you are at, both as a
             participant and as an organizer.
           </h2>
@@ -175,7 +175,7 @@ export function PortalLanding() {
 
       {/* 7. Organizers */}
       <section id="organizers" className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto min-w-0 max-w-3xl">
           <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
             For organizers
           </h2>
