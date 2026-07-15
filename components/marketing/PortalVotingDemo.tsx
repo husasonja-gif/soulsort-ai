@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 /**
  * Original portal-voting-demo.html — full card, drag path, tracking.exe.
  */
-export function PortalVotingDemo({ className = "" }: { className?: string }) {
+export function PortalVotingDemo() {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -14,12 +14,10 @@ export function PortalVotingDemo({ className = "" }: { className?: string }) {
     setMounted(true);
   }, []);
 
-  const shell = `w-full min-h-[min(92vw,520px)] md:min-h-[560px] ${className}`.trim();
-
   if (!mounted) {
     return (
       <div
-        className={`rounded-xl border border-[var(--border)] bg-[#06040a] ${shell}`}
+        className="mx-auto aspect-square w-full max-w-lg rounded-xl border border-[var(--border)] bg-[#06040a]"
         aria-hidden
       />
     );
@@ -27,14 +25,14 @@ export function PortalVotingDemo({ className = "" }: { className?: string }) {
 
   if (reducedMotion) {
     return (
-      <div className={shell}>
+      <div className="mx-auto aspect-square w-full max-w-lg overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a]">
         <video
           src="/marketing/portal-voting-demo.mp4"
           muted
           playsInline
           controls
           preload="metadata"
-          className="h-full min-h-[inherit] w-full rounded-xl border border-[var(--border)] bg-[#06040a] object-cover"
+          className="h-full w-full scale-[1.45] object-cover object-[center_42%]"
           aria-label="PORTAL drag physics demo showing scenario card pulled through portal field with path tracking"
         />
       </div>
@@ -42,11 +40,11 @@ export function PortalVotingDemo({ className = "" }: { className?: string }) {
   }
 
   return (
-    <div className={`overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a] ${shell}`}>
+    <div className="mx-auto aspect-square w-full max-w-lg overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a]">
       <iframe
         src="/marketing/portal-voting-demo.html?preview"
         title="PORTAL drag physics demo"
-        className="h-full min-h-[inherit] w-full border-0"
+        className="aspect-square w-full border-0"
         loading="lazy"
       />
     </div>

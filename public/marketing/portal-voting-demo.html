@@ -12,6 +12,8 @@
 <body>
   <canvas id="c" width="1080" height="1080"></canvas>
   <script>
+    const IS_PREVIEW = location.search.includes("preview");
+    const PREVIEW_ZOOM = IS_PREVIEW ? 1.48 : 1;
     const W = 1080;
     const H = 1080;
     const canvas = document.getElementById("c");
@@ -470,6 +472,17 @@
     }
 
     function renderFrame(frameIndex) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.fillStyle = "#06040a";
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.save();
+      if (IS_PREVIEW) {
+        ctx.translate(W / 2, H / 2);
+        ctx.scale(PREVIEW_ZOOM, PREVIEW_ZOOM);
+        ctx.translate(-W / 2, -H / 2);
+      }
+
       const loopT = (frameIndex % (LOOP_SEC * FPS)) / (LOOP_SEC * FPS);
       const ms = loopT * (PATH.totalMs + 1600);
       const state = pathAtMs(ms);
@@ -480,6 +493,8 @@
       drawTrail(state.trail);
       drawCard(state.x, state.y, state.absorbed, state.fade, state.dragging);
       drawTerminal(loopT);
+
+      ctx.restore();
     }
 
     window.renderFrame = renderFrame;

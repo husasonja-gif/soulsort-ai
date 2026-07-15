@@ -48,16 +48,18 @@ export function PortalLanding() {
         </div>
       </section>
 
-      {/* 2. Drag physics — demo fills frame; copy overlaps top-right */}
+      {/* 2. Drag physics — demo left, copy overlaps top-right */}
       <section
         id="how-it-works"
-        className="relative z-10 border-t border-[var(--border)] px-4 py-16 md:py-20"
+        className="relative z-10 border-t border-[var(--border)] px-4 py-20"
       >
         <div className="relative mx-auto max-w-6xl">
-          <div className="relative min-h-[min(92vw,520px)] md:min-h-[580px]">
-            <PortalVotingDemo className="absolute inset-0" />
-            <div className="pointer-events-none relative z-10 flex min-h-[min(92vw,520px)] flex-col justify-start p-4 md:absolute md:inset-0 md:min-h-0 md:items-end md:p-8">
-              <div className="pointer-events-auto ml-auto max-w-md rounded-xl border border-[var(--border)]/80 bg-[var(--background)]/85 p-5 backdrop-blur-md md:max-w-lg md:p-6">
+          <div className="grid gap-8 md:grid-cols-2 md:items-start md:gap-12">
+            <div className="order-2 flex justify-center md:order-1 md:justify-start">
+              <PortalVotingDemo />
+            </div>
+            <div className="order-1 md:order-2 md:relative md:z-10 md:-ml-16 md:mt-4 lg:-ml-24">
+              <div className="rounded-xl border border-[var(--border)]/80 bg-[var(--background)]/90 p-5 backdrop-blur-md md:p-6">
                 <h2 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
                   Not a personality survey → next-gen onboarding tool based on drag physics.
                 </h2>
