@@ -1,26 +1,27 @@
-import Image from "next/image";
+import {
+  HowTheyShowUpMockup,
+  ReadingTheRoomMockup,
+  WhereTheCrowdWentMockup,
+} from "@/components/marketing/OrganizerShowcaseMockups";
 
 const ORGANIZER_PANELS = [
   {
-    id: "b",
+    id: "where",
     label: "Where the crowd went",
     caption: "Anonymous landing heatmap — portal pull across Power, Desire, Community, Safety.",
-    src: "/marketing/orga-profile-b.png",
-    alt: "Organizer view of where the crowd went with portal gravity and landing patterns",
+    Mockup: WhereTheCrowdWentMockup,
   },
   {
-    id: "c",
+    id: "how",
     label: "How they show up",
     caption: "Category pulls across boundaries, intimacy, play, and the work.",
-    src: "/marketing/orga-profile-c.png",
-    alt: "Organizer how the crowd shows up with segmented portal bars per situation category",
+    Mockup: HowTheyShowUpMockup,
   },
   {
-    id: "d",
+    id: "reading",
     label: "Reading the room",
     caption: "Consent scenarios — room-first vs you-first, strengths and gaps.",
-    src: "/marketing/orga-profile-d.png",
-    alt: "Organizer reading the room panel with consent scenario aggregate and crowd strengths",
+    Mockup: ReadingTheRoomMockup,
   },
 ] as const;
 
@@ -31,25 +32,18 @@ export function OrganizerShowcaseGrid() {
         Organizer dashboard — the crowd, never an individual
       </p>
       <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--border)] md:grid-cols-3">
-        {ORGANIZER_PANELS.map((panel) => (
-          <article key={panel.id} className="flex flex-col bg-[var(--background)]">
+        {ORGANIZER_PANELS.map(({ id, label, caption, Mockup }) => (
+          <article key={id} className="flex flex-col bg-[var(--background)]">
             <div className="border-b border-[var(--border)] px-4 py-3">
               <p className="font-data text-[10px] uppercase tracking-[0.14em] text-[var(--accent)]">
-                {panel.label}
+                {label}
               </p>
             </div>
-            <div className="relative flex-1 bg-[#0a0610] p-2">
-              <Image
-                src={panel.src}
-                alt={panel.alt}
-                width={400}
-                height={520}
-                className="h-auto w-full rounded-sm object-contain object-top"
-                sizes="(max-width: 768px) 100vw, 33vw"
-              />
+            <div className="flex-1 bg-[#0a0610] p-3 sm:p-4">
+              <Mockup />
             </div>
             <p className="border-t border-[var(--border)] px-4 py-3 text-xs leading-relaxed text-[var(--muted)]">
-              {panel.caption}
+              {caption}
             </p>
           </article>
         ))}

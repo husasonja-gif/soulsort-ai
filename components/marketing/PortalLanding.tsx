@@ -36,7 +36,7 @@ export function PortalLanding() {
               Bring PORTAL to your space
             </a>
             <a
-              href="#how-it-works"
+              href="/portal"
               className="inline-flex min-h-[48px] items-center justify-center rounded-lg border border-[var(--border)] px-6 font-data text-sm text-[var(--foreground)] transition hover:border-[var(--accent)]"
             >
               See how it works
@@ -48,27 +48,37 @@ export function PortalLanding() {
         </div>
       </section>
 
-      {/* 2. Drag physics — demo left, copy overlaps top-right */}
+      {/* 2. Drag physics — demo left, copy overlaps bottom-right */}
       <section
         id="how-it-works"
         className="relative z-10 border-t border-[var(--border)] px-4 py-20"
       >
         <div className="relative mx-auto max-w-6xl">
-          <div className="grid gap-8 md:grid-cols-2 md:items-start md:gap-12">
-            <div className="order-2 flex justify-center md:order-1 md:justify-start">
+          <div className="flex justify-center md:justify-start">
+            <div className="relative w-full max-w-lg">
               <PortalVotingDemo />
-            </div>
-            <div className="order-1 md:order-2 md:relative md:z-10 md:-ml-16 md:mt-28 lg:-ml-24 lg:mt-36">
-              <div className="rounded-xl border border-[var(--border)]/80 bg-[var(--background)]/90 p-5 backdrop-blur-md md:p-6">
-                <h2 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
+              <div className="absolute bottom-2 left-2 right-2 z-10 hidden rounded-xl border border-[var(--border)]/80 bg-[var(--background)]/92 p-5 backdrop-blur-md md:block md:bottom-4 md:left-auto md:right-[-1.5rem] md:w-[min(100%,22rem)] lg:right-[-2.5rem] lg:w-[24rem] lg:p-6">
+                <h2 className="text-xl font-bold leading-tight sm:text-2xl lg:text-3xl">
                   Not another survey - next-gen onboarding based on{" "}
                   <span className="text-[var(--soulsort-purple)]">drag physics</span>
                 </h2>
-                <p className="mt-4 text-[var(--muted)] leading-relaxed">
+                <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed lg:mt-4 lg:text-base">
                   PORTAL reads how attendees move: Where you drag, how long you wait, where you
                   hover, where you land.
                 </p>
               </div>
+            </div>
+          </div>
+          <div className="mt-8 md:hidden">
+            <div className="rounded-xl border border-[var(--border)]/80 bg-[var(--background)]/90 p-5 backdrop-blur-md">
+              <h2 className="text-2xl font-bold leading-tight sm:text-3xl">
+                Not another survey - next-gen onboarding based on{" "}
+                <span className="text-[var(--soulsort-purple)]">drag physics</span>
+              </h2>
+              <p className="mt-4 text-[var(--muted)] leading-relaxed">
+                PORTAL reads how attendees move: Where you drag, how long you wait, where you
+                hover, where you land.
+              </p>
             </div>
           </div>
         </div>
