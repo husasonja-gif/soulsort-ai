@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 
-const ACCENT = "#ff2fd0";
-const ACCENT_DIM = "rgba(255, 47, 208, 0.35)";
-const ACCENT_MID = "rgba(255, 47, 208, 0.55)";
-const ACCENT_SOFT = "rgba(255, 47, 208, 0.22)";
+const LIME = "#a3e635";
+const LIME_DIM = "rgba(163, 230, 53, 0.35)";
+const LIME_MID = "rgba(163, 230, 53, 0.55)";
+const LIME_SOFT = "rgba(163, 230, 53, 0.22)";
 
 function Label({ children }: { children: ReactNode }) {
   return (
@@ -13,7 +13,7 @@ function Label({ children }: { children: ReactNode }) {
 
 function TryBox({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-1 rounded-lg border border-[var(--border)] bg-[#0a0610] px-3 py-2 text-xs leading-relaxed text-[var(--accent)]">
+    <p className="mt-1 rounded-lg border border-[var(--border)] bg-[#0a0610] px-3 py-2 text-xs leading-relaxed text-[var(--soulsort-lime)]">
       {children}
     </p>
   );
@@ -24,7 +24,7 @@ function PullBar({ pct }: { pct: number }) {
     <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[#1a1024]">
       <div
         className="h-full rounded-full"
-        style={{ width: `${pct}%`, backgroundColor: ACCENT }}
+        style={{ width: `${pct}%`, backgroundColor: LIME }}
         aria-hidden
       />
     </div>
@@ -53,14 +53,14 @@ export function WhereTheCrowdWentMockup() {
         Average portal pull — Power, Desire, Community, Safety.
       </p>
       <svg viewBox="0 0 120 120" className="mx-auto h-24 w-24" aria-hidden>
-        <circle cx="60" cy="60" r="48" fill="none" stroke={ACCENT_DIM} strokeWidth="1" />
+        <circle cx="60" cy="60" r="48" fill="none" stroke={LIME_DIM} strokeWidth="1" />
         {[
           [60, 18],
           [98, 60],
           [60, 102],
           [22, 60],
         ].map(([x, y], i) => (
-          <circle key={i} cx={x} cy={y} r={4 + i} fill={ACCENT} opacity={0.35 + i * 0.12} />
+          <circle key={i} cx={x} cy={y} r={4 + i} fill={LIME} opacity={0.35 + i * 0.12} />
         ))}
         {[
           ["Power", 60, 10],
@@ -74,7 +74,7 @@ export function WhereTheCrowdWentMockup() {
             y={y}
             textAnchor="middle"
             dominantBaseline="middle"
-            fill={ACCENT}
+            fill={LIME}
             fontSize="7"
             fontWeight="600"
           >
@@ -83,22 +83,13 @@ export function WhereTheCrowdWentMockup() {
         ))}
       </svg>
 
-      <div className="space-y-3">
-        <div>
+      <div>
           <div className="flex justify-between gap-2 text-[#ece2f6]">
             <span>Community — looking after others, holding the group</span>
-            <span style={{ color: ACCENT }}>29%</span>
+            <span style={{ color: LIME }}>29%</span>
           </div>
           <PullBar pct={29} />
         </div>
-        <div>
-          <div className="flex justify-between gap-2 text-[#ece2f6]">
-            <span>Safety — keeping things steady and safe, for themselves and others</span>
-            <span style={{ color: ACCENT }}>26%</span>
-          </div>
-          <PullBar pct={26} />
-        </div>
-      </div>
 
       <dl className="space-y-2">
         <div>
@@ -129,10 +120,10 @@ const CATEGORY_ROWS = [
     gloss: "moments where a line gets tested or crossed",
     badge: "47% · Power-led",
     segments: [
-      { pct: 47, tone: ACCENT },
-      { pct: 22, tone: ACCENT_MID },
-      { pct: 18, tone: ACCENT_SOFT },
-      { pct: 13, tone: ACCENT_DIM },
+      { pct: 47, tone: LIME },
+      { pct: 22, tone: LIME_MID },
+      { pct: 18, tone: LIME_SOFT },
+      { pct: 13, tone: LIME_DIM },
     ],
   },
   {
@@ -140,10 +131,10 @@ const CATEGORY_ROWS = [
     gloss: "moments of closeness, wanting, sex/connection",
     badge: "32% · Power-led",
     segments: [
-      { pct: 32, tone: ACCENT },
-      { pct: 28, tone: ACCENT_MID },
-      { pct: 25, tone: ACCENT_SOFT },
-      { pct: 15, tone: ACCENT_DIM },
+      { pct: 32, tone: LIME },
+      { pct: 28, tone: LIME_MID },
+      { pct: 25, tone: LIME_SOFT },
+      { pct: 15, tone: LIME_DIM },
     ],
   },
   {
@@ -151,10 +142,10 @@ const CATEGORY_ROWS = [
     gloss: "moments of fun, dancing, silliness, expression",
     badge: "47% · Power-led",
     segments: [
-      { pct: 47, tone: ACCENT },
-      { pct: 20, tone: ACCENT_MID },
-      { pct: 18, tone: ACCENT_SOFT },
-      { pct: 15, tone: ACCENT_DIM },
+      { pct: 47, tone: LIME },
+      { pct: 20, tone: LIME_MID },
+      { pct: 18, tone: LIME_SOFT },
+      { pct: 15, tone: LIME_DIM },
     ],
   },
   {
@@ -162,10 +153,10 @@ const CATEGORY_ROWS = [
     gloss: "looking after each other and yourself (crisis, comedown, care)",
     badge: "37% · Community-led",
     segments: [
-      { pct: 37, tone: ACCENT },
-      { pct: 25, tone: ACCENT_MID },
-      { pct: 20, tone: ACCENT_SOFT },
-      { pct: 18, tone: ACCENT_DIM },
+      { pct: 37, tone: LIME },
+      { pct: 25, tone: LIME_MID },
+      { pct: 20, tone: LIME_SOFT },
+      { pct: 18, tone: LIME_DIM },
     ],
   },
 ] as const;
@@ -182,7 +173,7 @@ export function HowTheyShowUpMockup() {
             <span className="font-semibold text-[#ece2f6]">{row.name}</span>
             <span
               className="rounded-full border px-2 py-0.5 text-[10px] font-medium"
-              style={{ color: ACCENT, borderColor: ACCENT_DIM, backgroundColor: ACCENT_SOFT }}
+              style={{ color: LIME, borderColor: LIME_DIM, backgroundColor: LIME_SOFT }}
             >
               {row.badge}
             </span>
@@ -230,7 +221,7 @@ export function ReadingTheRoomMockup() {
           <div
             className="absolute inset-0 rounded-full"
             style={{
-              background: `linear-gradient(90deg, ${ACCENT_SOFT} 0%, ${ACCENT_MID} 45%, ${ACCENT} 100%)`,
+              background: `linear-gradient(90deg, ${LIME_SOFT} 0%, ${LIME_MID} 45%, ${LIME} 100%)`,
             }}
           />
           <div
@@ -240,8 +231,8 @@ export function ReadingTheRoomMockup() {
           />
         </div>
         <div className="mt-1.5 flex justify-between text-[10px] font-medium">
-          <span style={{ color: ACCENT_MID }}>you first</span>
-          <span style={{ color: ACCENT }}>room first</span>
+          <span style={{ color: LIME_MID }}>you first</span>
+          <span style={{ color: LIME }}>room first</span>
         </div>
       </div>
 
@@ -250,7 +241,7 @@ export function ReadingTheRoomMockup() {
           <span className="text-[#b8a8c8]">Crowd is good at</span>
           <span
             className="rounded-full border px-2.5 py-1 text-[10px] font-medium"
-            style={{ color: ACCENT, borderColor: ACCENT_DIM }}
+            style={{ color: LIME, borderColor: LIME_DIM }}
           >
             partner goes still - nervous laugh - the repair
           </span>
@@ -259,7 +250,7 @@ export function ReadingTheRoomMockup() {
           <span className="text-[#b8a8c8]">Crowd is weak at</span>
           <span
             className="rounded-full border px-2.5 py-1 text-[10px] font-medium"
-            style={{ color: ACCENT_MID, borderColor: ACCENT_DIM }}
+            style={{ color: LIME_MID, borderColor: LIME_DIM }}
           >
             the dancefloor push - your own limit
           </span>

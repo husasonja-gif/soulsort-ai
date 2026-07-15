@@ -48,24 +48,24 @@ export function PortalLanding() {
         </div>
       </section>
 
-      {/* 2. Drag physics — copy left, demo right (tracking.exe visible in preview) */}
+      {/* 2. Drag physics — demo left, copy right */}
       <section
         id="how-it-works"
         className="relative z-10 border-t border-[var(--border)] px-4 py-20"
       >
         <div className="mx-auto grid max-w-6xl gap-10 md:grid-cols-2 md:items-center md:gap-12">
+          <div className="flex justify-center md:justify-start">
+            <PortalVotingDemo />
+          </div>
           <div>
             <h2 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
               Not another survey - next-gen onboarding based on{" "}
-              <span className="text-[var(--soulsort-purple)]">drag physics</span>
+              <span className="text-[var(--soulsort-lime)]">drag physics</span>
             </h2>
             <p className="mt-4 text-[var(--muted)] leading-relaxed">
               PORTAL reads how attendees move: Where you drag, how long you wait, where you
               hover, where you land.
             </p>
-          </div>
-          <div className="flex justify-center md:justify-end">
-            <PortalVotingDemo />
           </div>
         </div>
       </section>
@@ -86,7 +86,7 @@ export function PortalLanding() {
       {/* 4. Problem */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-center text-3xl font-bold leading-tight text-[var(--soulsort-purple)] sm:text-4xl">
+          <h2 className="text-center text-3xl font-bold leading-tight text-[var(--soulsort-lime)] sm:text-4xl">
             High-trust spaces carry high stakes — SoulSort solves the problem of a dead
             house-rules check-box.
           </h2>
@@ -97,7 +97,7 @@ export function PortalLanding() {
                 I have read the rules ☑
               </p>
               <p className="mt-2 text-sm text-[var(--muted)]">
-                Passive checkbox. No rehearsal. No signal back to the org.
+                Passive check-box. No rehearsal. Limited signal back to the org.
               </p>
             </div>
             <div className="rounded-xl border border-[var(--accent)]/50 bg-[var(--panel)] p-6">

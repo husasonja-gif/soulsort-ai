@@ -17,7 +17,7 @@
     const H = 1080;
     const PREVIEW_ZOOM = IS_PREVIEW ? 1.48 : 1;
     const PREVIEW_PAN_X = IS_PREVIEW ? -0.14 * W : 0;
-    const PREVIEW_PAN_Y = IS_PREVIEW ? 0.12 * H : 0;
+    const PREVIEW_PAN_Y = IS_PREVIEW ? 0.07 * H : 0;
     const canvas = document.getElementById("c");
     const ctx = canvas.getContext("2d");
 
@@ -448,7 +448,7 @@
 
         ctx.fillStyle = "rgba(154, 138, 170, 0.9)";
         ctx.fillText("> ", x + 14, lineY);
-        ctx.fillStyle = "#c77dff";
+        ctx.fillStyle = "#a3e635";
         ctx.fillText(keyShown, x + 30, lineY);
         if (valProg > 0) {
           ctx.fillStyle = "#ece2f6";
