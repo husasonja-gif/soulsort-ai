@@ -23,11 +23,10 @@ export function PortalLanding() {
             SoulSort PORTAL
           </p>
           <h1 className="mt-4 text-4xl font-bold leading-[1.08] tracking-tight sm:text-5xl md:text-6xl glow-accent">
-            The world&apos;s first hype &amp; onboarding tool for high-trust spaces.
+            High-trust events need a crowd that knows how to vibe.
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-[var(--muted)]">
-            Help attendees arrive knowing what to expect. Give organizers a vibe-aware crowd
-            read — completion signals and anonymous aggregates, never individual answers.
+            Set the tone upfront &amp; know what kind of crowd is stepping through your door.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <a
@@ -49,49 +48,48 @@ export function PortalLanding() {
         </div>
       </section>
 
-      {/* 2. Not a survey */}
+      {/* 2. Drag physics — demo fills frame; copy overlaps top-right */}
       <section
         id="how-it-works"
-        className="relative z-10 border-t border-[var(--border)] px-4 py-20"
+        className="relative z-10 border-t border-[var(--border)] px-4 py-16 md:py-20"
       >
-        <div className="mx-auto grid max-w-6xl gap-12 md:grid-cols-2 md:items-center">
-          <div className="order-2 md:order-1 flex justify-center">
-            <PortalVotingDemo />
-          </div>
-          <div className="order-1 md:order-2">
-            <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-              Not a personality survey → next-gen behavioral assessment based on drag physics.
-            </h2>
-            <p className="mt-4 text-[var(--muted)] leading-relaxed">
-              One gesture per scenario. Where you drag, how long you wait, where you hover,
-              where you land — continuous signal, not multiple choice.
-            </p>
+        <div className="relative mx-auto max-w-6xl">
+          <div className="relative min-h-[min(92vw,520px)] md:min-h-[580px]">
+            <PortalVotingDemo className="absolute inset-0" />
+            <div className="pointer-events-none relative z-10 flex min-h-[min(92vw,520px)] flex-col justify-start p-4 md:absolute md:inset-0 md:min-h-0 md:items-end md:p-8">
+              <div className="pointer-events-auto ml-auto max-w-md rounded-xl border border-[var(--border)]/80 bg-[var(--background)]/85 p-5 backdrop-blur-md md:max-w-lg md:p-6">
+                <h2 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
+                  Not a personality survey → next-gen onboarding tool based on drag physics.
+                </h2>
+                <p className="mt-4 text-[var(--muted)] leading-relaxed">
+                  PORTAL reads how attendees move: Where you drag, how long you wait, where you
+                  hover, where you land.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 3. Attendees */}
+      {/* 3. Pre-game / attendee profile */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <h2 className="text-3xl font-bold leading-tight sm:text-4xl">
-            SoulSort PORTAL reads how attendees move, helping them navigate the dancefloor
-            with more awareness &amp; community mindset.
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-center text-3xl font-bold leading-tight sm:text-4xl">
+            We are under-utilizing the pre-game: community mindset is a muscle that can be
+            trained. PORTAL points out reflexes, blind-spots and nudges towards personal growth.
           </h2>
-          {/* reads — not watches: sensitive scene; avoid surveillance framing */}
-          <p className="mt-4 text-sm text-[var(--muted)]">
-            Behavioural response data for self-knowledge — not identification. No biometrics.
-            No device fingerprinting.
-          </p>
+          <div className="mt-12 flex justify-center">
+            <ParticipantDashboardShowcase />
+          </div>
         </div>
       </section>
 
       {/* 4. Problem */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
         <div className="mx-auto max-w-4xl">
-          <h2 className="text-center text-3xl font-bold leading-tight sm:text-4xl">
+          <h2 className="text-center text-3xl font-bold leading-tight text-[var(--soulsort-purple)] sm:text-4xl">
             High-trust spaces carry high stakes — SoulSort solves the problem of a dead
-            house-rules check-box by helping attendees simulate the desired behaviors before
-            they&apos;ve even stepped inside.
+            house-rules check-box.
           </h2>
           <div className="mt-12 grid gap-6 md:grid-cols-2">
             <div className="rounded-xl border border-[var(--border)] bg-[var(--panel)] p-6 opacity-70">
@@ -117,23 +115,19 @@ export function PortalLanding() {
         </div>
       </section>
 
-      {/* 5. Dashboards */}
+      {/* 5. Feedback + organizer dashboard */}
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
         <div className="mx-auto max-w-7xl">
           <h2 className="text-center text-3xl font-bold leading-tight sm:text-4xl">
             Feedback is how we evolve: SoulSort shows you where you are at, both as a
             participant and as an organizer.
           </h2>
-          <p className="mx-auto mt-4 max-w-2xl text-center text-[var(--muted)]">
-            Organizers see the crowd — never an individual&apos;s answers. Pre-aggregated
-            only, with a k-anonymity floor.
+          <p className="mx-auto mt-4 max-w-3xl text-center text-[var(--muted)] leading-relaxed">
+            Organizers see the crowd — never an individual&apos;s answers. No identification.
+            No biometrics. No device fingerprinting.
           </p>
 
-          <div className="mt-16 flex justify-center">
-            <ParticipantDashboardShowcase />
-          </div>
-
-          <div className="mt-20">
+          <div className="mt-16">
             <OrganizerShowcaseGrid />
           </div>
         </div>
@@ -191,7 +185,6 @@ export function PortalLanding() {
         </div>
       </section>
 
-      {/* 8. Footer */}
       <MarketingFooter />
     </div>
   );

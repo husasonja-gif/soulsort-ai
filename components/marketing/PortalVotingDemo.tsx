@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 /**
- * Original portal-voting-demo.html from SoulSort folder — full card, drag path, tracking.exe.
+ * Original portal-voting-demo.html — full card, drag path, tracking.exe.
  */
-export function PortalVotingDemo() {
+export function PortalVotingDemo({ className = "" }: { className?: string }) {
   const [reducedMotion, setReducedMotion] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -14,10 +14,12 @@ export function PortalVotingDemo() {
     setMounted(true);
   }, []);
 
+  const shell = `w-full min-h-[min(92vw,520px)] md:min-h-[560px] ${className}`.trim();
+
   if (!mounted) {
     return (
       <div
-        className="mx-auto aspect-square w-full max-w-lg rounded-xl border border-[var(--border)] bg-[#06040a]"
+        className={`rounded-xl border border-[var(--border)] bg-[#06040a] ${shell}`}
         aria-hidden
       />
     );
@@ -25,14 +27,14 @@ export function PortalVotingDemo() {
 
   if (reducedMotion) {
     return (
-      <div className="mx-auto w-full max-w-lg">
+      <div className={shell}>
         <video
           src="/marketing/portal-voting-demo.mp4"
           muted
           playsInline
           controls
           preload="metadata"
-          className="aspect-square w-full rounded-xl border border-[var(--border)] bg-[#06040a] object-cover"
+          className="h-full min-h-[inherit] w-full rounded-xl border border-[var(--border)] bg-[#06040a] object-cover"
           aria-label="PORTAL drag physics demo showing scenario card pulled through portal field with path tracking"
         />
       </div>
@@ -40,11 +42,11 @@ export function PortalVotingDemo() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a]">
+    <div className={`overflow-hidden rounded-xl border border-[var(--border)] bg-[#06040a] ${shell}`}>
       <iframe
         src="/marketing/portal-voting-demo.html?preview"
         title="PORTAL drag physics demo"
-        className="aspect-square w-full border-0"
+        className="h-full min-h-[inherit] w-full border-0"
         loading="lazy"
       />
     </div>

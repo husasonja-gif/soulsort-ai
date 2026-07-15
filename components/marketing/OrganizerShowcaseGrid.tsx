@@ -2,18 +2,11 @@ import Image from "next/image";
 
 const ORGANIZER_PANELS = [
   {
-    id: "a",
-    label: "Crowd read",
-    caption: "Completions + anonymous landing heatmap.",
-    src: "/marketing/orga-profile-a.png",
-    alt: "Organizer crowd read showing 19 completions and anonymous portal landing heatmap",
-  },
-  {
     id: "b",
-    label: "Portal gravity",
-    caption: "Observation, could mean, and staff try-lines per portal.",
+    label: "Where the crowd went",
+    caption: "Anonymous landing heatmap — portal pull across Power, Desire, Community, Safety.",
     src: "/marketing/orga-profile-b.png",
-    alt: "Organizer portal gravity panels for Community and Safety with observation and try suggestions",
+    alt: "Organizer view of where the crowd went with portal gravity and landing patterns",
   },
   {
     id: "c",
@@ -35,14 +28,11 @@ export function OrganizerShowcaseGrid() {
   return (
     <div className="w-full">
       <p className="mb-6 text-center font-data text-[10px] uppercase tracking-widest text-[var(--muted)]">
-        Organizer — the crowd, never an individual
+        Organizer dashboard — the crowd, never an individual
       </p>
-      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--border)] sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--border)] md:grid-cols-3">
         {ORGANIZER_PANELS.map((panel) => (
-          <article
-            key={panel.id}
-            className="flex flex-col bg-[var(--background)]"
-          >
+          <article key={panel.id} className="flex flex-col bg-[var(--background)]">
             <div className="border-b border-[var(--border)] px-4 py-3">
               <p className="font-data text-[10px] uppercase tracking-[0.14em] text-[var(--accent)]">
                 {panel.label}
@@ -55,7 +45,7 @@ export function OrganizerShowcaseGrid() {
                 width={400}
                 height={520}
                 className="h-auto w-full rounded-sm object-contain object-top"
-                sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                sizes="(max-width: 768px) 100vw, 33vw"
               />
             </div>
             <p className="border-t border-[var(--border)] px-4 py-3 text-xs leading-relaxed text-[var(--muted)]">
