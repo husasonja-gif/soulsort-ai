@@ -13,9 +13,11 @@
   <canvas id="c" width="1080" height="1080"></canvas>
   <script>
     const IS_PREVIEW = location.search.includes("preview");
-    const PREVIEW_ZOOM = IS_PREVIEW ? 1.48 : 1;
     const W = 1080;
     const H = 1080;
+    const PREVIEW_ZOOM = IS_PREVIEW ? 1.48 : 1;
+    const PREVIEW_PAN_X = IS_PREVIEW ? -0.14 * W : 0;
+    const PREVIEW_PAN_Y = IS_PREVIEW ? 0.12 * H : 0;
     const canvas = document.getElementById("c");
     const ctx = canvas.getContext("2d");
 
@@ -480,7 +482,7 @@
       if (IS_PREVIEW) {
         ctx.translate(W / 2, H / 2);
         ctx.scale(PREVIEW_ZOOM, PREVIEW_ZOOM);
-        ctx.translate(-W / 2, -H / 2);
+        ctx.translate(-W / 2 + PREVIEW_PAN_X, -H / 2 + PREVIEW_PAN_Y);
       }
 
       const loopT = (frameIndex % (LOOP_SEC * FPS)) / (LOOP_SEC * FPS);

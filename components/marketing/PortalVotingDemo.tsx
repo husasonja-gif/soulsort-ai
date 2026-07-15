@@ -32,7 +32,7 @@ export function PortalVotingDemo() {
           playsInline
           controls
           preload="metadata"
-          className="h-full w-full scale-[1.45] object-cover object-[center_42%]"
+          className="h-full w-full scale-[1.45] object-cover object-[72%_18%]"
           aria-label="PORTAL drag physics demo showing scenario card pulled through portal field with path tracking"
         />
       </div>
