@@ -58,10 +58,11 @@ export function PortalLanding() {
             <div className="order-2 flex justify-center md:order-1 md:justify-start">
               <PortalVotingDemo />
             </div>
-            <div className="order-1 md:order-2 md:relative md:z-10 md:-ml-16 md:mt-4 lg:-ml-24">
+            <div className="order-1 md:order-2 md:relative md:z-10 md:-ml-16 md:mt-28 lg:-ml-24 lg:mt-36">
               <div className="rounded-xl border border-[var(--border)]/80 bg-[var(--background)]/90 p-5 backdrop-blur-md md:p-6">
                 <h2 className="text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
-                  Not a personality survey → next-gen onboarding tool based on drag physics.
+                  Not another survey - next-gen onboarding based on{" "}
+                  <span className="text-[var(--soulsort-purple)]">drag physics</span>
                 </h2>
                 <p className="mt-4 text-[var(--muted)] leading-relaxed">
                   PORTAL reads how attendees move: Where you drag, how long you wait, where you
