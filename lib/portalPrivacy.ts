@@ -1,6 +1,7 @@
 /**
  * PORTAL privacy statement — shared copy with soulsort-portal.
  * Keep in sync with soulsort-portal/lib/portal/privacy.ts
+ * (soulsort-ai adds the Organizer waitlist section only).
  */
 
 export const PORTAL_PRIVACY_TITLE = "PORTAL — Your privacy, plainly";
@@ -14,8 +15,14 @@ export const PORTAL_PRIVACY_SECTIONS: {
   {
     paragraphs: [
       "PORTAL exists to help people notice how they move through connection, desire, and limits — by dragging scenario cards into four portals: power, desire, community, and safety. That's the only reason we look at how people play, and it's the line we hold every data decision against.",
-      "No player account. No name. No email. You play as a randomly generated code, held in a short-lived browser cookie on your device. We don't attach IP addresses to gameplay rows in our database. Connection requests still pass through Vercel and Supabase, which may log IPs in their own infrastructure logs — see \"The honest caveat\" below.",
+      "No player account. No name. No email. You play as a randomly generated code, held in a short-lived browser cookie on your device. Our application never stores an IP address alongside your play — see \"Connection data we don't keep\" below.",
       "Event organizers sign in with email to view crowd-level readouts for their event. They never see your individual answers or your personal profile.",
+    ],
+  },
+  {
+    heading: "Who's responsible for your data",
+    paragraphs: [
+      "The event organizer keeps the attendee data they already collect (e.g. name, email, RSVP) — SoulSort never receives it and adds none of its own. PORTAL runs on an anonymous code the organizer mints; we can't connect your play to your identity, and neither can they. The only sensitive-category processing PORTAL involves — how you move through the game — sits with us, under the explicit consent you give before playing, never with the organizer. So PORTAL adds no new personal-data burden to the organizer's side.",
     ],
   },
   {
@@ -37,10 +44,9 @@ export const PORTAL_PRIVACY_SECTIONS: {
     ],
   },
   {
-    heading: "The honest caveat",
+    heading: "Connection data we don't keep",
     paragraphs: [
-      "Connection-level data passes through Vercel and Supabase, chosen for strong privacy practices. We don't enable features that log activity beyond what's needed to keep the game running.",
-      "Those providers may record connection metadata — including IP addresses — in their own logs. We don't copy that into gameplay tables, but we can't control their infrastructure retention.",
+      "We strip identifying connection data (like IP addresses) everywhere we control it: our application never stores an IP alongside your play, and IP visibility is disabled in our hosting logs. Where our infrastructure providers (Vercel, Supabase) retain connection metadata in their own systems, it is never joined to your gameplay and is subject to their standard short retention. In short: no IP is ever stored next to how you played; what remains is isolated provider-level metadata we don't link to you.",
       "When you finish, your event organizer learns that one anonymous player completed — and, once enough people have finished (see k-anonymity below), they see combined crowd patterns built from everyone's landings and timing. They never see your individual card answers, drag paths, or profile read-back.",
       "If you replay the game from your profile, your earlier run is cleared and only your latest finished run counts toward crowd totals. One anonymous player, one completion — not two plays.",
     ],
@@ -56,8 +62,8 @@ export const PORTAL_PRIVACY_SECTIONS: {
   {
     heading: "What your organizer sees",
     paragraphs: [
-      "Organizers receive two things: a completion signal (one anonymous player finished, and when), and — only after at least ten people have completed for that event cycle — pre-aggregated crowd statistics.",
-      "Those crowd readouts combine everyone's landings, timing, portal mix, situation summaries, and briefing-style takeaways. They are designed so no single player can be identified. Until the ten-completion floor is met, crowd panels stay hidden.",
+      "Organizers receive two things: a completion signal (one anonymous player finished, and when), and — only after at least twenty people have completed for that event cycle — pre-aggregated crowd statistics.",
+      "Those crowd readouts combine everyone's landings, timing, portal mix, situation summaries, and briefing-style takeaways. They are designed so no single player can be identified. Until the twenty-completion floor is met, crowd panels stay hidden.",
       "Row-level security in our database blocks organizers from reading your individual events, profile, or consent log. That wall is enforced in the schema, not just in the app.",
     ],
   },

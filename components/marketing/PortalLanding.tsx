@@ -147,14 +147,14 @@ export function PortalLanding() {
           </h2>
           <ul className="mt-6 grid gap-4 sm:grid-cols-2">
             {[
-              "No PII alongside gameplay — anonymous codes only",
-              "Organizers see completion + anonymous aggregate, never your answers",
-              "Deletion on request — consent-forward by design",
-              "Designed with GDPR and EU AI Act constraints in mind — not a compliance badge",
-              "Not biometric. Not surveillance.",
-              "Deterministic scoring — no generative AI on your play",
+              "No player account, name, or email — anonymous codes only",
               "You keep the attendee data you already manage — PORTAL adds none. We never receive it.",
-              "No crowd read appears until enough people have played that no one can be singled out.",
+              "Organizers see completion + anonymous aggregate, never your answers",
+              "No crowd read appears until at least twenty people have finished — enough that no one can be singled out.",
+              "No IP stored next to how you played",
+              "Delete my data on your profile — irrevocable when you ask",
+              "Designed with GDPR and EU AI Act constraints in mind — not a compliance badge",
+              "Not biometric. Not surveillance. Deterministic scoring — no generative AI on your play.",
             ].map((item) => (
               <li key={item} className="flex gap-2 text-sm leading-relaxed">
                 <span className="text-[var(--accent)]" aria-hidden>
