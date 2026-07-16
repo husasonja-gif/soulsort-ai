@@ -75,11 +75,15 @@ export function PortalBannerHero() {
       const tokenA = f * 0.018;
       const tx = cx + Math.cos(tokenA) * fieldR * 0.55;
       const ty = cy + Math.sin(tokenA) * fieldR * 0.55;
-      ctx.strokeStyle = ACCENT;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#a3e635";
+      ctx.lineWidth = 2.5;
       ctx.beginPath();
       ctx.arc(tx, ty, 6, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.fillStyle = "rgba(163, 230, 53, 0.2)";
+      ctx.beginPath();
+      ctx.arc(tx, ty, 6, 0, Math.PI * 2);
+      ctx.fill();
 
       if (!reducedMotion.current) frame++;
       raf = requestAnimationFrame(draw);

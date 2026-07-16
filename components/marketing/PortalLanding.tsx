@@ -61,13 +61,12 @@ export function PortalLanding() {
           </div>
           <div className="min-w-0">
             <h2 className="break-words text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
-              Not another survey —{" "}
-              <span className="text-[var(--soulsort-lime)]">a rehearsal</span>.
+              Not another survey -{" "}
+              <span className="text-[var(--soulsort-lime)]">a chance to practice</span>.
             </h2>
             <p className="mt-4 text-[var(--muted)] leading-relaxed">
               PORTAL walks attendees through the real moments of a night and asks them to move,
-              not tick a box. Built on how they move — where they drag, wait, hover, land — not
-              what they claim about themselves.
+              not tick a box. No right or wrong answers — only where they drag, wait, hover, land
             </p>
           </div>
         </div>

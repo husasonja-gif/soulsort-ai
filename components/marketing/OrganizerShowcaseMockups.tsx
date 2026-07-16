@@ -4,10 +4,10 @@ const LIME = "#a3e635";
 const LIME_DIM = "rgba(163, 230, 53, 0.35)";
 const LIME_MID = "rgba(163, 230, 53, 0.55)";
 const LIME_SOFT = "rgba(163, 230, 53, 0.22)";
-/** Growth zones — lime family, still distinct */
-const ZONE_UNCHARTERED = "#bef264";
-const ZONE_WORKING = "#a3e635";
-const ZONE_COMFORT = "#4d7c0f";
+/** Growth zones — high contrast: fuchsia / gold / lime */
+const ZONE_UNCHARTERED = "#ff2fd0";
+const ZONE_WORKING = "#ffc24b";
+const ZONE_COMFORT = "#a3e635";
 
 function Label({ children }: { children: ReactNode }) {
   return (
@@ -237,15 +237,15 @@ function GrowthBar({
         <span className="break-words text-[11px] text-[#d8cce6]">{name}</span>
         <span className="shrink-0 text-[10px] text-[#9a8aaa] sm:text-right">{split}</span>
       </div>
-      <div className="flex h-2 min-w-0 overflow-hidden rounded-full bg-[#1a1024]">
+      <div className="flex h-3 min-w-0 overflow-hidden rounded-full bg-[#1a1024]">
         <div
-          className="h-full min-w-0"
+          className="h-full min-w-0 border-r border-black/40 last:border-r-0"
           style={{ width: `${uncharteredPct}%`, backgroundColor: ZONE_UNCHARTERED }}
           title={`Unchartered ${uncharteredPct}%`}
           aria-hidden
         />
         <div
-          className="h-full min-w-0"
+          className="h-full min-w-0 border-r border-black/40 last:border-r-0"
           style={{ width: `${workingPct}%`, backgroundColor: ZONE_WORKING }}
           title={`Working it out ${workingPct}%`}
           aria-hidden

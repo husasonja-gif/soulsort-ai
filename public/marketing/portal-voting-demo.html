@@ -297,9 +297,9 @@
       for (let i = 1; i < trail.length; i++) {
         const a = fieldToScreen(trail[i - 1].x, trail[i - 1].y);
         const b = fieldToScreen(trail[i].x, trail[i].y);
-        const alpha = (i / trail.length) * 0.42;
-        ctx.strokeStyle = `rgba(255, 47, 208, ${alpha})`;
-        ctx.lineWidth = 3 + (i / trail.length) * 4;
+        const alpha = 0.35 + (i / trail.length) * 0.55;
+        ctx.strokeStyle = `rgba(163, 230, 53, ${alpha})`;
+        ctx.lineWidth = 5 + (i / trail.length) * 6;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
@@ -307,10 +307,10 @@
       }
       for (let i = 0; i < trail.length; i += 2) {
         const pt = fieldToScreen(trail[i].x, trail[i].y);
-        const alpha = (i / trail.length) * 0.18;
-        ctx.fillStyle = `rgba(199, 125, 255, ${alpha})`;
+        const alpha = 0.25 + (i / trail.length) * 0.45;
+        ctx.fillStyle = `rgba(163, 230, 53, ${alpha})`;
         ctx.beginPath();
-        ctx.arc(pt.x, pt.y, 3.5, 0, Math.PI * 2);
+        ctx.arc(pt.x, pt.y, 4.5, 0, Math.PI * 2);
         ctx.fill();
       }
       ctx.restore();

@@ -32,7 +32,7 @@ export function OrganizerShowcaseGrid() {
         {ORGANIZER_PANELS.map(({ id, label, Mockup }) => (
           <article key={id} className="flex min-w-0 flex-col bg-[var(--background)]">
             <div className="border-b border-[var(--border)] px-3 py-3 sm:px-4">
-              <p className="font-data text-[10px] uppercase tracking-wide break-words text-[var(--soulsort-lime)] sm:tracking-[0.14em]">
+              <p className="font-data text-[10px] uppercase tracking-wide break-words text-[var(--accent)] sm:tracking-[0.14em]">
                 {label}
               </p>
             </div>
