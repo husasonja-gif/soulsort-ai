@@ -61,12 +61,12 @@ export function PortalLanding() {
           </div>
           <div className="min-w-0">
             <h2 className="break-words text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
-              Not another survey - next-gen onboarding based on{" "}
-              <span className="text-[var(--soulsort-lime)]">drag physics</span>
+              Not another survey — a rehearsal.
             </h2>
             <p className="mt-4 text-[var(--muted)] leading-relaxed">
-              PORTAL reads how attendees move: Where you drag, how long you wait, where you
-              hover, where you land.
+              PORTAL walks attendees through the real moments of a night and asks them to move,
+              not tick a box. Built on how they move — where they drag, wait, hover, land — not
+              what they claim about themselves.
             </p>
           </div>
         </div>
@@ -76,11 +76,10 @@ export function PortalLanding() {
       <section className="relative z-10 border-t border-[var(--border)] px-4 py-20">
         <div className="mx-auto min-w-0 max-w-4xl text-center">
           <h2 className="break-words text-2xl font-bold leading-tight sm:text-4xl">
-            We are under-utilizing the pre-game: community mindset is a muscle that can be
-            trained.
+            Community mindset is a muscle.
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-lg leading-relaxed text-[var(--muted)]">
-            PORTAL points out reflexes, blind-spots and nudges towards personal growth.
+            PORTAL trains it — surfacing reflexes and blind-spots, nudging toward growth.
           </p>
           <div className="mt-12 flex justify-center">
             <ParticipantDashboardShowcase />
@@ -150,9 +149,11 @@ export function PortalLanding() {
               "No PII alongside gameplay — anonymous codes only",
               "Organizers see completion + anonymous aggregate, never your answers",
               "Deletion on request — consent-forward by design",
-              "GDPR & EU AI Act conscious architecture",
+              "Designed with GDPR and EU AI Act constraints in mind — not a compliance badge",
               "Not biometric. Not surveillance.",
               "Deterministic scoring — no generative AI on your play",
+              "You keep the attendee data you already manage — PORTAL adds none. We never receive it.",
+              "No crowd read appears until enough people have played that no one can be singled out.",
             ].map((item) => (
               <li key={item} className="flex gap-2 text-sm leading-relaxed">
                 <span className="text-[var(--accent)]" aria-hidden>
@@ -180,10 +181,8 @@ export function PortalLanding() {
             For organizers
           </h2>
           <p className="mt-6 text-lg leading-relaxed text-[var(--muted)]">
-            Replace the manual form and dead checkbox. Receive a better-prepared, more
-            consent-aware crowd. Get aggregate insight that helps you program and brief staff.
-            Designed to integrate with your existing membership or RSVP flow — completion
-            signals via API, embeddable when you&apos;re ready.
+            PORTAL is running its first pilots now. Join the early adopters, have real influence
+            on where this goes, and get a crowd read no one else has yet.
           </p>
           <div className="mt-10">
             <OrganizerWaitlistForm />
