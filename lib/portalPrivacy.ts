@@ -78,7 +78,7 @@ export const PORTAL_PRIVACY_SECTIONS: {
       "From completers in an organizer's event (crowd dashboard, k-anonymity floor):",
       "Where cards land across the four portals — power, desire, community, safety — so organizers can read the room.",
       "How long people take to decide and drag. Hesitation vs. snap landings feed ideas like comfort zone vs. uncharted territory.",
-      "Situation and category groupings — boundaries, intimacy, play, the work — each tagged in the scenario library, not guessed about your identity.",
+      "Situation and category groupings — boundaries, connection, play, the work — each tagged in the scenario library, not guessed about your identity.",
       "Consent-read scenarios — whether the crowd's landings matched room-attuned portals — as a group score, never per person in the organizer view.",
       "Newcomer vs. returner mix when that flag is set for the session.",
       "PORTAL is queer-first and consent-first: built by the community, for the community, sharing what we learn as openly as we can.",

@@ -1,7 +1,7 @@
 import {
-  HowTheyShowUpMockup,
   ReadingTheRoomMockup,
   WhereTheCrowdWentMockup,
+  WhereTheyCanGrowMockup,
 } from "@/components/marketing/OrganizerShowcaseMockups";
 
 const ORGANIZER_PANELS = [
@@ -11,14 +11,14 @@ const ORGANIZER_PANELS = [
     Mockup: WhereTheCrowdWentMockup,
   },
   {
-    id: "how",
-    label: "How they show up",
-    Mockup: HowTheyShowUpMockup,
-  },
-  {
     id: "reading",
     label: "Reading the room",
     Mockup: ReadingTheRoomMockup,
+  },
+  {
+    id: "grow",
+    label: "Where they can grow",
+    Mockup: WhereTheyCanGrowMockup,
   },
 ] as const;
 

@@ -61,7 +61,8 @@ export function PortalLanding() {
           </div>
           <div className="min-w-0">
             <h2 className="break-words text-2xl font-bold leading-tight sm:text-3xl md:text-4xl">
-              Not another survey — a rehearsal.
+              Not another survey —{" "}
+              <span className="text-[var(--soulsort-lime)]">a rehearsal</span>.
             </h2>
             <p className="mt-4 text-[var(--muted)] leading-relaxed">
               PORTAL walks attendees through the real moments of a night and asks them to move,

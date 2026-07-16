@@ -4,6 +4,10 @@ const LIME = "#a3e635";
 const LIME_DIM = "rgba(163, 230, 53, 0.35)";
 const LIME_MID = "rgba(163, 230, 53, 0.55)";
 const LIME_SOFT = "rgba(163, 230, 53, 0.22)";
+/** Growth zones — lime family, still distinct */
+const ZONE_UNCHARTERED = "#bef264";
+const ZONE_WORKING = "#a3e635";
+const ZONE_COMFORT = "#4d7c0f";
 
 function Label({ children }: { children: ReactNode }) {
   return (
@@ -27,21 +31,6 @@ function PullBar({ pct }: { pct: number }) {
         style={{ width: `${pct}%`, backgroundColor: LIME }}
         aria-hidden
       />
-    </div>
-  );
-}
-
-function MixBar({ segments }: { segments: Array<{ pct: number; tone: string }> }) {
-  return (
-    <div className="mt-2 flex h-2 min-w-0 overflow-hidden rounded-full bg-[#1a1024]">
-      {segments.map((seg, i) => (
-        <div
-          key={i}
-          className="h-full min-w-0"
-          style={{ width: `${seg.pct}%`, backgroundColor: seg.tone }}
-          aria-hidden
-        />
-      ))}
     </div>
   );
 }
@@ -111,80 +100,6 @@ export function WhereTheCrowdWentMockup() {
           </TryBox>
         </div>
       </dl>
-    </div>
-  );
-}
-
-const CATEGORY_ROWS = [
-  {
-    name: "Boundaries",
-    gloss: "moments where a line gets tested or crossed",
-    badge: "47% · Power-led",
-    segments: [
-      { pct: 47, tone: LIME },
-      { pct: 22, tone: LIME_MID },
-      { pct: 18, tone: LIME_SOFT },
-      { pct: 13, tone: LIME_DIM },
-    ],
-  },
-  {
-    name: "Intimacy",
-    gloss: "moments of closeness, wanting, sex/connection",
-    badge: "32% · Desire-led",
-    segments: [
-      { pct: 32, tone: LIME },
-      { pct: 28, tone: LIME_MID },
-      { pct: 25, tone: LIME_SOFT },
-      { pct: 15, tone: LIME_DIM },
-    ],
-  },
-  {
-    name: "Play",
-    gloss: "moments of fun, dancing, silliness, expression",
-    badge: "41% · Safety-led",
-    segments: [
-      { pct: 41, tone: LIME },
-      { pct: 24, tone: LIME_MID },
-      { pct: 20, tone: LIME_SOFT },
-      { pct: 15, tone: LIME_DIM },
-    ],
-  },
-  {
-    name: "The Work",
-    gloss: "looking after each other and yourself (crisis, comedown, care)",
-    badge: "37% · Community-led",
-    segments: [
-      { pct: 37, tone: LIME },
-      { pct: 25, tone: LIME_MID },
-      { pct: 20, tone: LIME_SOFT },
-      { pct: 18, tone: LIME_DIM },
-    ],
-  },
-] as const;
-
-export function HowTheyShowUpMockup() {
-  return (
-    <div className="min-w-0 space-y-3 text-xs leading-relaxed">
-      {CATEGORY_ROWS.map((row) => (
-        <div
-          key={row.name}
-          className="min-w-0 rounded-lg border border-[var(--border)] bg-[#0e0814] px-3 py-2.5"
-        >
-          <div className="flex flex-col gap-1.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
-            <span className="font-semibold text-[#ece2f6]">{row.name}</span>
-            <span
-              className="w-fit max-w-full rounded-full border px-2 py-0.5 text-[10px] font-medium break-words"
-              style={{ color: LIME, borderColor: LIME_DIM, backgroundColor: LIME_SOFT }}
-            >
-              {row.badge}
-            </span>
-          </div>
-          <p className="mt-1 break-words text-[#b8a8c8]">
-            {row.name} — {row.gloss}
-          </p>
-          <MixBar segments={[...row.segments]} />
-        </div>
-      ))}
     </div>
   );
 }
@@ -262,6 +177,113 @@ export function ReadingTheRoomMockup() {
             The dancefloor push - your own limit
           </span>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/** Reduced showcase — one situation per category, all three growth zones present. */
+const GROWTH_ROWS = [
+  {
+    category: "Boundaries",
+    name: "setting limits",
+    uncharteredPct: 18,
+    workingPct: 30,
+    comfortPct: 52,
+  },
+  {
+    category: "Connection",
+    name: "initiating connection",
+    uncharteredPct: 12,
+    workingPct: 20,
+    comfortPct: 68,
+  },
+  {
+    category: "Play",
+    name: "allowing silliness",
+    uncharteredPct: 22,
+    workingPct: 25,
+    comfortPct: 53,
+  },
+  {
+    category: "The work",
+    name: "calming yourself",
+    uncharteredPct: 8,
+    workingPct: 15,
+    comfortPct: 77,
+  },
+] as const;
+
+function GrowthBar({
+  name,
+  uncharteredPct,
+  workingPct,
+  comfortPct,
+}: {
+  name: string;
+  uncharteredPct: number;
+  workingPct: number;
+  comfortPct: number;
+}) {
+  const split = [
+    `${uncharteredPct}% unchartered`,
+    `${workingPct}% working`,
+    `${comfortPct}% comfort`,
+  ].join(" · ");
+
+  return (
+    <div className="min-w-0">
+      <div className="mb-1 flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-2">
+        <span className="break-words text-[11px] text-[#d8cce6]">{name}</span>
+        <span className="shrink-0 text-[10px] text-[#9a8aaa] sm:text-right">{split}</span>
+      </div>
+      <div className="flex h-2 min-w-0 overflow-hidden rounded-full bg-[#1a1024]">
+        <div
+          className="h-full min-w-0"
+          style={{ width: `${uncharteredPct}%`, backgroundColor: ZONE_UNCHARTERED }}
+          title={`Unchartered ${uncharteredPct}%`}
+          aria-hidden
+        />
+        <div
+          className="h-full min-w-0"
+          style={{ width: `${workingPct}%`, backgroundColor: ZONE_WORKING }}
+          title={`Working it out ${workingPct}%`}
+          aria-hidden
+        />
+        <div
+          className="h-full min-w-0"
+          style={{ width: `${comfortPct}%`, backgroundColor: ZONE_COMFORT }}
+          title={`Comfort ${comfortPct}%`}
+          aria-hidden
+        />
+      </div>
+    </div>
+  );
+}
+
+export function WhereTheyCanGrowMockup() {
+  return (
+    <div className="min-w-0 space-y-4 text-xs leading-relaxed">
+      <p className="text-center text-[10px] text-[var(--muted)]">
+        Share of the crowd per situation — comfort, working it out, unchartered.
+      </p>
+      <div className="flex flex-wrap justify-center gap-3 text-[9px] font-semibold uppercase tracking-[0.08em]">
+        <span style={{ color: ZONE_UNCHARTERED }}>unchartered</span>
+        <span style={{ color: ZONE_WORKING }}>working it out</span>
+        <span style={{ color: ZONE_COMFORT }}>comfort</span>
+      </div>
+      <div className="space-y-4">
+        {GROWTH_ROWS.map((row) => (
+          <div key={row.name} className="min-w-0">
+            <p className="mb-1.5 text-[11px] font-semibold text-[#c4b4d4]">{row.category}</p>
+            <GrowthBar
+              name={row.name}
+              uncharteredPct={row.uncharteredPct}
+              workingPct={row.workingPct}
+              comfortPct={row.comfortPct}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );
