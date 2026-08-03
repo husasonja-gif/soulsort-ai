@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     template: "%s | SoulSort PORTAL",
   },
   description:
-    "The world's first hype-and-onboarding tool for raves, festivals, and sex-positive parties. Attendees arrive prepared; organizers get anonymous crowd insight — never individual answers.",
+    "The world's first hype-and-onboarding tool for high-trust spaces. Attendees arrive prepared; organizers get anonymous crowd insight — never individual answers.",
   openGraph: {
     title: "SoulSort PORTAL — Hype & onboarding for high-trust spaces",
     description:
