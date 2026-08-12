@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   },
   description:
     "The world's first hype-and-onboarding tool for high-trust spaces. Attendees arrive prepared; organizers get anonymous crowd insight — never individual answers.",
+  alternates: {
+    canonical: appUrl,
+  },
   openGraph: {
     title: "SoulSort PORTAL — Hype & onboarding for high-trust spaces",
     description:
