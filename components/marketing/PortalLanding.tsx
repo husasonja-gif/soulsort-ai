@@ -28,18 +28,12 @@ export function PortalLanding() {
           <p className="mt-6 max-w-lg text-base leading-relaxed text-[var(--muted)] sm:text-lg">
             Set the tone upfront &amp; know what kind of crowd is stepping through your door.
           </p>
-          <div className="mt-8 flex w-full min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="mt-8">
             <a
               href="#organizers"
               className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg border border-[var(--accent)] bg-[var(--accent)] px-4 font-data text-sm font-medium text-black transition hover:brightness-110 sm:w-auto sm:px-6"
             >
               Bring PORTAL to your space
-            </a>
-            <a
-              href="/portal"
-              className="inline-flex min-h-[48px] w-full items-center justify-center rounded-lg border border-[var(--border)] px-4 font-data text-sm text-[var(--foreground)] transition hover:border-[var(--accent)] sm:w-auto sm:px-6"
-            >
-              See how it works
             </a>
           </div>
         </div>

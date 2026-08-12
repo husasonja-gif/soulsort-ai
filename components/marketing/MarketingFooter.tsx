@@ -14,22 +14,6 @@ export function MarketingFooter() {
           >
             soulsort.ai.official@gmail.com
           </a>
-          <a
-            href="https://instagram.com/soulsorts"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-[var(--foreground)]"
-          >
-            Instagram · @soulsorts
-          </a>
-          <a
-            href="https://tiktok.com/@soulsorts"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-[var(--foreground)]"
-          >
-            TikTok · @soulsorts
-          </a>
           <Link href="/privacy" className="hover:text-[var(--foreground)]">
             Privacy statement
           </Link>
